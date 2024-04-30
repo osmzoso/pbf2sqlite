@@ -4,7 +4,7 @@ A simple command line tool for reading OpenStreetMap .osm.pbf files into a SQLit
 
 ```
 Usage:
-pbf2sqlite SQLITE_DATABASE OSM_PBF_FILE
+pbf2sqlite.py SQLITE_DATABASE OSM_PBF_FILE
 ```
 
 The Python module **osmium** is required.  
