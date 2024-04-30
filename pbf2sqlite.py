@@ -117,9 +117,9 @@ class OSMHandler(osmium.SimpleHandler):
             self.cur.execute('INSERT INTO relation_tags (relation_id,key,value) VALUES (?,?,?)', (r.id, tag.k, tag.v))
 
 
-def add_index():
+def add_index(cur):
     """Create the indexes in the database"""
-    db.executescript('''
+    cur.executescript('''
     CREATE INDEX node_tags__node_id            ON node_tags (node_id);
     CREATE INDEX node_tags__key                ON node_tags (key);
     CREATE INDEX way_tags__way_id              ON way_tags (way_id);
@@ -136,7 +136,7 @@ def add_index():
 def main():
     """entry point"""
     if len(sys.argv) != 3:
-        print('Read .osm.pbf file\n'
+        print('Read .osm.pbf file into a SQLite database\n'
               'Usage:\n'
               f'{sys.argv[0]} DATABASE OSM_PBF_FILE\n')
         sys.exit(1)
