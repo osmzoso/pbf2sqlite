@@ -78,9 +78,11 @@ class OSMHandler(osmium.SimpleHandler):
         #print("  Node Tags:", {tag.k: tag.v for tag in n.tags})
         #print("  Node Location (Lat, Lon):", (n.location.lat, n.location.lon))
         self.num_nodes += 1
-        self.cur.execute('INSERT INTO nodes (node_id,lon,lat) VALUES (?,?,?)', (n.id, n.location.lon, n.location.lat))
+        self.cur.execute('INSERT INTO nodes (node_id,lon,lat) VALUES (?,?,?)',
+                          (n.id, n.location.lon, n.location.lat))
         for tag in n.tags:
-            self.cur.execute('INSERT INTO node_tags (node_id,key,value) VALUES (?,?,?)', (n.id, tag.k, tag.v))
+            self.cur.execute('INSERT INTO node_tags (node_id,key,value) VALUES (?,?,?)',
+                              (n.id, tag.k, tag.v))
 
     def way(self, w):
         """Insert way in database"""
@@ -94,10 +96,12 @@ class OSMHandler(osmium.SimpleHandler):
         self.num_ways += 1
         node_order = 1
         for node in w.nodes:
-            self.cur.execute('INSERT INTO way_nodes (way_id,node_id,node_order) VALUES (?,?,?)', (w.id, node.ref, node_order))
+            self.cur.execute('INSERT INTO way_nodes (way_id,node_id,node_order) VALUES (?,?,?)',
+                              (w.id, node.ref, node_order))
             node_order += 1
         for tag in w.tags:
-            self.cur.execute('INSERT INTO way_tags (way_id,key,value) VALUES (?,?,?)', (w.id, tag.k, tag.v))
+            self.cur.execute('INSERT INTO way_tags (way_id,key,value) VALUES (?,?,?)',
+                              (w.id, tag.k, tag.v))
 
     def relation(self, r):
         """Insert relation in database"""
@@ -107,16 +111,20 @@ class OSMHandler(osmium.SimpleHandler):
         #print("  Relation Timestamp:", r.timestamp)
         #print("  Relation User ID:", r.uid)
         #print("  Relation Tags:", {tag.k: tag.v for tag in r.tags})
-        #print("  Relation Members:", [(member.type, member.ref, member.role) for member in r.members])
-        # osmium returns type only shortened ('n', 'w' or 'r'), hence this conversion list
-        type = {'n': 'node', 'w': 'way', 'r': 'relation'}
+        #print("  Relation Members:",
+        #         [(member.type, member.ref, member.role) for member in r.members])
+        # osmium member.type is shortened ('n', 'w' or 'r'), hence this conversion list
+        longtype = {'n': 'node', 'w': 'way', 'r': 'relation'}
         self.num_relations += 1
         member_order = 1
         for member in r.members:
-            self.cur.execute('INSERT INTO relation_members (relation_id,ref,ref_id,role,member_order) VALUES (?,?,?,?,?)', (r.id, type[member.type], member.ref, member.role, member_order))
+            self.cur.execute('INSERT INTO relation_members '
+                             '(relation_id,ref,ref_id,role,member_order) VALUES (?,?,?,?,?)',
+                              (r.id, longtype[member.type], member.ref, member.role, member_order))
             member_order += 1
         for tag in r.tags:
-            self.cur.execute('INSERT INTO relation_tags (relation_id,key,value) VALUES (?,?,?)', (r.id, tag.k, tag.v))
+            self.cur.execute('INSERT INTO relation_tags (relation_id,key,value) VALUES (?,?,?)',
+                              (r.id, tag.k, tag.v))
 
 
 def add_index(cur):
@@ -138,7 +146,7 @@ def add_index(cur):
 def main():
     """entry point"""
     if len(sys.argv) != 3:
-        print('Read .osm.pbf file into a SQLite database\n'
+        print('Reads .osm.pbf file into a SQLite database\n'
               'Usage:\n'
               f'{sys.argv[0]} DATABASE OSM_PBF_FILE\n')
         sys.exit(1)
