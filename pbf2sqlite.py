@@ -84,7 +84,7 @@ class OSMHandler(osmium.SimpleHandler):
 
     def way(self, w):
         """Insert way in database"""
-        #rint("Way:", w)
+        #print("Way:", w)
         #print("  Way ID:", w.id)
         #print("  Way Version:", w.version)
         #print("  Way Timestamp:", w.timestamp)
@@ -108,10 +108,12 @@ class OSMHandler(osmium.SimpleHandler):
         #print("  Relation User ID:", r.uid)
         #print("  Relation Tags:", {tag.k: tag.v for tag in r.tags})
         #print("  Relation Members:", [(member.type, member.ref, member.role) for member in r.members])
+        # osmium returns type only shortened ('n', 'w' or 'r'), hence this conversion list
+        type = {'n': 'node', 'w': 'way', 'r': 'relation'}
         self.num_relations += 1
         member_order = 1
         for member in r.members:
-            self.cur.execute('INSERT INTO relation_members (relation_id,ref,ref_id,role,member_order) VALUES (?,?,?,?,?)', (r.id, member.type, member.ref, member.role, member_order))
+            self.cur.execute('INSERT INTO relation_members (relation_id,ref,ref_id,role,member_order) VALUES (?,?,?,?,?)', (r.id, type[member.type], member.ref, member.role, member_order))
             member_order += 1
         for tag in r.tags:
             self.cur.execute('INSERT INTO relation_tags (relation_id,key,value) VALUES (?,?,?)', (r.id, tag.k, tag.v))
