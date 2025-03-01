@@ -1,16 +1,11 @@
 #!/usr/bin/env python
 """
 Reads OpenStreetMap PBF data into a SQLite database
-
-Fedora:
-sudo dnf install python3-osmium.x86_64
-
-https://docs.osmcode.org/pyosmium/latest/index.html
-https://wiki.openstreetmap.org/wiki/PBF_Format
 """
 import sys
 import sqlite3
 import osmium
+
 
 class OSMHandler(osmium.SimpleHandler):
     """
@@ -27,7 +22,7 @@ class OSMHandler(osmium.SimpleHandler):
         #
         self.cur = cur
         #
-        self.cur.execute('PRAGMA journal_mode = OFF') # tuning database
+        self.cur.execute('PRAGMA journal_mode = OFF')  # tuning database
         self.cur.execute('PRAGMA page_size = 65536')
         self.cur.execute('BEGIN TRANSACTION')
         self.cur.executescript('''
@@ -70,49 +65,49 @@ class OSMHandler(osmium.SimpleHandler):
 
     def node(self, n):
         """Insert node in database"""
-        #print("Node:", n)
-        #print("  Node ID:", n.id)
-        #print("  Node Version:", n.version)
-        #print("  Node Timestamp:", n.timestamp)
-        #print("  Node User ID:", n.uid)
-        #print("  Node Tags:", {tag.k: tag.v for tag in n.tags})
-        #print("  Node Location (Lat, Lon):", (n.location.lat, n.location.lon))
+        # print("Node:", n)
+        # print("  Node ID:", n.id)
+        # print("  Node Version:", n.version)
+        # print("  Node Timestamp:", n.timestamp)
+        # print("  Node User ID:", n.uid)
+        # print("  Node Tags:", {tag.k: tag.v for tag in n.tags})
+        # print("  Node Location (Lat, Lon):", (n.location.lat, n.location.lon))
         self.num_nodes += 1
         self.cur.execute('INSERT INTO nodes (node_id,lon,lat) VALUES (?,?,?)',
-                          (n.id, n.location.lon, n.location.lat))
+                         (n.id, n.location.lon, n.location.lat))
         for tag in n.tags:
             self.cur.execute('INSERT INTO node_tags (node_id,key,value) VALUES (?,?,?)',
-                              (n.id, tag.k, tag.v))
+                             (n.id, tag.k, tag.v))
 
     def way(self, w):
         """Insert way in database"""
-        #print("Way:", w)
-        #print("  Way ID:", w.id)
-        #print("  Way Version:", w.version)
-        #print("  Way Timestamp:", w.timestamp)
-        #print("  Way User ID:", w.uid)
-        #print("  Way Tags:", {tag.k: tag.v for tag in w.tags})
-        #print("  Way Nodes:", [node.ref for node in w.nodes])
+        # print("Way:", w)
+        # print("  Way ID:", w.id)
+        # print("  Way Version:", w.version)
+        # print("  Way Timestamp:", w.timestamp)
+        # print("  Way User ID:", w.uid)
+        # print("  Way Tags:", {tag.k: tag.v for tag in w.tags})
+        # print("  Way Nodes:", [node.ref for node in w.nodes])
         self.num_ways += 1
         node_order = 1
         for node in w.nodes:
             self.cur.execute('INSERT INTO way_nodes (way_id,node_id,node_order) VALUES (?,?,?)',
-                              (w.id, node.ref, node_order))
+                             (w.id, node.ref, node_order))
             node_order += 1
         for tag in w.tags:
             self.cur.execute('INSERT INTO way_tags (way_id,key,value) VALUES (?,?,?)',
-                              (w.id, tag.k, tag.v))
+                             (w.id, tag.k, tag.v))
 
     def relation(self, r):
         """Insert relation in database"""
-        #print("Relation:", r)
-        #print("  Relation ID:", r.id)
-        #print("  Relation Version:", r.version)
-        #print("  Relation Timestamp:", r.timestamp)
-        #print("  Relation User ID:", r.uid)
-        #print("  Relation Tags:", {tag.k: tag.v for tag in r.tags})
-        #print("  Relation Members:",
-        #         [(member.type, member.ref, member.role) for member in r.members])
+        # print("Relation:", r)
+        # print("  Relation ID:", r.id)
+        # print("  Relation Version:", r.version)
+        # print("  Relation Timestamp:", r.timestamp)
+        # print("  Relation User ID:", r.uid)
+        # print("  Relation Tags:", {tag.k: tag.v for tag in r.tags})
+        # print("  Relation Members:",
+        #          [(member.type, member.ref, member.role) for member in r.members])
         # osmium member.type is shortened ('n', 'w' or 'r'), hence this conversion list
         longtype = {'n': 'node', 'w': 'way', 'r': 'relation'}
         self.num_relations += 1
@@ -120,11 +115,11 @@ class OSMHandler(osmium.SimpleHandler):
         for member in r.members:
             self.cur.execute('INSERT INTO relation_members '
                              '(relation_id,ref,ref_id,role,member_order) VALUES (?,?,?,?,?)',
-                              (r.id, longtype[member.type], member.ref, member.role, member_order))
+                             (r.id, longtype[member.type], member.ref, member.role, member_order))
             member_order += 1
         for tag in r.tags:
             self.cur.execute('INSERT INTO relation_tags (relation_id,key,value) VALUES (?,?,?)',
-                              (r.id, tag.k, tag.v))
+                             (r.id, tag.k, tag.v))
 
 
 def add_index(cur):
