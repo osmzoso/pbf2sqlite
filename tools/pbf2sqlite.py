@@ -16,9 +16,6 @@ class OSMHandler(osmium.SimpleHandler):
     """
     def __init__(self, cur):
         osmium.SimpleHandler.__init__(self)
-        self.num_nodes = 0
-        self.num_ways = 0
-        self.num_relations = 0
         #
         self.cur = cur
         #
@@ -72,7 +69,6 @@ class OSMHandler(osmium.SimpleHandler):
         # print("  Node User ID:", n.uid)
         # print("  Node Tags:", {tag.k: tag.v for tag in n.tags})
         # print("  Node Location (Lat, Lon):", (n.location.lat, n.location.lon))
-        self.num_nodes += 1
         self.cur.execute('INSERT INTO nodes (node_id,lon,lat) VALUES (?,?,?)',
                          (n.id, n.location.lon, n.location.lat))
         for tag in n.tags:
@@ -88,7 +84,6 @@ class OSMHandler(osmium.SimpleHandler):
         # print("  Way User ID:", w.uid)
         # print("  Way Tags:", {tag.k: tag.v for tag in w.tags})
         # print("  Way Nodes:", [node.ref for node in w.nodes])
-        self.num_ways += 1
         node_order = 1
         for node in w.nodes:
             self.cur.execute('INSERT INTO way_nodes (way_id,node_id,node_order) VALUES (?,?,?)',
@@ -110,7 +105,6 @@ class OSMHandler(osmium.SimpleHandler):
         #          [(member.type, member.ref, member.role) for member in r.members])
         # osmium member.type is shortened ('n', 'w' or 'r'), hence this conversion list
         longtype = {'n': 'node', 'w': 'way', 'r': 'relation'}
-        self.num_relations += 1
         member_order = 1
         for member in r.members:
             self.cur.execute('INSERT INTO relation_members '
@@ -151,9 +145,6 @@ def main():
     #
     osm_handler = OSMHandler(cur)
     osm_handler.apply_file(sys.argv[2])
-    print(f'Number of nodes: {osm_handler.num_nodes}')
-    print(f'Number of ways: {osm_handler.num_ways}')
-    print(f'Number of relations: {osm_handler.num_relations}')
     del osm_handler
     #
     add_index(cur)
