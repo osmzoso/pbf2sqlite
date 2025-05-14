@@ -399,8 +399,9 @@ void add_graph() {
   int64_t node_id_crossing;
   double lon;
   double lat;
-  rc = sqlite3_step(stmt);
-  while( rc!=SQLITE_DONE && rc!=SQLITE_OK ) {
+  /* rc = sqlite3_step(stmt); */
+  /* while( rc!=SQLITE_DONE && rc!=SQLITE_OK ) { */
+  while( sqlite3_step(stmt)==SQLITE_ROW ){
     way_id = sqlite3_column_int64(stmt, 0);
     node_id = sqlite3_column_int64(stmt, 1);
     node_id_crossing = sqlite3_column_int64(stmt, 2);
@@ -449,8 +450,9 @@ void add_graph() {
     prev_way_id = way_id;
     prev_node_id = node_id;
 
-    rc = sqlite3_step(stmt);
+    /* rc = sqlite3_step(stmt); */
   }
+  sqlite3_finalize(stmt);
   if( edge_active ) {
     sqlite3_bind_int64(stmt_insert_graph, 1, start_node_id);
     sqlite3_bind_int64(stmt_insert_graph, 2, node_id);
@@ -463,6 +465,7 @@ void add_graph() {
       abort_db_error();
     }
   }
+  sqlite3_finalize(stmt_insert_graph);
   rc = sqlite3_exec(db, "CREATE INDEX graph__way_id ON graph (way_id)", NULL, NULL, NULL);
   if( rc!=SQLITE_OK ) abort_db_error();
   rc = sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
