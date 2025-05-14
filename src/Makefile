@@ -1,8 +1,11 @@
 #
 #
 #
+CC = gcc
+CFLAGS = -Wall -O2 -s
+
 pbf2sqlite : pbf2sqlite.c
-	gcc pbf2sqlite.c -Wall -o pbf2sqlite -lsqlite3 -lreadosm
+	$(CC) pbf2sqlite.c -lsqlite3 -lreadosm -lm -o pbf2sqlite $(CFLAGS)
 
 clean:
 	rm -f pbf2sqlite
