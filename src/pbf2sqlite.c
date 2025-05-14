@@ -3,6 +3,7 @@
 */
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <sqlite3.h>
 #include <readosm.h>
 
@@ -322,20 +323,23 @@ int main(int argc, char **argv) {
   if( rc!=SQLITE_OK ) abort_db_error();
   int i = 2;
   while( i<argc ) {
+    if( strcmp("read", argv[i])==0 && argc>=i+2 ) {
+      rc = sqlite3_exec(db, " PRAGMA journal_mode = OFF;"
+                            " PRAGMA page_size = 65536;"
+                            " BEGIN TRANSACTION;", NULL, NULL, NULL);
+      if( rc!=SQLITE_OK ) abort_db_error();
+      add_tables();
+      create_prep_stmt();
+      read_osm_file(argv[i+1]);
+      destroy_prep_stmt();
+      add_index();
+      rc = sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
+      if( rc!=SQLITE_OK ) abort_db_error();
+      i++;
+    }
     i++;
   }
-  rc = sqlite3_exec(db, " PRAGMA journal_mode = OFF;"
-                        " PRAGMA page_size = 65536;"
-                        " BEGIN TRANSACTION;", NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error();
-  add_tables();
-  create_prep_stmt();
-  read_osm_file(argv[2]);
 
-  destroy_prep_stmt();
-  add_index();
-  rc = sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error();
   rc = sqlite3_close(db);  /* Close database connection */
   if( rc!=SQLITE_OK ) abort_db_error();
 
