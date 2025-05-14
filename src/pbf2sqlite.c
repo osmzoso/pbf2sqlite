@@ -287,71 +287,51 @@ static int print_relation (const void *user_data, const readosm_relation * relat
   return READOSM_OK;
 }
 
-int main (int argc, char *argv[]) {
+int read_osm_file(char *filename) {
   const void *osm_handle;
   int ret;
+  /* STEP #1: opening the OSM file */
+  ret = readosm_open(filename, &osm_handle);
+  if( ret!=READOSM_OK ) {
+    fprintf(stderr, "OPEN error: %d\n", ret);
+    readosm_close(osm_handle);
+    return EXIT_FAILURE;
+  }
+  /* STEP #2: parsing the OSM file */
+  ret = readosm_parse(osm_handle, (const void *) 0,
+          print_node, print_way, print_relation);
+  if( ret!=READOSM_OK ) {
+    fprintf(stderr, "PARSE error: %d\n", ret);
+    readosm_close(osm_handle);
+    return EXIT_FAILURE;
+  }
+  /* STEP #3: closing the OSM file */
+  readosm_close(osm_handle);
+  return EXIT_SUCCESS;
+}
 
-  if( argc!=3 ) {
+/*
+** Main
+*/
+int main(int argc, char **argv) {
+  if( argc==1 ) {
     show_help();
     return EXIT_FAILURE;
   }
-
-  /* STEP #0 Open database */
   rc = sqlite3_open(argv[1], &db);  /* Open database connection */
   if( rc!=SQLITE_OK ) abort_db_error();
+  int i = 2;
+  while( i<argc ) {
+    i++;
+  }
   rc = sqlite3_exec(db, " PRAGMA journal_mode = OFF;"
                         " PRAGMA page_size = 65536;"
                         " BEGIN TRANSACTION;", NULL, NULL, NULL);
   if( rc!=SQLITE_OK ) abort_db_error();
   add_tables();
   create_prep_stmt();
+  read_osm_file(argv[2]);
 
-  /*
-  * STEP #1: opening the OSM file
-  * this can indifferently be an OSM XML encoded file (.osm)
-  * or an OSM Protocol Buffer encoded file (.pbf)
-  * the library will transparently perform any required
-  * action in both cases.
-  */
-  ret = readosm_open (argv[2], &osm_handle);
-  if (ret != READOSM_OK) {
-    fprintf (stderr, "OPEN error: %d\n", ret);
-    goto stop;
-  }
-
-  /*
-  * STEP #2: parsing the OSM file
-  * this task is unbelievably simple
-  *
-  * you are simply required to pass the appropriate
-  * pointers for callback funtions respectively intended
-  * to process Node-objects, Way-objects and Relation-objects
-  *
-  * the library will then parse the whole input file, calling
-  * the appropriate callback handling function for each OSM object
-  * found: please see the callback functions implementing code
-  * to better understand how it works
-  *
-  * important notice: in this first example we'll not use at
-  * all the USER_DATA pointer. so the second arg will simply
-  * be (const void *)0 [i.e. NULL]
-  */
-  ret =
-    readosm_parse (osm_handle, (const void *) 0, print_node, print_way,
-                   print_relation);
-  if (ret != READOSM_OK) {
-    fprintf (stderr, "PARSE error: %d\n", ret);
-    goto stop;
-  }
-
-stop:
-  /*
-  * STEP #3: closing the OSM file
-  * this will release any internal memory allocation
-  */
-  readosm_close (osm_handle);
-
-  /* STEP #4 Close database */
   destroy_prep_stmt();
   add_index();
   rc = sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
