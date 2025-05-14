@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 #include <sqlite3.h>
 #include <readosm.h>
 
@@ -159,10 +160,10 @@ static int print_node (const void *user_data, const readosm_node * node) {
 
   sqlite3_bind_int64(stmt_insert_nodes, 1, node->id);
 
-  if (node->latitude != READOSM_UNDEFINED) {
+  if( node->latitude!=READOSM_UNDEFINED ) {
     sqlite3_bind_double(stmt_insert_nodes, 2, node->latitude);
   }
-  if (node->longitude != READOSM_UNDEFINED) {
+  if( node->longitude!=READOSM_UNDEFINED ) {
     sqlite3_bind_double(stmt_insert_nodes, 3, node->longitude);
   }
 
@@ -173,7 +174,7 @@ static int print_node (const void *user_data, const readosm_node * node) {
     abort_db_error();
   }
 
-  if (node->tag_count != 0) {
+  if( node->tag_count!=0 ) {
     for (i = 0; i < node->tag_count; i++) {
       tag = node->tags + i;
       sqlite3_bind_int64(stmt_insert_node_tags, 1, node->id);
@@ -197,7 +198,7 @@ static int print_way (const void *user_data, const readosm_way * way) {
   int i;
   const readosm_tag *tag;
 
-  if (way->node_ref_count != 0) {
+  if( way->node_ref_count!=0 ) {
     for (i = 0; i < way->node_ref_count; i++) {
       sqlite3_bind_int64(stmt_insert_way_nodes, 1, way->id);
       sqlite3_bind_int64(stmt_insert_way_nodes, 2, *(way->node_refs + i));
@@ -211,7 +212,7 @@ static int print_way (const void *user_data, const readosm_way * way) {
     }
   }
 
-  if (way->tag_count != 0) {
+  if( way->tag_count!=0 ) {
     for (i = 0; i < way->tag_count; i++) {
       tag = way->tags + i;
       sqlite3_bind_int64(stmt_insert_way_tags, 1, way->id);
@@ -257,7 +258,7 @@ static int print_relation (const void *user_data, const readosm_relation * relat
         sqlite3_bind_text(stmt_insert_relation_members, 2, "", -1, NULL);
         break;
       };
-      if (member->role != NULL) {
+      if( member->role!=NULL ) {
         sqlite3_bind_text(stmt_insert_relation_members, 4, member->role, -1, NULL);
       } else {
         sqlite3_bind_text(stmt_insert_relation_members, 4, "", -1, NULL);
@@ -312,6 +313,55 @@ int read_osm_file(char *filename) {
 }
 
 /*
+** Show data
+*/
+int64_t str_to_int64(const char *str) {
+  if (str == NULL) {
+    return 0; /* Handle NULL input safely */
+  }
+  char *endptr;
+  errno = 0; /* Reset errno before conversion */
+  int64_t result = strtoll(str, &endptr, 10);
+  /* Check for conversion errors */
+  if (errno == ERANGE) {
+    fprintf(stderr, "Error: Overflow or underflow occurred\n");
+    return 0; /* Indicate failure */
+  }
+  if (endptr == str || *endptr != '\0') {
+    fprintf(stderr, "Error: Invalid input - not a valid integer string\n");
+    return 0; /* Indicate failure */
+  }
+  return result;
+}
+
+void show_node(const int64_t node_id) {
+  sqlite3_stmt *stmt;
+
+  rc = sqlite3_prepare_v2(db,
+    "SELECT node_id,lon,lat FROM nodes WHERE node_id=?", -1, &stmt, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error();
+  sqlite3_bind_int64(stmt, 1, node_id);
+  while( sqlite3_step(stmt)==SQLITE_ROW ){
+    int64_t node_id = sqlite3_column_int64(stmt, 0);
+    double lon = sqlite3_column_double(stmt, 1);
+    double lat = sqlite3_column_double(stmt, 2);
+    printf("node %ld location %.7f %.7f\n", node_id, lon, lat);
+  }
+  sqlite3_finalize(stmt);
+
+  rc = sqlite3_prepare_v2(db,
+    "SELECT key,value FROM node_tags WHERE node_id=?", -1, &stmt, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error();
+  sqlite3_bind_int64(stmt, 1, node_id);
+  while( sqlite3_step(stmt)==SQLITE_ROW ) {
+    const char *key = (const char *)sqlite3_column_text(stmt, 0);
+    const char *value = (const char *)sqlite3_column_text(stmt, 1);
+    printf("node %ld tag \"%s\":\"%s\"\n", node_id, key, value);
+  }
+  sqlite3_finalize(stmt);
+}
+
+/*
 ** Main
 */
 int main(int argc, char **argv) {
@@ -337,8 +387,17 @@ int main(int argc, char **argv) {
       if( rc!=SQLITE_OK ) abort_db_error();
       i++;
     }
+    //else if( strcmp("rtree", argv[i])==0 ) add_rtree();
+    //else if( strcmp("addr", argv[i])==0 ) add_addr();
+    //else if( strcmp("graph", argv[i])==0 ) add_graph();
+    else if( strcmp("node", argv[i])==0 && argc>=i+2 ) {
+      show_node(str_to_int64(argv[i+1]));
+      i++;
+    }
+    else fprintf(stderr, "pbf2sqlite - Parameter error: '%s'?\n", argv[i]);
     i++;
   }
+
 
   rc = sqlite3_close(db);  /* Close database connection */
   if( rc!=SQLITE_OK ) abort_db_error();
