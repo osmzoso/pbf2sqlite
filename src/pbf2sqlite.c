@@ -1,5 +1,5 @@
 /*
-** pbf2sqlite - Reads OpenStreetMap PBF data into a SQLite database
+** pbf2sqlite
 */
 #include <stdlib.h>
 #include <stdio.h>
@@ -13,12 +13,12 @@ void show_help() {
   fprintf(stderr,
   "pbf2sqlite 0.1\n"
   "\n"
-  "Reads OpenStreetMap PBF data into a SQLite database.\n"
+  "Reads an OpenStreetMap .osm or .osm.pbf file into an SQLite database.\n"
   "\n"
   "Usage:\npbf2sqlite DATABASE [OPTION ...]\n"
   "\n"
   "Options:\n"
-  "  read FILE    Reads .osm or .osm.pbf FILE into the database\n"
+  "  read NAME    Reads file NAME into the database\n"
   "  rtree        Add R*Tree indexes\n"
   "  addr         Add address tables\n"
   "  graph        Add graph table\n"
@@ -398,8 +398,6 @@ void add_graph() {
   int64_t node_id_crossing;
   double lon;
   double lat;
-  /* rc = sqlite3_step(stmt); */
-  /* while( rc!=SQLITE_DONE && rc!=SQLITE_OK ) { */
   while( sqlite3_step(stmt)==SQLITE_ROW ){
     way_id = sqlite3_column_int64(stmt, 0);
     node_id = sqlite3_column_int64(stmt, 1);
@@ -448,8 +446,6 @@ void add_graph() {
     prev_lat = lat;
     prev_way_id = way_id;
     prev_node_id = node_id;
-
-    /* rc = sqlite3_step(stmt); */
   }
   sqlite3_finalize(stmt);
   if( edge_active ) {
