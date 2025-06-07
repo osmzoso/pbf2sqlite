@@ -10,11 +10,16 @@
 #include <sqlite3.h>
 #include <readosm.h>
 
+/* Mathematical Constants */
+#ifndef M_PI
+# define M_PI   3.141592653589793238462643383279502884
+#endif
+
 void show_help() {
   fprintf(stderr,
   "pbf2sqlite 0.1\n"
   "\n"
-  "Reads an OpenStreetMap .osm or .osm.pbf file into an SQLite database.\n"
+  "Reads an OpenStreetMap .osm.pbf file into an SQLite database.\n"
   "\n"
   "Usage:\npbf2sqlite DATABASE [OPTION ...]\n"
   "\n"

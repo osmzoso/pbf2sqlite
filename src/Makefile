@@ -2,7 +2,7 @@
 #
 #
 CC = gcc
-CFLAGS = -Wall -O2 -s
+CFLAGS = -Wall -O2 -s -std=c99
 
 pbf2sqlite : pbf2sqlite.c
 	$(CC) pbf2sqlite.c -lsqlite3 -lreadosm -lm -o pbf2sqlite $(CFLAGS)
@@ -29,6 +29,5 @@ win64:
      -lexpat -lz -liconv -lpthread -lwinpthread -lws2_32 -lssp -lgcc
 
 clean:
-	rm -f pbf2sqlite
-	rm -f pbf2sqlite.exe
+	rm -f pbf2sqlite pbf2sqlite.exe
 
