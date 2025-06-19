@@ -22,11 +22,7 @@ file **country.osm.pbf** and creates in the database **test.db** the tables.
 
 OSM data can be obtained from a provider such as [Geofabrik](https://download.geofabrik.de).
 
-Linux Fedora:  
-The readosm packages are required for compilation:  
-`sudo dnf install readosm readosm-devel`  
-<https://www.gaia-gis.it/fossil/readosm/index>  
-The Python module osmium is required for testing:  
-`sudo dnf install python3-osmium`  
-<https://docs.osmcode.org/pyosmium/latest/index.html>  
+
+|[**Download the latest version**](https://github.com/osmzoso/pbf2sqlite/releases/latest)|
+|----------------------------------------------------------------------------------------|
 
