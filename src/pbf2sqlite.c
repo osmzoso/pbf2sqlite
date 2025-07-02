@@ -17,14 +17,15 @@
 
 void show_help() {
   fprintf(stderr,
-  "pbf2sqlite 0.1\n"
+  "pbf2sqlite 0.2\n"
   "\n"
   "Reads an OpenStreetMap .osm.pbf file into an SQLite database.\n"
   "\n"
   "Usage:\npbf2sqlite DATABASE [OPTION ...]\n"
   "\n"
   "Options:\n"
-  "  read NAME    Reads file NAME into the database\n"
+  "  read FILE    Reads FILE into the database\n"
+  "               (.osm.pbf or .osm)\n"
   "  rtree        Add R*Tree indexes\n"
   "  addr         Add address tables\n"
   "  graph        Add graph table\n"
