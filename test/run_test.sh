@@ -1,13 +1,13 @@
 #!/bin/bash
-if [ $# != 1 ]; then
+if [ $# != 2 ]; then
     echo "Test pbf2sqlite"
     echo "Read OpenStreetMap .osm.pbf file and compare the databases"
     echo "Usage:"
-    echo "$0 OSM_PBF_FILE"
+    echo "$0 TEST_DIR OSM_PBF_FILE"
     exit 1
 fi
-test_dir=$(dirname "$1")
-test_osm_file=$(basename "$1")
+test_dir=$1
+test_osm_file=$2
 
 echo "Test dir  : " $test_dir
 echo "Test file : " $test_osm_file
