@@ -1,6 +1,8 @@
 /*
 ** pbf2sqlite
 */
+#include "pbf2sqlite.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -715,6 +717,10 @@ int main(int argc, char **argv) {
     else if( strcmp("graph", argv[i])==0 ) add_graph();
     else if( strcmp("node", argv[i])==0 && argc>=i+2 ) {
       show_node(str_to_int64(argv[i+1]));
+      i++;
+    }
+    else if( strcmp("way", argv[i])==0 && argc>=i+2 ) {
+      show_way(db, str_to_int64(argv[i+1]));
       i++;
     }
     else fprintf(stderr, "pbf2sqlite - Parameter error: '%s'?\n", argv[i]);

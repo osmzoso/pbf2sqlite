@@ -4,11 +4,19 @@
 CC = gcc
 CFLAGS = -Wall -O2 -s -std=c99
 
-pbf2sqlite : pbf2sqlite.c
-	$(CC) pbf2sqlite.c -lsqlite3 -lreadosm -lm -o pbf2sqlite $(CFLAGS)
+# Source files
+SRC = pbf2sqlite.c show.c
+OBJ = $(SRC:.c=.o)
+BIN = pbf2sqlite
 
-install: pbf2sqlite
-	install -m755 pbf2sqlite /usr/bin
+# Compiling
+all: $(BIN)
+
+$(BIN): $(SRC)
+	$(CC) $(SRC) -lsqlite3 -lreadosm -lm -o $(BIN) $(CFLAGS)
+
+install:
+	install -m755 $(BIN) /usr/bin
 
 win64:
 	x86_64-w64-mingw32-gcc \
@@ -29,5 +37,5 @@ win64:
      -lexpat -lz -liconv -lpthread -lwinpthread -lws2_32 -lssp -lgcc
 
 clean:
-	rm -f pbf2sqlite pbf2sqlite.exe
+	rm -f $(BIN) pbf2sqlite.exe
 
