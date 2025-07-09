@@ -91,6 +91,44 @@ void show_way(sqlite3 *db, const int64_t way_id) {
 }
 
 void show_relation(sqlite3 *db, const int64_t relation_id) {
-  /* TODO */
-  printf("relation %ld TODO...\n", relation_id);
+  sqlite3_stmt *stmt;
+  /* Tags */
+  rc = sqlite3_prepare_v2(db,
+    "SELECT key,value FROM relation_tags WHERE relation_id=?", -1, &stmt, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error();
+  sqlite3_bind_int64(stmt, 1, relation_id);
+  while( sqlite3_step(stmt)==SQLITE_ROW ) {
+    printf("relation %ld tag \"%s\":\"%s\"\n", relation_id,
+             (const char *)sqlite3_column_text(stmt, 0),
+             (const char *)sqlite3_column_text(stmt, 1) );
+  }
+  sqlite3_finalize(stmt);
+  /* Part of relation */
+  rc = sqlite3_prepare_v2(db,
+    " SELECT relation_id,role"
+    " FROM relation_members"
+    " WHERE ref_id=? AND ref='relation'", -1, &stmt, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error();
+  sqlite3_bind_int64(stmt, 1, relation_id);
+  while( sqlite3_step(stmt)==SQLITE_ROW ) {
+    printf("relation %ld part_of_relation %15ld %s\n", relation_id,
+             (const int64_t)sqlite3_column_int64(stmt, 0),
+             (const char *)sqlite3_column_text(stmt, 1) );
+  }
+  sqlite3_finalize(stmt);
+  /* Members */
+  rc = sqlite3_prepare_v2(db,
+    " SELECT ref,ref_id,role"
+    " FROM relation_members"
+    " WHERE relation_id=?"
+    " ORDER BY member_order", -1, &stmt, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error();
+  sqlite3_bind_int64(stmt, 1, relation_id);
+  while( sqlite3_step(stmt)==SQLITE_ROW ) {
+    printf("relation %ld member %s %15ld %s\n", relation_id,
+             (const char *)sqlite3_column_text(stmt, 0), 
+             (const int64_t)sqlite3_column_int64(stmt, 1),
+             (const char *)sqlite3_column_text(stmt, 2) );
+  }
+  sqlite3_finalize(stmt);
 }
