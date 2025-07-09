@@ -10,8 +10,6 @@ OBJ = $(SRC:.c=.o)
 BIN = pbf2sqlite
 
 # Compiling
-all: $(BIN)
-
 $(BIN): $(SRC)
 	$(CC) $(SRC) -lsqlite3 -lreadosm -lm -o $(BIN) $(CFLAGS)
 
@@ -39,3 +37,4 @@ win64:
 clean:
 	rm -f $(BIN) pbf2sqlite.exe
 
+.PHONY: clean install win64

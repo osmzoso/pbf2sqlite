@@ -19,18 +19,23 @@
 
 void show_help() {
   fprintf(stderr,
-  "pbf2sqlite 0.2\n"
+  "pbf2sqlite 0.2 ALPHA\n"
   "\n"
   "Reads an OpenStreetMap .osm.pbf file into an SQLite database.\n"
   "\n"
   "Usage:\npbf2sqlite DATABASE [OPTION ...]\n"
   "\n"
   "Options:\n"
-  "  read FILE    Reads FILE into the database\n"
-  "               (.osm.pbf or .osm)\n"
-  "  rtree        Add R*Tree indexes\n"
-  "  addr         Add address tables\n"
-  "  graph        Add graph table\n"
+  "  read FILE     Reads FILE into the database\n"
+  "                (.osm.pbf or .osm)\n"
+  "  rtree         Add R*Tree indexes\n"
+  "  addr          Add address tables\n"
+  "  graph         Add graph table\n"
+  "\n"
+  "Other options:\n"
+  "  node ID       Show node data\n"
+  "  way ID        Show way data\n"
+  "  relation ID   Show relation data\n"
   "\n"
   );
   fprintf(stderr, "(SQLite %s is used)\n\n", sqlite3_libversion());
@@ -659,33 +664,6 @@ int64_t str_to_int64(const char *str) {
   return result;
 }
 
-void show_node(const int64_t node_id) {
-  sqlite3_stmt *stmt;
-
-  rc = sqlite3_prepare_v2(db,
-    "SELECT node_id,lon,lat FROM nodes WHERE node_id=?", -1, &stmt, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error();
-  sqlite3_bind_int64(stmt, 1, node_id);
-  while( sqlite3_step(stmt)==SQLITE_ROW ){
-    int64_t node_id = sqlite3_column_int64(stmt, 0);
-    double lon = sqlite3_column_double(stmt, 1);
-    double lat = sqlite3_column_double(stmt, 2);
-    printf("node %ld location %.7f %.7f\n", node_id, lon, lat);
-  }
-  sqlite3_finalize(stmt);
-
-  rc = sqlite3_prepare_v2(db,
-    "SELECT key,value FROM node_tags WHERE node_id=?", -1, &stmt, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error();
-  sqlite3_bind_int64(stmt, 1, node_id);
-  while( sqlite3_step(stmt)==SQLITE_ROW ) {
-    const char *key = (const char *)sqlite3_column_text(stmt, 0);
-    const char *value = (const char *)sqlite3_column_text(stmt, 1);
-    printf("node %ld tag \"%s\":\"%s\"\n", node_id, key, value);
-  }
-  sqlite3_finalize(stmt);
-}
-
 /*
 ** Main
 */
@@ -716,11 +694,15 @@ int main(int argc, char **argv) {
     else if( strcmp("addr", argv[i])==0 ) add_addr();
     else if( strcmp("graph", argv[i])==0 ) add_graph();
     else if( strcmp("node", argv[i])==0 && argc>=i+2 ) {
-      show_node(str_to_int64(argv[i+1]));
+      show_node(db, str_to_int64(argv[i+1]));
       i++;
     }
     else if( strcmp("way", argv[i])==0 && argc>=i+2 ) {
       show_way(db, str_to_int64(argv[i+1]));
+      i++;
+    }
+    else if( strcmp("relation", argv[i])==0 && argc>=i+2 ) {
+      show_relation(db, str_to_int64(argv[i+1]));
       i++;
     }
     else fprintf(stderr, "pbf2sqlite - Parameter error: '%s'?\n", argv[i]);
