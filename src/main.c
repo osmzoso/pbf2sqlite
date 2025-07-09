@@ -482,9 +482,9 @@ void add_graph() {
 }
 
 /*
-** readosm tag node callback function
+** readosm tag node
 */
-static int print_node (const void *user_data, const readosm_node * node) {
+static int callback_node (const void *user_data, const readosm_node * node) {
   int i;
   const readosm_tag *tag;
 
@@ -522,9 +522,9 @@ static int print_node (const void *user_data, const readosm_node * node) {
 }
 
 /*
-** readosm tag way callback function
+** readosm tag way
 */
-static int print_way (const void *user_data, const readosm_way * way) {
+static int callback_way (const void *user_data, const readosm_way * way) {
   int i;
   const readosm_tag *tag;
 
@@ -560,9 +560,9 @@ static int print_way (const void *user_data, const readosm_way * way) {
 }
 
 /*
-** readosm tag relation callback function
+** readosm tag relation
 */
-static int print_relation (const void *user_data, const readosm_relation * relation) {
+static int callback_relation (const void *user_data, const readosm_relation * relation) {
   int i;
   const readosm_member *member;
   const readosm_tag *tag;
@@ -631,7 +631,7 @@ int read_osm_file(char *filename) {
   }
   /* STEP #2: parsing the OSM file */
   ret = readosm_parse(osm_handle, (const void *) 0,
-          print_node, print_way, print_relation);
+          callback_node, callback_way, callback_relation);
   if( ret!=READOSM_OK ) {
     fprintf(stderr, "PARSE error: %d\n", ret);
     readosm_close(osm_handle);
