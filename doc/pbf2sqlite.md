@@ -4,12 +4,23 @@ A simple command line tool for reading a
 [OpenStreetMap PBF file](https://wiki.openstreetmap.org/wiki/PBF_Format)
 into a SQLite database.
 
-Example: `pbf2sqlite test.db read country.osm.pbf`  
-
 Alternatively, [OpenStreetMap XML data](https://wiki.openstreetmap.org/wiki/OSM_XML)
 can also be read.
 
 OSM data can be obtained from a provider such as [Geofabrik](https://download.geofabrik.de).
+
+A simple example:  
+`pbf2sqlite test.db read country.osm.pbf`  
+This command reads the file **country.osm.pbf** and creates the tables
+described below in the **test.db** database.
+
+An extended example:  
+`pbf2sqlite test.db read country.osm.pbf addr rtree graph`  
+This command is executed in the following order:  
+1. read file **country.osm.pbf**  
+2. creates address tables  
+3. creates R*Tree Index  
+4. creates graph table  
 
 
 # 2. Tables
@@ -180,9 +191,5 @@ Bit 3 : 2^3  8  car
 Bit 4 : 2^4 16  bike_oneway  
 Bit 5 : 2^5 32  car_oneway  
 
-> This field is currently not yet filled, but there is a script that
-> fills this field, see **./tools/fill_graph_permit.py**.
-
-Queries on how to determine a smaller subgraph from this table
-can be found in **./queries/graph_subgraph.sql**.
+> This field is currently not yet filled!
 

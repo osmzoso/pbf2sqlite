@@ -1,0 +1,22 @@
+body {
+ margin: 40px;
+}
+blockquote {
+ margin: 0px;
+ margin-top: 15px;
+ margin-bottom: 15px;
+ padding: 2px;
+ padding-left: 10px;
+ border: 0px;
+ border-left: 4px solid #000000;
+ background-color: #dddddd;
+}
+table, th, td {
+ border: 1px solid;
+ border-collapse: collapse;
+ padding-left: 5px;
+ padding-right: 5px;
+}
+th {
+ background-color: #b1efff;
+}
