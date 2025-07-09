@@ -1,5 +1,8 @@
 # Compiling pbf2sqlite on Linux
 
+The [readosm library](https://www.gaia-gis.it/fossil/readosm/index)
+is used for this program.
+
 
 ## Dynamic binary for Linux
 
@@ -54,21 +57,26 @@ The static libs are in the following directories:
 /usr/lib/gcc/x86_64-w64-mingw32/12.2.1/libgcc.a
 ```
 
-First, the following files must also be present in the /src directory:
+First, the following source files must also be present in the /src directory:
 
 The [SQLite amalgamation files](https://www.sqlite.org/amalgamation.html):  
-sqlite3.c  
-sqlite3.h  
+```
+sqlite3.c
+sqlite3.h
+```
+in a subdirectory ./src/sqlite3/  
 
 Second, the source code files of the [readosm library](https://www.gaia-gis.it/fossil/readosm/index):
-
-config.h  
-osm_objects.c  
-osmxml.c  
-protobuf.c  
-readosm.c  
-readosm.h  
-readosm_internals.h  
-readosm_protobuf.h  
+```
+config.h
+osm_objects.c
+osmxml.c
+protobuf.c
+readosm.c
+readosm.h
+readosm_internals.h
+readosm_protobuf.h
+```
+in a subdirectory ./src/readosm/  
 
 `make win64` should do the job.

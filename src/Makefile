@@ -23,30 +23,20 @@ win64:
      -DSQLITE_THREADSAFE=0 -DSQLITE_OMIT_LOAD_EXTENSION -DSQLITE_ENABLE_RTREE \
      -D_FORTIFY_SOURCE=2 \
      $(SRC) \
-     sqlite3.c \
-     osm_objects.c \
-     osmxml.c \
-     protobuf.c \
-     readosm.c \
+     ./sqlite3/sqlite3.c \
+     ./readosm/osm_objects.c \
+     ./readosm/osmxml.c \
+     ./readosm/protobuf.c \
+     ./readosm/readosm.c \
      -o $(BIN).exe \
      -I. \
+     -I./sqlite3 \
+     -I./readosm \
      -I/usr/x86_64-w64-mingw32/sys-root/mingw/include \
      -L/usr/x86_64-w64-mingw32/sys-root/mingw/lib \
      -lexpat -lz -liconv -lpthread -lwinpthread -lws2_32 -lssp -lgcc
 
 clean:
-	rm -f \
-     $(BIN) \
-     $(BIN).exe \
-     sqlite3.c \
-     sqlite3.h \
-     config.h \
-     osm_objects.c \
-     osmxml.c \
-     protobuf.c \
-     readosm.c \
-     readosm.h \
-     readosm_internals.h \
-     readosm_protobuf.h
+	rm -f $(BIN) $(BIN).exe
 
 .PHONY: clean install win64
