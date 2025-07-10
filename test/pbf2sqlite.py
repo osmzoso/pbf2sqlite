@@ -4,8 +4,8 @@ Reads OpenStreetMap PBF data into a SQLite database
 """
 import sys
 import sqlite3
-import osmium
 import math
+import osmium
 
 
 def show_help():

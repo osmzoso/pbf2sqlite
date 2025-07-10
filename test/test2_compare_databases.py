@@ -56,6 +56,13 @@ def compare_osm2sqlite_db(db1, db2):
     compare_table(cur, 'way_tags', 'way_id,key,value')
     compare_table(cur, 'relation_members', 'relation_id,ref,ref_id,role,member_order')
     compare_table(cur, 'relation_tags', 'relation_id,key,value')
+    # for floating point columns CAST needed
+    compare_table(cur, 'addr_street', 'street_id,postcode,city,street,'
+                       'CAST(min_lon AS TEXT),CAST(min_lat AS TEXT),'
+                       'CAST(max_lon AS TEXT),CAST(max_lat AS TEXT)')
+    compare_table(cur, 'addr_housenumber', 'housenumber_id,street_id,housenumber,'
+                       'CAST(lon AS TEXT),CAST(lat AS TEXT),way_id,node_id')
+    compare_table(cur, 'graph', 'edge_id,start_node_id,end_node_id,dist,way_id,permit')
 
 
 def main():
