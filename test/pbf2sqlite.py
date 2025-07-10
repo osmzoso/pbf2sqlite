@@ -19,7 +19,7 @@ def show_help():
           '\n'
           'Options:\n'
           '  read FILE    Reads FILE into the database\n'
-          '               (When FILE is -, read stdin)\n'
+          '               (.osm.pbf or .osm)\n'
           '  rtree        Add R*Tree indexes\n'
           '  addr         Add address tables\n'
           '  graph        Add graph table\n'
