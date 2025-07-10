@@ -4,6 +4,11 @@
 #include <stdint.h>
 #include <sqlite3.h>
 
+/* Mathematical Constants */
+#ifndef M_PI
+# define M_PI   3.141592653589793238462643383279502884
+#endif
+
 /*
 ** Public variables
 */
@@ -15,8 +20,15 @@ extern sqlite3_stmt *stmt_insert_nodes, *stmt_insert_node_tags, *stmt_insert_way
 /*
 **  Function prototypes
 */
+/* main.c */
 void abort_db_error();
 int64_t str_to_int64(const char *str);
+/* add_data.c */
+void add_rtree(sqlite3 *db);
+void add_addr(sqlite3 *db);
+void add_graph(sqlite3 *db);
+double distance(double lon1, double lat1, double lon2, double lat2);
+/* show.c */
 void show_node(sqlite3 *db, const int64_t node_id);
 void show_way(sqlite3 *db, const int64_t way_id);
 void show_relation(sqlite3 *db, const int64_t relation_id);
