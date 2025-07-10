@@ -157,7 +157,7 @@ def add_index(cur):
     ''')
 
 
-def add_rtree():
+def add_rtree(cur):
     """Create the R*Tree indexes in the database"""
     cur.executescript('''
     CREATE VIRTUAL TABLE rtree_way USING rtree(way_id, min_lat, max_lat, min_lon, max_lon);
@@ -175,7 +175,7 @@ def add_rtree():
     ''')
 
 
-def add_addr():
+def add_addr(cur):
     """Create the address tables in the database"""
     cur.executescript('''
     BEGIN TRANSACTION;
@@ -331,7 +331,7 @@ def distance(lon1, lat1, lon2, lat2):
     return dist     # distance in meters
 
 
-def add_graph():
+def add_graph(cur):
     """Create the graph table in the database"""
     cur.execute('BEGIN TRANSACTION')
     cur.execute('''
@@ -488,7 +488,6 @@ def show_relation(cur, relation_id):
 
 def main():
     """Main function: entry point for execution"""
-    global con, cur
     if len(sys.argv) == 1:
         show_help()
         sys.exit(1)
@@ -506,11 +505,11 @@ def main():
             cur.execute('ANALYZE')
             i += 1
         elif sys.argv[i] == 'rtree':
-            add_rtree()
+            add_rtree(cur)
         elif sys.argv[i] == 'addr':
-            add_addr()
+            add_addr(cur)
         elif sys.argv[i] == 'graph':
-            add_graph()
+            add_graph(cur)
         elif sys.argv[i] == 'node' and len(sys.argv) >= i+2:
             show_node(cur, sys.argv[i+1])
             i += 1
