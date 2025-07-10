@@ -18,11 +18,16 @@ def show_help():
           f'{sys.argv[0]} DATABASE [OPTION ...]\n'
           '\n'
           'Options:\n'
-          '  read FILE    Reads FILE into the database\n'
-          '               (.osm.pbf or .osm)\n'
-          '  rtree        Add R*Tree indexes\n'
-          '  addr         Add address tables\n'
-          '  graph        Add graph table\n'
+          '  read FILE     Reads FILE into the database\n'
+          '                (.osm.pbf or .osm)\n'
+          '  rtree         Add R*Tree indexes\n'
+          '  addr          Add address tables\n'
+          '  graph         Add graph table\n'
+          '\n'
+          'Other options:\n'
+          '  node ID       Show node data\n'
+          '  way ID        Show way data\n'
+          '  relation ID   Show relation data\n'
           )
     print('(SQLite '+sqlite3.sqlite_version+' is used)\n')
 
@@ -407,6 +412,80 @@ def add_graph():
     cur.execute('COMMIT TRANSACTION')
 
 
+def show_node(cur, node_id):
+    """
+    Displays OSM data of a node
+    """
+    # Location
+    cur.execute('SELECT lon,lat FROM nodes WHERE node_id=?', (node_id,))
+    for (lon, lat) in cur.fetchall():
+        print(f'node {node_id} location {lon} {lat}')
+    # Tags
+    cur.execute('SELECT key,value FROM node_tags WHERE node_id=?', (node_id,))
+    for (key, value) in cur.fetchall():
+        print(f'node {node_id} tag "{key}":"{value}"')
+    # Part of relation
+    cur.execute("""
+    SELECT relation_id,role
+    FROM relation_members
+    WHERE ref_id=? AND ref='node'""", (node_id,))
+    for (relation_id, role) in cur.fetchall():
+        print(f'node {node_id} part_of_relation {relation_id} {role}')
+
+
+def show_way(cur, way_id):
+    """
+    Displays OSM data of a way
+    """
+    # Tags
+    cur.execute('SELECT key,value FROM way_tags WHERE way_id=?', (way_id,))
+    for (key, value) in cur.fetchall():
+        print(f'way {way_id} tag "{key}":"{value}"')
+    # Part of relation
+    cur.execute("""
+    SELECT relation_id,role
+    FROM relation_members
+    WHERE ref_id=? AND ref='way'""", (way_id,))
+    for (relation_id, role) in cur.fetchall():
+        print(f'way {way_id} part_of_relation {relation_id:15d} {role}')
+    # Nodes
+    cur.execute('''
+    SELECT wn.node_id,n.lat,n.lon
+    FROM way_nodes AS wn
+    LEFT JOIN nodes AS n ON wn.node_id=n.node_id
+    WHERE wn.way_id=?
+    ORDER BY wn.node_order''', (way_id,))
+    for (node_id, lat, lon) in cur.fetchall():
+        print(f'way {way_id} node {node_id:15d} {lat:12.7f} {lon:12.7f}')
+
+
+def show_relation(cur, relation_id):
+    """
+    Displays OSM data of a relation
+    """
+    # Tags
+    cur.execute('SELECT key,value FROM relation_tags WHERE relation_id=?',
+                (relation_id,))
+    for (key, value) in cur.fetchall():
+        print(f'relation {relation_id} tag "{key}":"{value}"')
+    # Part of relation
+    cur.execute("""
+    SELECT relation_id,role
+    FROM relation_members
+    WHERE ref_id=? AND ref='relation'""", (relation_id,))
+    for (part_relation_id, role) in cur.fetchall():
+        print(f'relation {relation_id} part_of_relation '
+              f'{part_relation_id} {role}')
+    # Members
+    cur.execute('''
+    SELECT ref,ref_id,role
+    FROM relation_members
+    WHERE relation_id=?
+    ORDER BY member_order''', (relation_id,))
+    for (ref, ref_id, role) in cur.fetchall():
+        print(f'relation {relation_id} member {ref} {ref_id} {role}')
+
+
 def main():
     """Main function: entry point for execution"""
     global con, cur
@@ -424,6 +503,7 @@ def main():
             osm_handler.apply_file(sys.argv[i+1])
             del osm_handler
             add_index(cur)
+            cur.execute('ANALYZE')
             i += 1
         elif sys.argv[i] == 'rtree':
             add_rtree()
@@ -431,10 +511,18 @@ def main():
             add_addr()
         elif sys.argv[i] == 'graph':
             add_graph()
+        elif sys.argv[i] == 'node' and len(sys.argv) >= i+2:
+            show_node(cur, sys.argv[i+1])
+            i += 1
+        elif sys.argv[i] == 'way' and len(sys.argv) >= i+2:
+            show_way(cur, sys.argv[i+1])
+            i += 1
+        elif sys.argv[i] == 'relation' and len(sys.argv) >= i+2:
+            show_relation(cur, sys.argv[i+1])
+            i += 1
         else:
             print("osm2sqlite.py - Parameter error: '"+sys.argv[i]+"'?")
         i += 1
-    cur.execute('ANALYZE')
     con.commit()                        # commit
     con.close()                         # close database connection
 
