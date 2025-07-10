@@ -521,7 +521,7 @@ def main():
             show_relation(cur, sys.argv[i+1])
             i += 1
         else:
-            print("osm2sqlite.py - Parameter error: '"+sys.argv[i]+"'?")
+            print(f"{sys.argv[0]} - Parameter error: '"+sys.argv[i]+"'?")
         i += 1
     con.commit()                        # commit
     con.close()                         # close database connection

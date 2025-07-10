@@ -14,9 +14,9 @@
 
 void show_help() {
   fprintf(stderr,
-  "pbf2sqlite 0.2 ALPHA\n"
+  "pbf2sqlite 0.2\n"
   "\n"
-  "Reads an OpenStreetMap .osm.pbf file into an SQLite database.\n"
+  "Reads OpenStreetMap PBF data into a SQLite database.\n"
   "\n"
   "Usage:\npbf2sqlite DATABASE [OPTION ...]\n"
   "\n"
@@ -365,6 +365,8 @@ int main(int argc, char **argv) {
       destroy_prep_stmt();
       add_index();
       rc = sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
+      if( rc!=SQLITE_OK ) abort_db_error();
+      rc = sqlite3_exec(db, "ANALYZE", NULL, NULL, NULL);
       if( rc!=SQLITE_OK ) abort_db_error();
       i++;
     }
