@@ -10,12 +10,16 @@ can also be read.
 OSM data can be obtained from a provider such as [Geofabrik](https://download.geofabrik.de).
 
 A simple example:  
+
 `pbf2sqlite test.db read country.osm.pbf`  
+
 This command reads the file **country.osm.pbf** and creates the tables
 described below in the **test.db** database.
 
 An extended example:  
+
 `pbf2sqlite test.db read country.osm.pbf addr rtree graph`  
+
 This command is executed in the following order:  
 1. read file **country.osm.pbf**  
 2. creates address tables  
