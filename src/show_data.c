@@ -1,5 +1,5 @@
 /*
-** Show data
+** Show data for node, way or relation
 */
 #include "pbf2sqlite.h"
 
@@ -10,14 +10,13 @@ void show_node(sqlite3 *db, const int64_t node_id) {
   sqlite3_stmt *stmt;
   /* Location */
   rc = sqlite3_prepare_v2(db,
-    "SELECT node_id,lon,lat FROM nodes WHERE node_id=?", -1, &stmt, NULL);
+    "SELECT lon,lat FROM nodes WHERE node_id=?", -1, &stmt, NULL);
   if( rc!=SQLITE_OK ) abort_db_error();
   sqlite3_bind_int64(stmt, 1, node_id);
   while( sqlite3_step(stmt)==SQLITE_ROW ){
-    int64_t node_id = sqlite3_column_int64(stmt, 0);
-    double lon = sqlite3_column_double(stmt, 1);
-    double lat = sqlite3_column_double(stmt, 2);
-    printf("node %ld location %.7f %.7f\n", node_id, lon, lat);
+    printf("node %ld location %.7f %.7f\n", node_id,
+             (double)sqlite3_column_double(stmt, 0),
+             (double)sqlite3_column_double(stmt, 1) );
   }
   sqlite3_finalize(stmt);
   /* Tags */
@@ -26,9 +25,9 @@ void show_node(sqlite3 *db, const int64_t node_id) {
   if( rc!=SQLITE_OK ) abort_db_error();
   sqlite3_bind_int64(stmt, 1, node_id);
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
-    const char *key = (const char *)sqlite3_column_text(stmt, 0);
-    const char *value = (const char *)sqlite3_column_text(stmt, 1);
-    printf("node %ld tag \"%s\":\"%s\"\n", node_id, key, value);
+    printf("node %ld tag \"%s\":\"%s\"\n", node_id,
+             (char *)sqlite3_column_text(stmt, 0),
+             (char *)sqlite3_column_text(stmt, 1) );
   }
   sqlite3_finalize(stmt);
   /* Part of relation */
@@ -39,9 +38,9 @@ void show_node(sqlite3 *db, const int64_t node_id) {
   if( rc!=SQLITE_OK ) abort_db_error();
   sqlite3_bind_int64(stmt, 1, node_id);
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
-    int64_t relation_id = sqlite3_column_int64(stmt, 0);
-    const char *role = (const char *)sqlite3_column_text(stmt, 1);
-    printf("node %ld part_of_relation %15ld %s\n", node_id, relation_id, role);
+    printf("node %ld part_of_relation %15ld %s\n", node_id,
+             (int64_t)sqlite3_column_int64(stmt, 0),
+             (char *)sqlite3_column_text(stmt, 1) );
   }
   sqlite3_finalize(stmt);
 }
@@ -54,9 +53,9 @@ void show_way(sqlite3 *db, const int64_t way_id) {
   if( rc!=SQLITE_OK ) abort_db_error();
   sqlite3_bind_int64(stmt, 1, way_id);
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
-    const char *key = (const char *)sqlite3_column_text(stmt, 0);
-    const char *value = (const char *)sqlite3_column_text(stmt, 1);
-    printf("way %ld tag \"%s\":\"%s\"\n", way_id, key, value);
+    printf("way %ld tag \"%s\":\"%s\"\n", way_id,
+             (char *)sqlite3_column_text(stmt, 0),
+             (char *)sqlite3_column_text(stmt, 1) );
   }
   sqlite3_finalize(stmt);
   /* Part of relation */
@@ -67,9 +66,9 @@ void show_way(sqlite3 *db, const int64_t way_id) {
   if( rc!=SQLITE_OK ) abort_db_error();
   sqlite3_bind_int64(stmt, 1, way_id);
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
-    int64_t relation_id = sqlite3_column_int64(stmt, 0);
-    const char *role = (const char *)sqlite3_column_text(stmt, 1);
-    printf("way %ld part_of_relation %15ld %s\n", way_id, relation_id, role);
+    printf("way %ld part_of_relation %15ld %s\n", way_id,
+             (int64_t)sqlite3_column_int64(stmt, 0),
+             (char *)sqlite3_column_text(stmt, 1) );
   }
   sqlite3_finalize(stmt);
   /* Nodes */
@@ -82,10 +81,10 @@ void show_way(sqlite3 *db, const int64_t way_id) {
   if( rc!=SQLITE_OK ) abort_db_error();
   sqlite3_bind_int64(stmt, 1, way_id);
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
-    int64_t node_id = sqlite3_column_int64(stmt, 0);
-    double lon = sqlite3_column_double(stmt, 1);
-    double lat = sqlite3_column_double(stmt, 2);
-    printf("way %ld node %15ld %.7f %.7f\n", way_id, node_id, lon, lat);
+    printf("way %ld node %15ld %.7f %.7f\n", way_id,
+             (int64_t)sqlite3_column_int64(stmt, 0),
+             (double)sqlite3_column_double(stmt, 1),
+             (double)sqlite3_column_double(stmt, 2) );
   }
   sqlite3_finalize(stmt);
 }
@@ -99,8 +98,8 @@ void show_relation(sqlite3 *db, const int64_t relation_id) {
   sqlite3_bind_int64(stmt, 1, relation_id);
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
     printf("relation %ld tag \"%s\":\"%s\"\n", relation_id,
-             (const char *)sqlite3_column_text(stmt, 0),
-             (const char *)sqlite3_column_text(stmt, 1) );
+             (char *)sqlite3_column_text(stmt, 0),
+             (char *)sqlite3_column_text(stmt, 1) );
   }
   sqlite3_finalize(stmt);
   /* Part of relation */
@@ -112,8 +111,8 @@ void show_relation(sqlite3 *db, const int64_t relation_id) {
   sqlite3_bind_int64(stmt, 1, relation_id);
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
     printf("relation %ld part_of_relation %15ld %s\n", relation_id,
-             (const int64_t)sqlite3_column_int64(stmt, 0),
-             (const char *)sqlite3_column_text(stmt, 1) );
+             (int64_t)sqlite3_column_int64(stmt, 0),
+             (char *)sqlite3_column_text(stmt, 1) );
   }
   sqlite3_finalize(stmt);
   /* Members */
@@ -126,9 +125,9 @@ void show_relation(sqlite3 *db, const int64_t relation_id) {
   sqlite3_bind_int64(stmt, 1, relation_id);
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
     printf("relation %ld member %s %15ld %s\n", relation_id,
-             (const char *)sqlite3_column_text(stmt, 0), 
-             (const int64_t)sqlite3_column_int64(stmt, 1),
-             (const char *)sqlite3_column_text(stmt, 2) );
+             (char *)sqlite3_column_text(stmt, 0), 
+             (int64_t)sqlite3_column_int64(stmt, 1),
+             (char *)sqlite3_column_text(stmt, 2) );
   }
   sqlite3_finalize(stmt);
 }
