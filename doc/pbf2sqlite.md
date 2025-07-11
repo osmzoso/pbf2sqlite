@@ -21,7 +21,7 @@ An extended example:
 `pbf2sqlite test.db read country.osm.pbf addr rtree graph`  
 
 This command is executed in the following order:  
-1. read file **country.osm.pbf**  
+1. read file **country.osm.pbf** and creates the tables  
 2. creates address tables  
 3. creates R*Tree Index  
 4. creates graph table  
