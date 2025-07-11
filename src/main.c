@@ -56,7 +56,7 @@ void abort_db_error() {
 /*
 ** create tables, indexes and prepared insert statements
 */
-void add_tables() {
+void add_tables(sqlite3 *db) {
   rc = sqlite3_exec(
          db,
          " CREATE TABLE nodes (\n"
@@ -100,7 +100,7 @@ void add_tables() {
   if( rc!=SQLITE_OK ) abort_db_error();
 }
 
-void create_prep_stmt() {
+void create_prep_stmt(sqlite3 *db) {
   rc = sqlite3_prepare_v2(
          db,
          "INSERT INTO nodes (node_id,lat,lon) VALUES (?1,?2,?3)",
@@ -142,7 +142,7 @@ void destroy_prep_stmt() {
   sqlite3_finalize(stmt_insert_relation_tags);
 }
 
-void add_index() {
+void add_index(sqlite3 *db) {
   rc = sqlite3_exec(
     db,
     " CREATE INDEX node_tags__node_id            ON node_tags (node_id);"
@@ -300,14 +300,14 @@ static int callback_relation (const void *user_data, const readosm_relation * re
 int read_osm_file(char *filename) {
   const void *osm_handle;
   int ret;
-  /* STEP #1: opening the OSM file */
+  /* Opening the OSM file */
   ret = readosm_open(filename, &osm_handle);
   if( ret!=READOSM_OK ) {
     fprintf(stderr, "OPEN error: %d\n", ret);
     readosm_close(osm_handle);
     return EXIT_FAILURE;
   }
-  /* STEP #2: parsing the OSM file */
+  /* Parsing the OSM file */
   ret = readosm_parse(osm_handle, (const void *) 0,
           callback_node, callback_way, callback_relation);
   if( ret!=READOSM_OK ) {
@@ -315,27 +315,22 @@ int read_osm_file(char *filename) {
     readosm_close(osm_handle);
     return EXIT_FAILURE;
   }
-  /* STEP #3: closing the OSM file */
+  /* Closing the OSM file */
   readosm_close(osm_handle);
   return EXIT_SUCCESS;
 }
 
-/*
-** Show data
-*/
 int64_t str_to_int64(const char *str) {
-  if (str == NULL) {
-    return 0; /* Handle NULL input safely */
-  }
+  if( str==NULL ) return 0;  /* Handle NULL input safely */
   char *endptr;
   errno = 0; /* Reset errno before conversion */
   int64_t result = strtoll(str, &endptr, 10);
   /* Check for conversion errors */
-  if (errno == ERANGE) {
+  if( errno==ERANGE ) {
     fprintf(stderr, "Error: Overflow or underflow occurred\n");
     return 0; /* Indicate failure */
   }
-  if (endptr == str || *endptr != '\0') {
+  if( endptr==str || *endptr!='\0' ) {
     fprintf(stderr, "Error: Invalid input - not a valid integer string\n");
     return 0; /* Indicate failure */
   }
@@ -359,11 +354,11 @@ int main(int argc, char **argv) {
                             " PRAGMA page_size = 65536;"
                             " BEGIN TRANSACTION;", NULL, NULL, NULL);
       if( rc!=SQLITE_OK ) abort_db_error();
-      add_tables();
-      create_prep_stmt();
+      add_tables(db);
+      create_prep_stmt(db);
       read_osm_file(argv[i+1]);
       destroy_prep_stmt();
-      add_index();
+      add_index(db);
       rc = sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
       if( rc!=SQLITE_OK ) abort_db_error();
       rc = sqlite3_exec(db, "ANALYZE", NULL, NULL, NULL);
