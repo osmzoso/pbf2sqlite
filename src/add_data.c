@@ -25,7 +25,7 @@ void add_rtree(sqlite3 *db) {
     " LEFT JOIN node_tags ON nodes.node_id=node_tags.node_id"
     " WHERE node_tags.node_id IS NOT NULL;",
     NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error();
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
 }
 
 void add_addr(sqlite3 *db) {
@@ -165,7 +165,7 @@ void add_addr(sqlite3 *db) {
     " DROP TABLE tmp_addr;"
     " COMMIT TRANSACTION;",
     NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error();
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
 }
 
 /* Calculates great circle distance between two coordinates in degrees */
@@ -194,7 +194,7 @@ void add_graph(sqlite3 *db) {
     "  permit        INTEGER DEFAULT 15    -- bit field access\n"
     " )\n",
     NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error();
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   /* Create a table with all nodes that are crossing points */
   rc = sqlite3_exec(
     db,
@@ -203,7 +203,7 @@ void add_graph(sqlite3 *db) {
     "  node_id INTEGER PRIMARY KEY"
     " )",
     NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error();
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   rc = sqlite3_exec(
     db,
     " INSERT INTO highway_nodes_crossing"
@@ -216,7 +216,7 @@ void add_graph(sqlite3 *db) {
     " )"
     " GROUP BY node_id HAVING count(*)>1",
     NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error();
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   /* */
   double prev_lon = 0;
   double prev_lat = 0;
@@ -231,7 +231,7 @@ void add_graph(sqlite3 *db) {
     db,
     "INSERT INTO graph (start_node_id,end_node_id,dist,way_id) VALUES (?1,?2,?3,?4)",
     -1, &stmt_insert_graph, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error();
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
 
   sqlite3_stmt *stmt = NULL;
   rc = sqlite3_prepare_v2(
@@ -247,7 +247,7 @@ void add_graph(sqlite3 *db) {
     " WHERE wt.key='highway'"
     " ORDER BY wn.way_id,wn.node_order",
     -1, &stmt, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error();
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
 
   int64_t way_id;
   int64_t node_id;
@@ -270,7 +270,7 @@ void add_graph(sqlite3 *db) {
       if( rc==SQLITE_DONE ) {
         sqlite3_reset(stmt_insert_graph);
       } else {
-        abort_db_error();
+        abort_db_error(db, rc);
       }
       edge_active = 0;
     }
@@ -291,7 +291,7 @@ void add_graph(sqlite3 *db) {
         if( rc==SQLITE_DONE ) {
           sqlite3_reset(stmt_insert_graph);
         } else {
-          abort_db_error();
+          abort_db_error(db, rc);
         }
         edge_active = 0;
       }
@@ -313,12 +313,12 @@ void add_graph(sqlite3 *db) {
     if( rc==SQLITE_DONE ) {
       sqlite3_reset(stmt_insert_graph);
     } else {
-      abort_db_error();
+      abort_db_error(db, rc);
     }
   }
   sqlite3_finalize(stmt_insert_graph);
   rc = sqlite3_exec(db, "CREATE INDEX graph__way_id ON graph (way_id)", NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error();
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   rc = sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error();
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
 }
