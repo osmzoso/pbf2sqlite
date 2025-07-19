@@ -13,8 +13,8 @@
 #include <readosm.h>
 
 void show_help() {
-  fprintf(stderr,
-  "pbf2sqlite 0.2\n"
+  fprintf(stdout,
+  "pbf2sqlite " PBF2SQLITE_VERSION "\n"
   "\n"
   "Reads OpenStreetMap PBF data into a SQLite database.\n"
   "\n"
@@ -33,7 +33,8 @@ void show_help() {
   "  relation ID   Show relation data\n"
   "\n"
   );
-  fprintf(stderr, "(SQLite %s is used)\n\n", sqlite3_libversion());
+  fprintf(stdout, "(SQLite %s and readosm %s is used)\n\n",
+                    sqlite3_libversion(), readosm_version());
 }
 
 /*
