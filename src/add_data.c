@@ -191,7 +191,8 @@ void add_graph(sqlite3 *db) {
     "  end_node_id   INTEGER,              -- edge end node ID\n"
     "  dist          INTEGER,              -- distance in meters\n"
     "  way_id        INTEGER,              -- way ID\n"
-    "  permit        INTEGER DEFAULT 15    -- bit field access\n"
+    "  permit        INTEGER DEFAULT 15,   -- bit field access\n"
+    "  permit_v2     INTEGER DEFAULT 15    -- bit field access\n"
     " )\n",
     NULL, NULL, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
