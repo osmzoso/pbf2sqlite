@@ -5,7 +5,7 @@ CC = gcc
 CFLAGS = -Wall -O2 -s -std=c99
 
 # Source files
-SRC = main.c show_data.c add_data.c
+SRC = main.c read_data.c add_data.c show_data.c
 OBJ = $(SRC:.c=.o)
 BIN = pbf2sqlite
 
