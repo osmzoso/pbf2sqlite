@@ -47,7 +47,7 @@ sqlite3_stmt *stmt_insert_nodes, *stmt_insert_node_tags, *stmt_insert_way_nodes,
 ** Shows last result code and then aborts the program
 */
 void abort_db_error(sqlite3 *db, int rc) {
-  fprintf(stderr, "abort pbf2sqlite - (%i) %s - %s\n", rc, sqlite3_errstr(rc), sqlite3_errmsg(db));
+  fprintf(stderr, "pbf2sqlite - (%i) %s - %s\n", rc, sqlite3_errstr(rc), sqlite3_errmsg(db));
   sqlite3_close(db);
   exit(EXIT_FAILURE);
 }
@@ -69,56 +69,78 @@ int64_t str_to_int64(const char *str) {
   return result;
 }
 
-/*
-** Main
-*/
 int main(int argc, char **argv) {
-  if( argc==1 ) {
+  char *db_name;
+  char *osm_file_name;
+  int read = 0;
+  int rtree = 0;
+  int addr = 0;
+  int graph = 0;
+  int64_t node_id = 0;
+  int64_t way_id = 0;
+  int64_t relation_id = 0;
+  int i;
+  /* Parse parameter */
+  if( argc==1 ){
     show_help();
     return EXIT_FAILURE;
   }
-  rc = sqlite3_open(argv[1], &db);  /* Open database connection */
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
-  int i = 2;
-  while( i<argc ) {
-    if( strcmp("read", argv[i])==0 && argc>=i+2 ) {
-      rc = sqlite3_exec(db, " PRAGMA journal_mode = OFF;"
-                            " PRAGMA page_size = 65536;"
-                            " BEGIN TRANSACTION;", NULL, NULL, NULL);
-      if( rc!=SQLITE_OK ) abort_db_error(db, rc);
-      add_tables(db);
-      create_prep_stmt(db);
-      read_osm_file(argv[i+1]);
-      destroy_prep_stmt();
-      add_index(db);
-      rc = sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
-      if( rc!=SQLITE_OK ) abort_db_error(db, rc);
-      rc = sqlite3_exec(db, "ANALYZE", NULL, NULL, NULL);
-      if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  db_name = argv[1];
+  i = 2;
+  while( i<argc ){
+    if( strcmp("read", argv[i])==0 && argc>=i+2 ){
+      read = 1;
+      osm_file_name = argv[i+1];
+      i++;
+    } 
+    else if( strcmp("rtree", argv[i])==0 ) rtree = 1;
+    else if( strcmp("addr", argv[i])==0 ) addr = 1;
+    else if( strcmp("graph", argv[i])==0 ) graph = 1;
+    else if( strcmp("node", argv[i])==0 && argc>=i+2 ){
+      node_id = str_to_int64(argv[i+1]);
       i++;
     }
-    else if( strcmp("rtree", argv[i])==0 ) add_rtree(db);
-    else if( strcmp("addr", argv[i])==0 ) add_addr(db);
-    else if( strcmp("graph", argv[i])==0 ) add_graph(db);
-    else if( strcmp("node", argv[i])==0 && argc>=i+2 ) {
-      show_node(db, str_to_int64(argv[i+1]));
+    else if( strcmp("way", argv[i])==0 && argc>=i+2 ){
+      way_id = str_to_int64(argv[i+1]);
       i++;
     }
-    else if( strcmp("way", argv[i])==0 && argc>=i+2 ) {
-      show_way(db, str_to_int64(argv[i+1]));
+    else if( strcmp("relation", argv[i])==0 && argc>=i+2 ){
+      relation_id = str_to_int64(argv[i+1]);
       i++;
     }
-    else if( strcmp("relation", argv[i])==0 && argc>=i+2 ) {
-      show_relation(db, str_to_int64(argv[i+1]));
-      i++;
-    }
-    else fprintf(stderr, "pbf2sqlite - Parameter error: '%s'?\n", argv[i]);
+    else {
+      printf("Invalid option: %s\n", argv[i]);
+      return EXIT_FAILURE;
+    };
     i++;
   }
-
-
-  rc = sqlite3_close(db);  /* Close database connection */
+  /* Open database connection */
+  rc = sqlite3_open(db_name, &db);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
-
-  return 0;
+  /* Execute options */
+  if( read ){
+    rc = sqlite3_exec(db, " PRAGMA journal_mode = OFF;"
+                          " PRAGMA page_size = 65536;"
+                          " BEGIN TRANSACTION;", NULL, NULL, NULL);
+    if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+    add_tables(db);
+    create_prep_stmt(db);
+    read_osm_file(osm_file_name);
+    destroy_prep_stmt();
+    add_index(db);
+    rc = sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
+    if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+    rc = sqlite3_exec(db, "ANALYZE", NULL, NULL, NULL);
+    if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  }
+  if( rtree ) add_rtree(db);
+  if( addr ) add_addr(db);
+  if( graph ) add_graph(db);
+  if( node_id ) show_node(db, node_id);
+  if( way_id ) show_way(db, way_id);
+  if( relation_id ) show_relation(db, relation_id);
+  /* Close database connection */
+  rc = sqlite3_close(db);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  return EXIT_SUCCESS;
 }
