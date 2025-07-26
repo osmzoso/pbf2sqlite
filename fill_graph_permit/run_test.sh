@@ -10,7 +10,7 @@ database=$1
 echo "Database : " $database
 
 echo "create table 'graph_permit'..."
-sqlite3 $database < permit_def.sql
+sqlite3 $database < graph_permit.sql
 echo "fill field permit with old testscript..."
 time ./fill_graph_permit.py $database
 echo "fill field permit_v2 with new testscript..."
