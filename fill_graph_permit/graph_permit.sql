@@ -72,7 +72,7 @@ INSERT INTO graph_permit VALUES ('oneway','yes',             0x30, 255);
 */
 /* Tags no foot -> clear bits 11111110 (dec 254) */
 INSERT INTO graph_permit VALUES ('sidewalk','separate',             0, 254);
-INSERT INTO graph_permit VALUES ('foot','use_sidpath',              0, 254);
+INSERT INTO graph_permit VALUES ('foot','use_sidepath',             0, 254);
 INSERT INTO graph_permit VALUES ('access','no',                     0, 254);
 /* Tags no bike -> clear bits 11111001 (dec 249) */
 INSERT INTO graph_permit VALUES ('cycleway','separate',             0, 249);
