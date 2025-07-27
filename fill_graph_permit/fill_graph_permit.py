@@ -18,32 +18,6 @@ def clear_bit(value, bit):
 
 def fill_graph_permit(cur):
     """Fill the field 'permit' in table 'graph'"""
-    tags_car = {
-      'highway=motorway',
-      'highway=motorway_link',
-      'highway=trunk',
-      'highway=trunk_link'
-    }
-    tags_car_bike = {
-      'highway=primary',
-      'highway=primary_link',
-      'highway=secondary',
-      'highway=secondary_link',
-      'highway=tertiary',
-      'highway=tertiary_link',
-      'highway=unclassified',
-      'highway=residential'
-    }
-    tags_bike_foot = {
-      'highway=residential',
-      'highway=living_street',
-      'highway=service',
-      'highway=cycleway',
-      'highway=track',
-      'highway=unclassified',
-      'bicycle=yes',
-      'bicycle=designated'
-    }
     tags_foot = {
       'highway=pedestrian',
       'highway=track',
@@ -61,6 +35,42 @@ def fill_graph_permit(cur):
       'sidewalk:left=yes',
       'sidewalk=yes'
     }
+    tags_foot_bike = {
+      'highway=residential',
+      'highway=living_street',
+      'highway=service',
+      'highway=track',
+      'highway=unclassified'
+    }
+    tags_bike = {
+      'highway=cycleway',
+      'bicycle=yes',
+      'bicycle=designated'
+    }
+    tags_bike_car = {
+      'highway=primary',
+      'highway=primary_link',
+      'highway=secondary',
+      'highway=secondary_link',
+      'highway=tertiary',
+      'highway=tertiary_link',
+      'highway=unclassified',
+      'highway=residential'
+    }
+    tags_car = {
+      'highway=motorway',
+      'highway=motorway_link',
+      'highway=trunk',
+      'highway=trunk_link'
+    }
+    tags_paved = {
+      'surface=asphalt',
+      'surface=sett',
+      'surface=paving_stones'
+    }
+    tags_oneway = {
+      'oneway=yes'
+    }
     cur.execute('SELECT DISTINCT way_id FROM graph')
     for (way_id,) in cur.fetchall():
         permit = 0b00000000
@@ -69,24 +79,25 @@ def fill_graph_permit(cur):
         cur.execute('SELECT key,value FROM way_tags WHERE way_id=?', (way_id,))
         for (key, value) in cur.fetchall():
             tags.add(key + '=' + value)
-        # 1. Set basic flags
-        if tags_car.intersection(tags):
-            permit = set_bit(permit, 3)
-        if tags_car_bike.intersection(tags):
-            permit = set_bit(permit, 3)
-            permit = set_bit(permit, 2)
-            permit = set_bit(permit, 1)
-        if tags_bike_foot.intersection(tags):
-            permit = set_bit(permit, 2)
-            permit = set_bit(permit, 1)
-            permit = set_bit(permit, 0)
+        # 1. Set permit bits
         if tags_foot.intersection(tags):
             permit = set_bit(permit, 0)
-        # 2. Corrections
-        if 'surface=asphalt' not in tags and \
-           'surface=sett' not in tags and \
-           'surface=paving_stones' not in tags:
-            permit = clear_bit(permit, 2)
+        if tags_foot_bike.intersection(tags):
+            permit = set_bit(permit, 0)
+            permit = set_bit(permit, 1)
+        if tags_bike.intersection(tags):
+            permit = set_bit(permit, 1)
+        if tags_bike_car.intersection(tags):
+            permit = set_bit(permit, 1)
+            permit = set_bit(permit, 2)
+        if tags_car.intersection(tags):
+            permit = set_bit(permit, 2)
+        if tags_paved.intersection(tags):
+            permit = set_bit(permit, 3)
+        if tags_oneway.intersection(tags):
+            permit = set_bit(permit, 4)
+            permit = set_bit(permit, 5)
+        # 2. Clear permit bits
         if 'sidewalk=separate' in tags or \
            'foot=use_sidepath' in tags or \
            'access=no' in tags:
@@ -97,12 +108,7 @@ def fill_graph_permit(cur):
            'cycleway:left=separate' in tags or \
            'bicycle=use_sidepath' in tags or \
            'access=no' in tags:
-            permit = clear_bit(permit, 2)
             permit = clear_bit(permit, 1)
-        # 3. One way
-        if 'oneway=yes' in tags:
-            permit = set_bit(permit, 5)
-            permit = set_bit(permit, 4)
         if 'oneway:bicycle=no' in tags:
             permit = clear_bit(permit, 4)
         #
@@ -115,9 +121,9 @@ def main():
     if len(sys.argv) != 2:
         print('Set the bits in the field "permit" in an existing table "graph".\n\n'
               'Bit 0: foot\n'
-              'Bit 1: bike_gravel\n'
-              'Bit 2: bike_road\n'
-              'Bit 3: car\n'
+              'Bit 1: bike\n'
+              'Bit 2: car\n'
+              'Bit 3: paved\n'
               'Bit 4: bike_oneway\n'
               'Bit 5: car_oneway\n\n'
               'Usage:\n'
