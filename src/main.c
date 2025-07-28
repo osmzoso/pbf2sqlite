@@ -10,8 +10,7 @@
 #include <sqlite3.h>
 #include <readosm.h>
 
-void show_help() {
-  fprintf(stdout,
+static char *help =
   "pbf2sqlite " PBF2SQLITE_VERSION "\n"
   "\n"
   "Reads OpenStreetMap PBF data into a SQLite database.\n"
@@ -30,10 +29,7 @@ void show_help() {
   "  way ID        Show way data\n"
   "  relation ID   Show relation data\n"
   "\n"
-  );
-  fprintf(stdout, "(SQLite %s and readosm %s is used)\n\n",
-                    sqlite3_libversion(), readosm_version());
-}
+  ;
 
 /*
 ** Public variables
@@ -82,7 +78,9 @@ int main(int argc, char **argv) {
   int i;
   /* Parse parameter */
   if( argc==1 ){
-    show_help();
+    printf("%s", help);
+    printf("(SQLite %s and readosm %s is used)\n\n",
+             sqlite3_libversion(), readosm_version());
     return EXIT_FAILURE;
   }
   db_name = argv[1];
