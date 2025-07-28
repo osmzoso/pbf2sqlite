@@ -10,26 +10,20 @@ def fill_graph_permit(cur):
     """Fill the field 'permit_v2' in table 'graph'"""
     cur.execute('SELECT DISTINCT way_id FROM graph')
     for (way_id,) in cur.fetchall():
+        mask_set = 0b00000000
+        mask_clear = 0b11111111
+        cur.execute('''
+        SELECT gp.set_bit,gp.clear_bit
+        FROM way_tags AS wt
+        JOIN graph_permit AS gp ON wt.key=gp.key AND wt.value=gp.value
+        WHERE wt.way_id=?
+        ''', (way_id,))
+        for (set_bit, clear_bit) in cur.fetchall():
+            mask_set = mask_set | set_bit        # bitwise or
+            mask_clear = mask_clear & clear_bit  # bitwise and
         permit = 0b00000000
-        # set bits
-        cur.execute('''
-        SELECT gp.set_bit
-        FROM way_tags AS wt
-        JOIN graph_permit AS gp ON wt.key=gp.key AND wt.value=gp.value
-        WHERE wt.way_id=?
-        ''', (way_id,))
-        for (set_bit,) in cur.fetchall():
-            permit = permit | set_bit    # bitwise or
-        # clear bits
-        cur.execute('''
-        SELECT gp.clear_bit
-        FROM way_tags AS wt
-        JOIN graph_permit AS gp ON wt.key=gp.key AND wt.value=gp.value
-        WHERE wt.way_id=?
-        ''', (way_id,))
-        for (clear_bit,) in cur.fetchall():
-            permit = permit & clear_bit    # bitwise and
-        #
+        permit = permit | mask_set
+        permit = permit & mask_clear
         cur.execute('UPDATE graph SET permit_v2=? WHERE way_id=?',
                     (permit, way_id))
 
