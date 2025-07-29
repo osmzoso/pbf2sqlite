@@ -331,6 +331,122 @@ def distance(lon1, lat1, lon2, lat2):
     return dist     # distance in meters
 
 
+def fill_graph_permit(cur):
+    """Fill the field 'permit_v2' in table 'graph'"""
+    cur.execute('SELECT DISTINCT way_id FROM graph')
+    for (way_id,) in cur.fetchall():
+        mask_set = 0b00000000
+        mask_clear = 0b11111111
+        cur.execute('''
+        SELECT gp.set_bit,gp.clear_bit
+        FROM way_tags AS wt
+        JOIN graph_permit AS gp ON wt.key=gp.key AND wt.value=gp.value
+        WHERE wt.way_id=?
+        ''', (way_id,))
+        for (set_bit, clear_bit) in cur.fetchall():
+            mask_set = mask_set | set_bit        # bitwise or
+            mask_clear = mask_clear & clear_bit  # bitwise and
+        permit = 0b00000000
+        permit = permit | mask_set
+        permit = permit & mask_clear
+        cur.execute('UPDATE graph SET permit=? WHERE way_id=?',
+                    (permit, way_id))
+
+
+def create_table_graph_permit(cur):
+    """Create table graph_permit"""
+    cur.executescript('''
+    /*
+    **
+    ** Bits in the bitfield "permit":
+    **  Bit 0: foot
+    **  Bit 1: bike
+    **  Bit 2: car
+    **  Bit 3: paved
+    **  Bit 4: bike_oneway
+    **  Bit 5: car_oneway
+    **  Bit 6: (not used)
+    **  Bit 7: (not used)
+    **
+    */
+    BEGIN TRANSACTION;
+    CREATE TABLE graph_permit(
+      key     TEXT,
+      value   TEXT,
+      set_bit INTEGER,
+      clear_bit INTEGER
+    );
+    /*
+    ** Tags to set permit bits
+    */
+    /* Tags foot -> set bits 00000001 (dec 1) */
+    INSERT INTO graph_permit VALUES ('highway','pedestrian',            1, 255);
+    INSERT INTO graph_permit VALUES ('highway','track',                 1, 255);
+    INSERT INTO graph_permit VALUES ('highway','footway',               1, 255);
+    INSERT INTO graph_permit VALUES ('highway','steps',                 1, 255);
+    INSERT INTO graph_permit VALUES ('highway','path',                  1, 255);
+    INSERT INTO graph_permit VALUES ('highway','construction',          1, 255);
+    INSERT INTO graph_permit VALUES ('foot','yes',                      1, 255);
+    INSERT INTO graph_permit VALUES ('foot','designated',               1, 255);
+    INSERT INTO graph_permit VALUES ('sidewalk','both',                 1, 255);
+    INSERT INTO graph_permit VALUES ('sidewalk:both','yes',             1, 255);
+    INSERT INTO graph_permit VALUES ('sidewalk','right',                1, 255);
+    INSERT INTO graph_permit VALUES ('sidewalk:right','yes',            1, 255);
+    INSERT INTO graph_permit VALUES ('sidewalk','left',                 1, 255);
+    INSERT INTO graph_permit VALUES ('sidewalk:left','yes',             1, 255);
+    INSERT INTO graph_permit VALUES ('sidewalk','yes',                  1, 255);
+    /* Tags foot & bike -> set bits 00000011 (dec 3) */
+    INSERT INTO graph_permit VALUES ('highway','residential',           3, 255);
+    INSERT INTO graph_permit VALUES ('highway','living_street',         3, 255);
+    INSERT INTO graph_permit VALUES ('highway','service',               3, 255);
+    INSERT INTO graph_permit VALUES ('highway','track',                 3, 255);
+    INSERT INTO graph_permit VALUES ('highway','unclassified',          3, 255);
+    /* Tags bike -> set bits 00000010 (dec 2) */
+    INSERT INTO graph_permit VALUES ('highway','cycleway',              2, 255);
+    INSERT INTO graph_permit VALUES ('bicycle','yes',                   2, 255);
+    INSERT INTO graph_permit VALUES ('bicycle','designated',            2, 255);
+    /* Tags bike & car -> set bits 00000110 (dec 6) */
+    INSERT INTO graph_permit VALUES ('highway','primary',               6, 255);
+    INSERT INTO graph_permit VALUES ('highway','primary_link',          6, 255);
+    INSERT INTO graph_permit VALUES ('highway','secondary',             6, 255);
+    INSERT INTO graph_permit VALUES ('highway','secondary_link',        6, 255);
+    INSERT INTO graph_permit VALUES ('highway','tertiary',              6, 255);
+    INSERT INTO graph_permit VALUES ('highway','tertiary_link',         6, 255);
+    INSERT INTO graph_permit VALUES ('highway','unclassified',          6, 255);
+    INSERT INTO graph_permit VALUES ('highway','residential',           6, 255);
+    /* Tags car -> set bits 00000100 (dec 4) */
+    INSERT INTO graph_permit VALUES ('highway','motorway',              4, 255);
+    INSERT INTO graph_permit VALUES ('highway','motorway_link',         4, 255);
+    INSERT INTO graph_permit VALUES ('highway','trunk',                 4, 255);
+    INSERT INTO graph_permit VALUES ('highway','trunk_link',            4, 255);
+    /* Tags paved -> set bits 00001000 (dec 8) */
+    INSERT INTO graph_permit VALUES ('surface','asphalt',               8, 255);
+    INSERT INTO graph_permit VALUES ('surface','sett',                  8, 255);
+    INSERT INTO graph_permit VALUES ('surface','paving_stones',         8, 255);
+    /* Tags oneway -> set bits 00110000 (dec 48) */
+    INSERT INTO graph_permit VALUES ('oneway','yes',                   48, 255);
+    /*
+    ** Tags to clear permit bits
+    */
+    /* Tags no foot -> clear bits 11111110 (dec 254) */
+    INSERT INTO graph_permit VALUES ('sidewalk','separate',             0, 254);
+    INSERT INTO graph_permit VALUES ('foot','use_sidepath',             0, 254);
+    INSERT INTO graph_permit VALUES ('access','no',                     0, 254);
+    /* Tags no bike -> clear bits 11111101 (dec 253) */
+    INSERT INTO graph_permit VALUES ('cycleway','separate',             0, 253);
+    INSERT INTO graph_permit VALUES ('cycleway:both','separate',        0, 253);
+    INSERT INTO graph_permit VALUES ('cycleway:right','separate',       0, 253);
+    INSERT INTO graph_permit VALUES ('cycleway:left','separate',        0, 253);
+    INSERT INTO graph_permit VALUES ('bicycle','use_sidepath',          0, 253);
+    INSERT INTO graph_permit VALUES ('access','no',                     0, 253);
+    /* Tags no oneway -> clear bits 11101111 (dec 239) */
+    INSERT INTO graph_permit VALUES ('oneway:bicycle','no',             0, 239);
+    /* create index */
+    CREATE INDEX graph_permit__key_value ON graph_permit (key, value);
+    COMMIT TRANSACTION;
+    ''')
+
+
 def add_graph(cur):
     """Create the graph table in the database"""
     cur.execute('BEGIN TRANSACTION')
@@ -341,7 +457,7 @@ def add_graph(cur):
      end_node_id   INTEGER,              -- edge end node ID
      dist          INTEGER,              -- distance in meters
      way_id        INTEGER,              -- way ID
-     permit        INTEGER DEFAULT 15    -- bit field access
+     permit        INTEGER DEFAULT 255   -- bit field access
     )
     ''')
     # Create a table with all nodes that are crossing points
@@ -410,6 +526,9 @@ def add_graph(cur):
                    (start_node_id, node_id, round(dist), way_id))
     cur.execute('CREATE INDEX graph__way_id ON graph (way_id)')
     cur.execute('COMMIT TRANSACTION')
+    #
+    create_table_graph_permit(cur)
+    fill_graph_permit(cur)
 
 
 def show_node(cur, node_id):

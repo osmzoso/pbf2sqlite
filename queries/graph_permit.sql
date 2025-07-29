@@ -11,7 +11,6 @@
 **  Bit 7: (not used)
 **
 */
-DROP TABLE IF EXISTS graph_permit;
 BEGIN TRANSACTION;
 CREATE TABLE graph_permit(
   key     TEXT,
