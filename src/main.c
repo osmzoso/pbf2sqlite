@@ -17,7 +17,7 @@ static char *help =
   "\n"
   "Usage:\npbf2sqlite DATABASE [OPTION ...]\n"
   "\n"
-  "Options:\n"
+  "Main options:\n"
   "  read FILE     Reads FILE into the database\n"
   "                (.osm.pbf or .osm)\n"
   "  rtree         Add R*Tree indexes\n"
@@ -28,6 +28,7 @@ static char *help =
   "  node ID       Show node data\n"
   "  way ID        Show way data\n"
   "  relation ID   Show relation data\n"
+  "  noindex       Do not create indexes (not recommended)\n"
   "\n"
   ;
 
@@ -75,6 +76,7 @@ int main(int argc, char **argv) {
   int64_t node_id = 0;
   int64_t way_id = 0;
   int64_t relation_id = 0;
+  int index = 1;
   int i;
   /* Parse parameter */
   if( argc==1 ){
@@ -106,6 +108,7 @@ int main(int argc, char **argv) {
       relation_id = str_to_int64(argv[i+1]);
       i++;
     }
+    else if( strcmp("noindex", argv[i])==0 ) index = 0;
     else {
       printf("Invalid option: %s\n", argv[i]);
       return EXIT_FAILURE;
@@ -125,7 +128,7 @@ int main(int argc, char **argv) {
     create_prep_stmt(db);
     read_osm_file(osm_file_name);
     destroy_prep_stmt();
-    add_index(db);
+    if( index ) add_index(db);
     rc = sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
     if( rc!=SQLITE_OK ) abort_db_error(db, rc);
     rc = sqlite3_exec(db, "ANALYZE", NULL, NULL, NULL);
