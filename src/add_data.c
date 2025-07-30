@@ -182,6 +182,50 @@ double distance(double lon1, double lat1, double lon2, double lat2) {
 }
 
 void fill_graph_permit(sqlite3 *db) {
+  sqlite3_stmt *stmt, *stmt_mask, *stmt_update;
+  int64_t way_id;
+  int mask_set, mask_clear, set_bit, clear_bit, permit;
+  rc = sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, NULL);
+  /* prepare statements */
+  rc = sqlite3_prepare_v2(db, "SELECT DISTINCT way_id FROM graph", -1, &stmt, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  rc = sqlite3_prepare_v2(db,
+    " SELECT gp.set_bit,gp.clear_bit"
+    " FROM way_tags AS wt"
+    " JOIN graph_permit AS gp ON wt.key=gp.key AND wt.value=gp.value"
+    " WHERE wt.way_id=?",
+     -1, &stmt_mask, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  rc = sqlite3_prepare_v2(db, "UPDATE graph SET permit=? WHERE way_id=?", -1, &stmt_update, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  /* get the ways */
+  while( sqlite3_step(stmt)==SQLITE_ROW ) {
+    way_id = (int64_t)sqlite3_column_int64(stmt, 0);
+    mask_set = 0;
+    mask_clear = 255;
+    /* get the bitmasks for the tags */
+    sqlite3_reset(stmt_mask);
+    sqlite3_bind_int64(stmt_mask, 1, way_id);
+    while( sqlite3_step(stmt_mask)==SQLITE_ROW ) {
+      set_bit = (int)sqlite3_column_int(stmt_mask, 0);
+      clear_bit = (int)sqlite3_column_int(stmt_mask, 1);
+      mask_set = mask_set | set_bit;        /* bitwise or */
+      mask_clear = mask_clear & clear_bit;  /* bitwise and */
+    }
+    permit = 0;
+    permit = permit | mask_set;
+    permit = permit & mask_clear;
+    /* update */
+    sqlite3_bind_int(stmt_update, 1, permit);
+    sqlite3_bind_int64(stmt_update, 2, way_id);
+    rc = sqlite3_step(stmt_update);
+    if( rc!=SQLITE_DONE ) abort_db_error(db, rc);
+    sqlite3_reset(stmt_update);
+  }
+  rc = sqlite3_exec(db, "COMMIT TRANSACTION", NULL, NULL, NULL);
+  sqlite3_finalize(stmt);
+  sqlite3_finalize(stmt_mask);
+  sqlite3_finalize(stmt_update);
 }
 
 void create_table_graph_permit(sqlite3 *db) {
@@ -276,8 +320,7 @@ void add_graph(sqlite3 *db) {
     "  end_node_id   INTEGER,              -- edge end node ID\n"
     "  dist          INTEGER,              -- distance in meters\n"
     "  way_id        INTEGER,              -- way ID\n"
-    "  permit        INTEGER DEFAULT 15,   -- bit field access\n"
-    "  permit_v2     INTEGER DEFAULT 15    -- bit field access\n"
+    "  permit        INTEGER DEFAULT 15    -- bit field access\n"
     " )\n",
     NULL, NULL, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
