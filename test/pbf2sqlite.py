@@ -332,7 +332,7 @@ def distance(lon1, lat1, lon2, lat2):
 
 
 def fill_graph_permit(cur):
-    """Fill the field 'permit_v2' in table 'graph'"""
+    """Fill the field 'permit' in table 'graph'"""
     cur.execute('SELECT DISTINCT way_id FROM graph')
     for (way_id,) in cur.fetchall():
         mask_set = 0b00000000
@@ -356,19 +356,6 @@ def fill_graph_permit(cur):
 def create_table_graph_permit(cur):
     """Create table graph_permit"""
     cur.executescript('''
-    /*
-    **
-    ** Bits in the bitfield "permit":
-    **  Bit 0: foot
-    **  Bit 1: bike
-    **  Bit 2: car
-    **  Bit 3: paved
-    **  Bit 4: bike_oneway
-    **  Bit 5: car_oneway
-    **  Bit 6: (not used)
-    **  Bit 7: (not used)
-    **
-    */
     BEGIN TRANSACTION;
     CREATE TABLE graph_permit(
       key     TEXT,
@@ -526,7 +513,6 @@ def add_graph(cur):
                    (start_node_id, node_id, round(dist), way_id))
     cur.execute('CREATE INDEX graph__way_id ON graph (way_id)')
     cur.execute('COMMIT TRANSACTION')
-    #
     create_table_graph_permit(cur)
     fill_graph_permit(cur)
 
