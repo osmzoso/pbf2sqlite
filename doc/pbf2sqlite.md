@@ -188,12 +188,14 @@ Visualization of the table 'graph':
 ![table_graph.jpg](table_graph.jpg)
 
 The bit field **permit** determines who may use this edge:  
-Bit 0 : 2^0  1  foot  
-Bit 1 : 2^1  2  bike_gravel  
-Bit 2 : 2^2  4  bike_road  
-Bit 3 : 2^3  8  car  
-Bit 4 : 2^4 16  bike_oneway  
-Bit 5 : 2^5 32  car_oneway  
+Bit 0 : 2^0   1  foot  
+Bit 1 : 2^1   2  bike  
+Bit 2 : 2^2   4  car  
+Bit 3 : 2^3   8  paved  
+Bit 4 : 2^4  16  bike_oneway  
+Bit 5 : 2^5  32  car_oneway  
+Bit 6 : 2^6  64  (not used)  
+Bit 7 : 2^7 128  (not used)  
 
 > This field is currently not yet filled!
 
