@@ -42,9 +42,9 @@ def compare_table(cur, table, columns):
 
 def compare_osm2sqlite_db(db1, db2):
     """Establishing database connection, compare each table"""
-    print("----------------------------------------------\n"
+    print("-----------------------------------------------------------------\n"
           "Test2: Compare two databases\n"
-          "----------------------------------------------\n"
+          "-----------------------------------------------------------------\n"
           f"db1 : {db1}\ndb2 : {db2}")
     con = sqlite3.connect(":memory:")
     cur = con.cursor()
@@ -63,6 +63,11 @@ def compare_osm2sqlite_db(db1, db2):
     compare_table(cur, 'addr_housenumber', 'housenumber_id,street_id,housenumber,'
                        'CAST(lon AS TEXT),CAST(lat AS TEXT),way_id,node_id')
     compare_table(cur, 'graph', 'edge_id,start_node_id,end_node_id,dist,way_id,permit')
+    print("Due to rounding errors, the 'dist' column in the 'graph' table "
+          "may have different values.\n"
+          "Therefore, the comparison again without the 'dist' column:")
+    compare_table(cur, 'graph', 'edge_id,start_node_id,end_node_id,way_id,permit')
+    compare_table(cur, 'graph_permit', 'key,value,set_bit,clear_bit')
 
 
 def main():

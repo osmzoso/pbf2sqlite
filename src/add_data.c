@@ -221,6 +221,7 @@ void fill_graph_permit(sqlite3 *db) {
     rc = sqlite3_step(stmt_update);
     if( rc!=SQLITE_DONE ) abort_db_error(db, rc);
     sqlite3_reset(stmt_update);
+    sqlite3_clear_bindings(stmt_update);
   }
   rc = sqlite3_exec(db, "COMMIT TRANSACTION", NULL, NULL, NULL);
   sqlite3_finalize(stmt);
