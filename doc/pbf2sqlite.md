@@ -188,14 +188,29 @@ Visualization of the table 'graph':
 ![table_graph.jpg](table_graph.jpg)
 
 The bit field **permit** determines who may use this edge:  
-Bit 0 : 2^0   1  foot  
-Bit 1 : 2^1   2  bike  
-Bit 2 : 2^2   4  car  
-Bit 3 : 2^3   8  paved  
-Bit 4 : 2^4  16  bike_oneway  
-Bit 5 : 2^5  32  car_oneway  
-Bit 6 : 2^6  64  (not used)  
-Bit 7 : 2^7 128  (not used)  
+
+bit   | meaning     | value decimal
+------|-------------|----------------
+Bit 0 | foot        | 2^0   1
+Bit 1 | bike        | 2^1   2
+Bit 2 | car         | 2^2   4
+Bit 3 | paved       | 2^3   8
+Bit 4 | oneway_bike | 2^4  16
+Bit 5 | oneway_car  | 2^5  32
+Bit 6 | (not used)  | 2^6  64
+Bit 7 | (not used)  | 2^7 128
+
+To fill the column **permit** a table **graph_permit** is created:  
+
+#### Table "graph_permit"
+column     | type     | description
+-----------|----------|-------------------------------------
+key        | TEXT     | tag key
+value      | TEXT     | tag value
+set_bit    | INTEGER  | bitmask set bits
+clear_bit  | INTEGER  | bitmask clear bits
+
+In this table you can specify which tags set or clear the individual bits.
 
 <https://www.sqlite.org/lang_with.html#queries_against_a_graph>
 

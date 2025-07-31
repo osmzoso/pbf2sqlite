@@ -358,10 +358,10 @@ def create_table_graph_permit(cur):
     cur.executescript('''
     BEGIN TRANSACTION;
     CREATE TABLE graph_permit(
-      key     TEXT,
-      value   TEXT,
-      set_bit INTEGER,
-      clear_bit INTEGER
+      key       TEXT,     -- tag key
+      value     TEXT,     -- tag value
+      set_bit   INTEGER,  -- bitmask set bits
+      clear_bit INTEGER   -- bitmask clear bits
     );
     /*
     ** Tags to set permit bits

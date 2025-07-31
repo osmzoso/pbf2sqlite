@@ -5,18 +5,18 @@
 **  Bit 1: bike
 **  Bit 2: car
 **  Bit 3: paved
-**  Bit 4: bike_oneway
-**  Bit 5: car_oneway
+**  Bit 4: oneway_bike
+**  Bit 5: oneway_car
 **  Bit 6: (not used)
 **  Bit 7: (not used)
 **
 */
 BEGIN TRANSACTION;
 CREATE TABLE graph_permit(
-  key     TEXT,
-  value   TEXT,
-  set_bit INTEGER,
-  clear_bit INTEGER
+  key       TEXT,     -- tag key
+  value     TEXT,     -- tag value
+  set_bit   INTEGER,  -- bitmask set bits
+  clear_bit INTEGER   -- bitmask clear bits
 );
 /*
 ** Tags to set permit bits
