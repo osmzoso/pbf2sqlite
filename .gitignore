@@ -6,4 +6,4 @@ src/pbf2sqlite.exe
 src/sqlite3/
 src/readosm/
 #
-doc/bld/
+build/

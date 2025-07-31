@@ -1,6 +1,6 @@
 #!/bin/bash
 
-mkdir -p bld
+mkdir -p ../build
 
 #
 # PDF
@@ -10,7 +10,7 @@ pandoc \
  pbf2sqlite.md \
  --pdf-engine=xelatex \
  --toc \
- -o ./bld/pbf2sqlite.pdf
+ -o ../build/pbf2sqlite.pdf
 
 #
 # HTML
@@ -22,14 +22,14 @@ pandoc \
  --toc \
  --css=custom.css \
  pbf2sqlite.md \
- -o ./bld/pbf2sqlite.html
+ -o ../build/pbf2sqlite.html
 
 #
 # manpage
 #
-rm -f ./bld/pbf2sqlite.1.gz
+rm -f ../build/pbf2sqlite.1.gz
 pandoc \
  -s -f markdown -t man \
  pbf2sqlite.md \
- -o ./bld/pbf2sqlite.1
-gzip ./bld/pbf2sqlite.1
+ -o ../build/pbf2sqlite.1
+gzip ../build/pbf2sqlite.1

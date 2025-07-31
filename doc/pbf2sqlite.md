@@ -197,5 +197,5 @@ Bit 5 : 2^5  32  car_oneway
 Bit 6 : 2^6  64  (not used)  
 Bit 7 : 2^7 128  (not used)  
 
-> This field is currently not yet filled!
+<https://www.sqlite.org/lang_with.html#queries_against_a_graph>
 
