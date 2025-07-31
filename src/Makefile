@@ -7,19 +7,21 @@ CFLAGS = -Wall -O2 -s -std=c99
 # Source files
 SRC = main.c read_data.c add_data.c show_data.c
 OBJ = $(SRC:.c=.o)
-BIN = pbf2sqlite
+BIN = ../build/pbf2sqlite
 
 # Compiling
 $(BIN): $(SRC)
+	mkdir -p $(dir $(BIN))
 	$(CC) $(SRC) -lsqlite3 -lreadosm -lm -o $(BIN) $(CFLAGS)
 
 install:
 	install -m755 $(BIN) /usr/bin
 
 win64:
+	mkdir -p $(dir $(BIN))
 	x86_64-w64-mingw32-gcc \
      -static \
-     -O2 -s \
+     $(CFLAGS) \
      -DSQLITE_THREADSAFE=0 -DSQLITE_OMIT_LOAD_EXTENSION -DSQLITE_ENABLE_RTREE \
      -D_FORTIFY_SOURCE=2 \
      $(SRC) \

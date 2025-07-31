@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <inttypes.h>
 
 void show_node(sqlite3 *db, const int64_t node_id) {
   sqlite3_stmt *stmt;
@@ -14,7 +15,7 @@ void show_node(sqlite3 *db, const int64_t node_id) {
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   sqlite3_bind_int64(stmt, 1, node_id);
   while( sqlite3_step(stmt)==SQLITE_ROW ){
-    printf("node %ld location %.7f %.7f\n", node_id,
+    printf("node %" PRId64 " location %.7f %.7f\n", node_id,
              (double)sqlite3_column_double(stmt, 0),
              (double)sqlite3_column_double(stmt, 1) );
   }
@@ -25,7 +26,7 @@ void show_node(sqlite3 *db, const int64_t node_id) {
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   sqlite3_bind_int64(stmt, 1, node_id);
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
-    printf("node %ld tag \"%s\":\"%s\"\n", node_id,
+    printf("node %" PRId64 " tag \"%s\":\"%s\"\n", node_id,
              (char *)sqlite3_column_text(stmt, 0),
              (char *)sqlite3_column_text(stmt, 1) );
   }
@@ -38,7 +39,7 @@ void show_node(sqlite3 *db, const int64_t node_id) {
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   sqlite3_bind_int64(stmt, 1, node_id);
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
-    printf("node %ld part_of_relation %15ld %s\n", node_id,
+    printf("node %" PRId64 " part_of_relation %15" PRId64 " %s\n", node_id,
              (int64_t)sqlite3_column_int64(stmt, 0),
              (char *)sqlite3_column_text(stmt, 1) );
   }
@@ -53,7 +54,7 @@ void show_way(sqlite3 *db, const int64_t way_id) {
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   sqlite3_bind_int64(stmt, 1, way_id);
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
-    printf("way %ld tag \"%s\":\"%s\"\n", way_id,
+    printf("way %" PRId64 " tag \"%s\":\"%s\"\n", way_id,
              (char *)sqlite3_column_text(stmt, 0),
              (char *)sqlite3_column_text(stmt, 1) );
   }
@@ -66,7 +67,7 @@ void show_way(sqlite3 *db, const int64_t way_id) {
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   sqlite3_bind_int64(stmt, 1, way_id);
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
-    printf("way %ld part_of_relation %15ld %s\n", way_id,
+    printf("way %" PRId64 " part_of_relation %15" PRId64 " %s\n", way_id,
              (int64_t)sqlite3_column_int64(stmt, 0),
              (char *)sqlite3_column_text(stmt, 1) );
   }
@@ -81,7 +82,7 @@ void show_way(sqlite3 *db, const int64_t way_id) {
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   sqlite3_bind_int64(stmt, 1, way_id);
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
-    printf("way %ld node %15ld %.7f %.7f\n", way_id,
+    printf("way %" PRId64 " node %15" PRId64 " %.7f %.7f\n", way_id,
              (int64_t)sqlite3_column_int64(stmt, 0),
              (double)sqlite3_column_double(stmt, 1),
              (double)sqlite3_column_double(stmt, 2) );
@@ -97,7 +98,7 @@ void show_relation(sqlite3 *db, const int64_t relation_id) {
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   sqlite3_bind_int64(stmt, 1, relation_id);
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
-    printf("relation %ld tag \"%s\":\"%s\"\n", relation_id,
+    printf("relation %" PRId64 " tag \"%s\":\"%s\"\n", relation_id,
              (char *)sqlite3_column_text(stmt, 0),
              (char *)sqlite3_column_text(stmt, 1) );
   }
@@ -110,7 +111,7 @@ void show_relation(sqlite3 *db, const int64_t relation_id) {
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   sqlite3_bind_int64(stmt, 1, relation_id);
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
-    printf("relation %ld part_of_relation %15ld %s\n", relation_id,
+    printf("relation %" PRId64 " part_of_relation %15" PRId64 " %s\n", relation_id,
              (int64_t)sqlite3_column_int64(stmt, 0),
              (char *)sqlite3_column_text(stmt, 1) );
   }
@@ -124,7 +125,7 @@ void show_relation(sqlite3 *db, const int64_t relation_id) {
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   sqlite3_bind_int64(stmt, 1, relation_id);
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
-    printf("relation %ld member %s %15ld %s\n", relation_id,
+    printf("relation %" PRId64 " member %s %15" PRId64 " %s\n", relation_id,
              (char *)sqlite3_column_text(stmt, 0), 
              (int64_t)sqlite3_column_int64(stmt, 1),
              (char *)sqlite3_column_text(stmt, 2) );
