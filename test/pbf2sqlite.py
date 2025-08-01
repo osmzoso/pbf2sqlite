@@ -354,6 +354,12 @@ def fill_graph_permit(cur):
 
 def create_table_graph_permit(cur):
     """Create table graph_permit"""
+    # do not create the table if it already exists
+    cur.execute(" SELECT name FROM sqlite_master"
+                " WHERE type='table' AND name='graph_permit'")
+    result = cur.fetchone()
+    if result:
+        return
     cur.executescript('''
     BEGIN TRANSACTION;
     CREATE TABLE graph_permit(

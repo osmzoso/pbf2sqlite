@@ -230,6 +230,18 @@ void fill_graph_permit(sqlite3 *db) {
 }
 
 void create_table_graph_permit(sqlite3 *db) {
+  sqlite3_stmt *stmt_check;
+  /* do not create the table if it already exists */
+  rc = sqlite3_prepare_v2(db,
+    " SELECT name FROM sqlite_master"
+    " WHERE type='table' AND name='graph_permit'",
+    -1, &stmt_check, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( sqlite3_step(stmt_check)==SQLITE_ROW ) {
+        sqlite3_finalize(stmt_check);
+        return;
+  }
+  sqlite3_finalize(stmt_check);
   rc = sqlite3_exec(
     db,
     " BEGIN TRANSACTION;"
