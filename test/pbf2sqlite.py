@@ -8,28 +8,27 @@ import math
 import osmium
 
 
-def show_help():
-    """Show built-in help"""
-    print(f'{sys.argv[0]} 0.2\n'
-          '\n'
-          'Reads OpenStreetMap PBF data into a SQLite database.\n'
-          '\n'
-          'Usage:\n'
-          f'{sys.argv[0]} DATABASE [OPTION ...]\n'
-          '\n'
-          'Options:\n'
-          '  read FILE     Reads FILE into the database\n'
-          '                (.osm.pbf or .osm)\n'
-          '  rtree         Add R*Tree indexes\n'
-          '  addr          Add address tables\n'
-          '  graph         Add graph table\n'
-          '\n'
-          'Other options:\n'
-          '  node ID       Show node data\n'
-          '  way ID        Show way data\n'
-          '  relation ID   Show relation data\n'
-          )
-    print('(SQLite '+sqlite3.sqlite_version+' is used)\n')
+help = f'''
+{sys.argv[0]} 0.3
+
+Reads OpenStreetMap PBF data into a SQLite database.
+
+Usage:
+{sys.argv[0]} DATABASE [OPTION ...]
+
+Main options:
+  read FILE     Reads FILE into the database
+                (.osm.pbf or .osm)
+  rtree         Add R*Tree indexes
+  addr          Add address tables
+  graph         Add graph table
+
+Other options:
+  node ID       Show node data
+  way ID        Show way data
+  relation ID   Show relation data
+  noindex       Do not create indexes (not recommended)
+'''
 
 
 class OSMHandler(osmium.SimpleHandler):
@@ -489,7 +488,7 @@ def add_graph(cur):
         # If a new way is active but there are still remnants of the previous way, create a new edge.
         if way_id != prev_way_id and edge_active:
             cur.execute('INSERT INTO graph (start_node_id,end_node_id,dist,way_id) VALUES (?,?,?,?)',
-                       (start_node_id, prev_node_id, round(dist), prev_way_id))
+                        (start_node_id, prev_node_id, round(dist), prev_way_id))
             edge_active = False
         dist = dist + distance(prev_lon, prev_lat, lon, lat)
         edge_active = True
@@ -500,7 +499,7 @@ def add_graph(cur):
         if node_id_crossing > -1 and way_id == prev_way_id:
             if start_node_id != -1:
                 cur.execute('INSERT INTO graph (start_node_id,end_node_id,dist,way_id) VALUES (?,?,?,?)',
-                           (start_node_id, node_id, round(dist), way_id))
+                            (start_node_id, node_id, round(dist), way_id))
                 edge_active = False
             start_node_id = node_id
             dist = 0
@@ -510,7 +509,7 @@ def add_graph(cur):
         prev_node_id = node_id
     if edge_active:
         cur.execute('INSERT INTO graph (start_node_id,end_node_id,dist,way_id) VALUES (?,?,?,?)',
-                   (start_node_id, node_id, round(dist), way_id))
+                    (start_node_id, node_id, round(dist), way_id))
     cur.execute('CREATE INDEX graph__way_id ON graph (way_id)')
     cur.execute('COMMIT TRANSACTION')
     create_table_graph_permit(cur)
@@ -593,42 +592,77 @@ def show_relation(cur, relation_id):
 
 def main():
     """Main function: entry point for execution"""
+    db_name = ''
+    osm_file_name = ''
+    read = False
+    rtree = False
+    addr = False
+    graph = False
+    node_id = 0
+    way_id = 0
+    relation_id = 0
+    index = True
+    # Parse parameter
     if len(sys.argv) == 1:
-        show_help()
+        print(help)
+        print('(SQLite '+sqlite3.sqlite_version+' is used)\n')
         sys.exit(1)
-    con = sqlite3.connect(sys.argv[1])  # open database connection
-    cur = con.cursor()                  # new database cursor
+    db_name = sys.argv[1]
     i = 2
     while i < len(sys.argv):
-        if sys.argv[i] == 'read':
-            cur.execute('PRAGMA journal_mode = OFF')
-            cur.execute('PRAGMA page_size = 65536')
-            osm_handler = OSMHandler(cur)
-            osm_handler.apply_file(sys.argv[i+1])
-            del osm_handler
-            add_index(cur)
-            cur.execute('ANALYZE')
+        if sys.argv[i] == 'read' and len(sys.argv) >= i+2:
+            read = True
+            osm_file_name = sys.argv[i+1]
             i += 1
         elif sys.argv[i] == 'rtree':
-            add_rtree(cur)
+            rtree = True
         elif sys.argv[i] == 'addr':
-            add_addr(cur)
+            addr = True
         elif sys.argv[i] == 'graph':
-            add_graph(cur)
+            graph = True
         elif sys.argv[i] == 'node' and len(sys.argv) >= i+2:
-            show_node(cur, sys.argv[i+1])
+            node_id = sys.argv[i+1]
             i += 1
         elif sys.argv[i] == 'way' and len(sys.argv) >= i+2:
-            show_way(cur, sys.argv[i+1])
+            way_id = sys.argv[i+1]
             i += 1
         elif sys.argv[i] == 'relation' and len(sys.argv) >= i+2:
-            show_relation(cur, sys.argv[i+1])
+            relation_id = sys.argv[i+1]
             i += 1
+        elif sys.argv[i] == 'noindex':
+            index = False
         else:
-            print(f"{sys.argv[0]} - Parameter error: '"+sys.argv[i]+"'?")
+            print("Invalid option:", sys.argv[i])
+            sys.exit(1)
         i += 1
-    con.commit()                        # commit
-    con.close()                         # close database connection
+    # open database connection
+    con = sqlite3.connect(db_name)
+    cur = con.cursor()
+    # Execute options
+    if read:
+        cur.execute('PRAGMA journal_mode = OFF')
+        cur.execute('PRAGMA page_size = 65536')
+        osm_handler = OSMHandler(cur)
+        osm_handler.apply_file(osm_file_name)
+        del osm_handler
+        if index:
+            add_index(cur)
+        cur.execute('ANALYZE')
+    if rtree:
+        add_rtree(cur)
+    if addr:
+        add_addr(cur)
+    if graph:
+        add_graph(cur)
+    if node_id:
+        show_node(cur, node_id)
+    if way_id:
+        show_way(cur, way_id)
+    if relation_id:
+        show_relation(cur, relation_id)
+    # Close database connection
+    con.commit()
+    con.close()
 
 
 if __name__ == '__main__':
