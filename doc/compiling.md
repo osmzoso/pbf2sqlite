@@ -28,7 +28,7 @@ make
 sudo make install
 ```
 
-Show shared object dependencies for pbf2sqlite: `ldd pbf2sqlite`
+The binary is in the /build directory.
 
 
 ## Build a static binary for Windows (64bit)
