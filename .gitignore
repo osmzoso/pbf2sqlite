@@ -1,9 +1,4 @@
 #
-#
-#
-src/pbf2sqlite
-src/pbf2sqlite.exe
+build/
 src/sqlite3/
 src/readosm/
-#
-build/
