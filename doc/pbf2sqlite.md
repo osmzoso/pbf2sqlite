@@ -20,16 +20,16 @@ An extended example:
 
 `pbf2sqlite test.db read country.osm.pbf addr rtree graph`  
 
-This command is executed in the following order:  
-1. read file **country.osm.pbf** and creates the tables  
-2. creates address tables  
-3. creates R*Tree Index  
-4. creates graph table  
+This command first reads the file and then creates additional data.
+
+> The **read** option is always executed first
+
+The database can be easily queried with the [SQLite CLI tool](https://www.sqlite.org/cli.html).
 
 
 # 2. Tables
 
-The following tables and indexes are created in the database:
+The **read** option creates the following tables and indexes in the database:
 
 #### Table "nodes"
 column       | type                | description
@@ -85,14 +85,14 @@ value        | TEXT                | tag value
 - INDEX relation_tags__relation_id    ON relation_tags (relation_id)
 - INDEX relation_tags__key            ON relation_tags (key)
 
-The database can be easily queried with the [SQLite CLI tool](https://www.sqlite.org/cli.html).
+> The **noindex** option suppresses the creation of all indexes (not recommended)
 
 
-# 3. Options
+# 3. Create additional data
 
-There are several options for creating additional data in the database.
+Additional tables can be created from the tables created with the **read** option.
 
-## Option "rtree"
+## 3.1. Option "rtree"
 
 This option creates additional [R*Tree](https://www.sqlite.org/rtree.html)
 indexes **rtree_node** and **rtree_way** for finding ways quickly.  
@@ -136,7 +136,7 @@ WHERE way_id=4872512;
 ```
 
 
-## Option "addr"
+## 3.2. Option "addr"
 
 This option creates two tables with address data.  
 
@@ -168,7 +168,7 @@ node_id        | INTEGER             | node ID
 The view **addr_view** join the two tables.
 
 
-## Option "graph"
+## 3.3. Option "graph"
 
 This option creates an additional table **graph** with the complete graph
 of all highways.  
@@ -200,7 +200,8 @@ Bit 5 | oneway_car  | 2^5  32
 Bit 6 | (not used)  | 2^6  64
 Bit 7 | (not used)  | 2^7 128
 
-To fill the column **permit** a table **graph_permit** is created:  
+To fill the column **permit** a table **graph_permit** is needed.  
+This table specifies which tags set or clear which bits in permit.  
 
 #### Table "graph_permit"
 column     | type     | description
@@ -210,7 +211,9 @@ value      | TEXT     | tag value
 set_bit    | INTEGER  | bitmask set bits
 clear_bit  | INTEGER  | bitmask clear bits
 
-In this table you can specify which tags set or clear the individual bits.
+> If this table doesn't exist, a new one will be created.  
+> If the table already exists, it will be used.  
+> This allows you to create your own definition for filling the permit field.  
 
 <https://www.sqlite.org/lang_with.html#queries_against_a_graph>
 
