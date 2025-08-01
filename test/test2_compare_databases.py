@@ -20,7 +20,7 @@ def compare_table(cur, table, columns):
         ''').fetchone()[0]
     except:
         print('\033[31m' + 'missing table?' + '\033[0m') 
-        return
+        return False
     try:
         diff2 = cur.execute(f'''
         SELECT count(*) FROM
@@ -32,12 +32,14 @@ def compare_table(cur, table, columns):
         ''').fetchone()[0]
     except:
         print('\033[31m' + 'missing table?' + '\033[0m') 
-        return
+        return False
     if diff1 == 0 and diff2 == 0:
         print('\033[32m' + 'OK' + '\033[0m')
+        return True
     else:
         print('\033[31m' + 'ERROR' + '\033[0m' +
-              f' -> diff db1->db2 {diff1}, diff db2->db1 {diff2}')
+              f' -> diff db1->db2: {diff1} rows, diff db2->db1: {diff2} rows')
+        return False
 
 
 def compare_osm2sqlite_db(db1, db2):
@@ -50,24 +52,21 @@ def compare_osm2sqlite_db(db1, db2):
     cur = con.cursor()
     cur.execute(f"ATTACH DATABASE '{db1}' AS db1")
     cur.execute(f"ATTACH DATABASE '{db2}' AS db2")
-    compare_table(cur, 'nodes', 'node_id,lon,lat')
-    compare_table(cur, 'node_tags', 'node_id,key,value')
-    compare_table(cur, 'way_nodes', 'way_id,node_id,node_order')
-    compare_table(cur, 'way_tags', 'way_id,key,value')
-    compare_table(cur, 'relation_members', 'relation_id,ref,ref_id,role,member_order')
-    compare_table(cur, 'relation_tags', 'relation_id,key,value')
-    # for floating point columns CAST needed
-    compare_table(cur, 'addr_street', 'street_id,postcode,city,street,'
-                       'CAST(min_lon AS TEXT),CAST(min_lat AS TEXT),'
-                       'CAST(max_lon AS TEXT),CAST(max_lat AS TEXT)')
-    compare_table(cur, 'addr_housenumber', 'housenumber_id,street_id,housenumber,'
-                       'CAST(lon AS TEXT),CAST(lat AS TEXT),way_id,node_id')
-    compare_table(cur, 'graph', 'edge_id,start_node_id,end_node_id,dist,way_id,permit')
-    print("Due to rounding errors, the 'dist' column in the 'graph' table "
-          "may have different values.\n"
-          "Therefore, the comparison again without the 'dist' column:")
-    compare_table(cur, 'graph', 'edge_id,start_node_id,end_node_id,way_id,permit')
-    compare_table(cur, 'graph_permit', 'key,value,set_bit,clear_bit')
+    rc = compare_table(cur, 'nodes', 'node_id,lon,lat')
+    rc = compare_table(cur, 'node_tags', 'node_id,key,value')
+    rc = compare_table(cur, 'way_nodes', 'way_id,node_id,node_order')
+    rc = compare_table(cur, 'way_tags', 'way_id,key,value')
+    rc = compare_table(cur, 'relation_members', 'relation_id,ref,ref_id,role,member_order')
+    rc = compare_table(cur, 'relation_tags', 'relation_id,key,value')
+    rc = compare_table(cur, 'addr_street', 'street_id,postcode,city,street,min_lon,min_lat,max_lon,max_lat')
+    rc = compare_table(cur, 'addr_housenumber', 'housenumber_id,street_id,housenumber,lon,lat,way_id,node_id')
+    rc = compare_table(cur, 'graph', 'edge_id,start_node_id,end_node_id,dist,way_id,permit')
+    if not rc:
+        print(" Due to floating point rounding, the 'dist' column in the 'graph' table\n"
+              " may have in rare cases different values.\n"
+              " Therefore, the comparison again without the 'dist' column:")
+        rc = compare_table(cur, 'graph', 'edge_id,start_node_id,end_node_id,way_id,permit')
+    rc = compare_table(cur, 'graph_permit', 'key,value,set_bit,clear_bit')
 
 
 def main():
