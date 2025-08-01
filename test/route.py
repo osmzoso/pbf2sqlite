@@ -224,7 +224,7 @@ def shortest_way(cur, lon_start, lat_start, lon_dest, lat_dest, permit, csvfile)
     graph = Graph(number_of_nodes)
     #
     cur.execute('''
-    SELECT s.edge_id,sns.no,sne.no,s.dist,s.directed 
+    SELECT s.edge_id,sns.no,sne.no,s.dist,s.directed
     FROM subgraph AS s
     LEFT JOIN subgraph_nodes AS sns ON s.start_node_id=sns.node_id
     LEFT JOIN subgraph_nodes AS sne ON s.end_node_id=sne.node_id
