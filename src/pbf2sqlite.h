@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <sqlite3.h>
 
-#define PBF2SQLITE_VERSION  "0.3"
+#define PBF2SQLITE_VERSION  "0.3 BETA"
 
 /* Mathematical Constants */
 #ifndef M_PI
