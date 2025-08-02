@@ -21,14 +21,20 @@ The dynamic libs are in the following directory:
 /usr/lib64/libexpat.so.1
 ```
 
-Compilation and installation in /usr/bin:
+Compile with
 ```
 cd ./src
 make
-sudo make install
 ```
+The binary is in the **/build** directory.  
+(install in **/usr/bin** with `sudo make install`)  
 
-The binary is in the /build directory.
+Create the documentation files (pandoc is required):
+```
+cd ./doc
+make
+```
+The doc files are also in the **/build** directory.  
 
 
 ## Build a static binary for Windows (64bit)
@@ -57,16 +63,15 @@ The static libs are in the following directories:
 /usr/lib/gcc/x86_64-w64-mingw32/12.2.1/libgcc.a
 ```
 
-First, the following source files must also be present in the /src directory:
+The following files must also be present in the /src path:
 
-The [SQLite amalgamation files](https://www.sqlite.org/amalgamation.html):  
+In subdirectory ./src/sqlite3/ the [SQLite amalgamation files](https://www.sqlite.org/amalgamation.html):  
 ```
 sqlite3.c
 sqlite3.h
 ```
-in a subdirectory ./src/sqlite3/  
 
-Second, the source code files of the [readosm library](https://www.gaia-gis.it/fossil/readosm/index):
+In subdirectory ./src/readosm/ the source files of [readosm library](https://www.gaia-gis.it/fossil/readosm/index):  
 ```
 config.h
 osm_objects.c
@@ -77,6 +82,10 @@ readosm.h
 readosm_internals.h
 readosm_protobuf.h
 ```
-in a subdirectory ./src/readosm/  
 
-`make win64` should do the job.
+Compile with
+```
+cd ./src
+make win64
+```
+The binary is in the **/build** directory.  
