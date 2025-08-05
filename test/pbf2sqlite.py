@@ -407,6 +407,7 @@ def create_table_graph_permit(cur):
     INSERT INTO graph_permit VALUES ('cycleway','lane',                 2, 255);
     INSERT INTO graph_permit VALUES ('cycleway:right','lane',           2, 255);
     INSERT INTO graph_permit VALUES ('bicycle','designated',            2, 255);
+    INSERT INTO graph_permit VALUES ('bicycle','yes',                   2, 255);
     /* Tags car -> set bit 2, mask  00000100 dec 4 */
     INSERT INTO graph_permit VALUES ('highway','unclassified',          4, 255);
     INSERT INTO graph_permit VALUES ('highway','residential',           4, 255);
