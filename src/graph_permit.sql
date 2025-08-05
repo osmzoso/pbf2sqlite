@@ -10,8 +10,6 @@
 " **  Bit 6: (not used)"
 " **  Bit 7: (not used)"
 " **"
-" ** https://wiki.openstreetmap.org/wiki/Key:highway"
-" **"
 " */"
 " BEGIN TRANSACTION;"
 " CREATE TABLE graph_permit(\n"
