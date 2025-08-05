@@ -5,7 +5,7 @@ CC = gcc
 CFLAGS = -Wall -O2 -s -std=c99
 
 # Source files
-SRC = main.c read_data.c add_data.c show_data.c graph_permit.sql
+SRC = main.c pbf2sqlite.h read_data.c add_data.c show_data.c graph_permit.sql
 CFILES = $(filter %.c, $(SRC))
 BIN = ../build/pbf2sqlite
 
