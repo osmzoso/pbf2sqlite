@@ -1,9 +1,9 @@
 #!/bin/bash
 if [ $# != 6 ]; then
     echo
-    echo "Test4: Show table 'graph'"
+    echo "Test4: Visualizes the table 'graph'"
     echo
-    echo "Generates HTML files with the graph in TEST_DIR"
+    echo "Generates HTML files with the graph in TEST_DIR."
     echo "A boundingbox must be given."
     echo
     echo "Usage:"

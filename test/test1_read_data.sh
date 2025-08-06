@@ -1,9 +1,8 @@
 #!/bin/bash
-#
-# Test1: Read OSM file with Python and C version
-#
 if [ $# != 2 ]; then
-    echo "error: no test directory and osm file specified"
+    echo
+    echo "Test1: Read OSM file with Python and C version"
+    echo
     echo "Usage:"
     echo "$0 TEST_DIR OSM_FILE"
     exit 1

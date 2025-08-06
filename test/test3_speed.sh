@@ -1,9 +1,10 @@
 #!/bin/bash
-#
-# Test3: Speedtest
-#
 if [ $# != 2 ]; then
-    echo "error: no test directory and osm file specified"
+    echo
+    echo "Test3: Speedtest"
+    echo
+    echo "Measures the time required for each option."
+    echo
     echo "Usage:"
     echo "$0 TEST_DIR OSM_FILE"
     exit 1
