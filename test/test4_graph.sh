@@ -17,22 +17,33 @@ lon2=$4
 lat2=$5
 test_dir=$6
 
-# graph foot
-./html_leaflet_graph.py $db $lon1 $lat1 $lon2  $lat2 1 course $test_dir/graph_foot.html
-firefox $test_dir/graph_foot.html
+permit=0
+filename=$test_dir/graph_all_edges.html
+./html_leaflet_graph.py $db $lon1 $lat1 $lon2  $lat2 $permit course $filename
+firefox $filename
 
-# graph bike
-./html_leaflet_graph.py $db $lon1 $lat1 $lon2  $lat2 2 course $test_dir/graph_bike.html
-firefox $test_dir/graph_bike.html
+permit=1
+filename=$test_dir/graph_foot.html
+./html_leaflet_graph.py $db $lon1 $lat1 $lon2  $lat2 $permit course $filename
+firefox $filename
 
-# graph car
-./html_leaflet_graph.py $db $lon1 $lat1 $lon2  $lat2 4 course $test_dir/graph_car.html
-firefox $test_dir/graph_car.html
+permit=2
+filename=$test_dir/graph_bike.html
+./html_leaflet_graph.py $db $lon1 $lat1 $lon2  $lat2 $permit course $filename
+firefox $filename
 
-# graph paved
-./html_leaflet_graph.py $db $lon1 $lat1 $lon2  $lat2 8 course $test_dir/graph_paved.html
-firefox $test_dir/graph_paved.html
+permit=4
+filename=$test_dir/graph_car.html
+./html_leaflet_graph.py $db $lon1 $lat1 $lon2  $lat2 $permit course $filename
+firefox $filename
 
-# graph bike paved
-./html_leaflet_graph.py $db $lon1 $lat1 $lon2  $lat2 10 course $test_dir/graph_bike_paved.html
-firefox $test_dir/graph_bike_paved.html
+permit=8
+filename=$test_dir/graph_paved.html
+./html_leaflet_graph.py $db $lon1 $lat1 $lon2  $lat2 $permit course $filename
+firefox $filename
+
+permit=10
+filename=$test_dir/graph_bike_paved.html
+./html_leaflet_graph.py $db $lon1 $lat1 $lon2  $lat2 $permit course $filename
+firefox $filename
+
