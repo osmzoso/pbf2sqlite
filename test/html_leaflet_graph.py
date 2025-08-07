@@ -141,16 +141,19 @@ L.control.scale( { position: 'bottomleft', maxWidth: 200, metric:true, imperial:
         self.file.write(';\n')
         self.adjust_boundingbox(lon, lat)
 
-    def add_polyline(self, lonlat):
+    def add_polyline(self, lonlat, popuptext=''):
         """Write Leaflet.js code to display a polyline."""
         lat_lon_str = self.lonlat2str(lonlat)
         self.file.write(f'L.polyline( [ {lat_lon_str} ]')
         self.file.write(f", {{ color:'{self.p['color']}', opacity:{self.p['opacity']}, weight:{self.p['weight']}, dashArray:'{self.p['dasharray']}', stroke:true }} )")
-        self.file.write('.addTo(mymap);\n')
+        self.file.write('.addTo(mymap)')
+        if popuptext != '':
+            self.file.write(f".bindPopup('{popuptext}')")
+        self.file.write(';\n')
 
-    def add_line(self, lon1, lat1, lon2, lat2):
+    def add_line(self, lon1, lat1, lon2, lat2, popuptext=''):
         """Write Leaflet.js code to display a simple line."""
-        self.add_polyline([(lon1, lat1), (lon2, lat2)])   # wrapper for a simple line
+        self.add_polyline([(lon1, lat1), (lon2, lat2)], popuptext)  # wrapper for a simple line
 
     def add_polygon(self, lonlat, popuptext=''):
         """Write Leaflet.js code to display a polygon."""
@@ -256,18 +259,7 @@ def node_point(cur, node_id):
 
 
 def html_map_table_graph(cur, min_lon, min_lat, max_lon, max_lat, permit, style, html_filename):
-    """Create map from table 'graph'
-
-    Parameter permit:
-    1 -> foot
-    2 -> bike_gravel
-    4 -> bike_road
-    8 -> car
-
-    Parameter style:
-    'line'   -> draw simple line for the edge
-    'course' -> draw exact course of the edge
-    """
+    """Create map from table 'graph'"""
     m = Leaflet(html_filename)
     m.write_html_header('Map Routing Graph')
     m.write_html_code(f'''
@@ -282,7 +274,7 @@ def html_map_table_graph(cur, min_lon, min_lat, max_lon, max_lat, permit, style,
                   (?=10 AND permit&16=16) OR
                   (?=4 AND permit&32=32) THEN 1
              ELSE 0
-           END AS directed
+           END AS directed,way_id
     FROM graph
     WHERE permit & ? = ? AND
           way_id IN (
@@ -292,7 +284,7 @@ def html_map_table_graph(cur, min_lon, min_lat, max_lon, max_lat, permit, style,
                     )
     ''', (permit, permit, permit, permit, permit, min_lon, max_lon, min_lat, max_lat))
     m.set_property({'color':'#0000ff', 'opacity':0.8})
-    for (way_id, start_node_id, end_node_id, directed) in cur.fetchall():
+    for (way_id, start_node_id, end_node_id, directed, way_id) in cur.fetchall():
         if directed:
             m.set_property({'dasharray':'5 5'})
         else:
@@ -300,10 +292,10 @@ def html_map_table_graph(cur, min_lon, min_lat, max_lon, max_lat, permit, style,
         if style == 'line':
             lon1, lat1 = node_point(cur, start_node_id)
             lon2, lat2 = node_point(cur, end_node_id)
-            m.add_line(lon1, lat1, lon2, lat2)
+            m.add_line(lon1, lat1, lon2, lat2, f'way_id {way_id}')
         elif style == 'course':
             point_list = way_edge_points(cur, way_id, start_node_id, end_node_id)
-            m.add_polyline(point_list)
+            m.add_polyline(point_list, f'way_id {way_id}')
     m.set_property(
       {'color': '#ff0000', 'opacity': 1.0, 'weight': 2, 'dasharray': '5 5',
        'fillcolor': 'none', 'fillopacity': 1.0}
@@ -317,8 +309,8 @@ def main():
     """entry point"""
     if len(sys.argv) != 9:
         print('Creates an HTML file with a map to display the data in the "graph" table.\n'
-              'PERMIT: 1 (foot), 2 (bike_gravel), 4 (bike_road) or 8 (car)\n'
-              'STYLE: "line" or "course"\n\n'
+              'PERMIT: 1 (foot), 2 (bike), 4 (car) or 10 (bike_paved)\n'
+              'STYLE: "line" or "course" (draw straight line or exact course)\n\n'
               'Usage:\n'
               f'{sys.argv[0]} DATABASE MIN_LON MIN_LAT MAX_LON MAX_LAT PERMIT STYLE HTML_FILE')
         sys.exit(1)
