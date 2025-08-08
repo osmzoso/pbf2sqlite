@@ -244,7 +244,7 @@ void create_table_graph_permit(sqlite3 *db) {
   sqlite3_finalize(stmt_check);
   /* else create the table */
   const char *sql = 
-  #include "graph_permit.sql"
+  #include "add_graph_permit.sql"
   ;
   rc = sqlite3_exec(db, sql, NULL, NULL, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
