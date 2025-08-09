@@ -19,9 +19,9 @@ echo "OSM file : $osm_file"
 rm -f $test_dir/osm_py.db $test_dir/osm_c.db
 
 echo "read OSM file with Python version in database 'osm_py.db'..."
-time -p ./pbf2sqlite.py $test_dir/osm_py.db read $osm_file addr graph rtree
+time -p ./pbf2sqlite.py $test_dir/osm_py.db read $osm_file graph
 echo "read OSM file with C version in database 'osm_c.db'..."
-time -p ../build/pbf2sqlite $test_dir/osm_c.db read $osm_file addr graph rtree
+time -p ../build/pbf2sqlite $test_dir/osm_c.db read $osm_file graph
 
 echo "size of databases:"
 ls -l $test_dir/*.db
