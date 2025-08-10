@@ -49,23 +49,46 @@ void abort_db_error(sqlite3 *db, int rc) {
   exit(EXIT_FAILURE);
 }
 
-int64_t str_to_int64(const char *str) {
-  if( str==NULL ) return 0;  /* Handle NULL input safely */
+/*
+** Convert and check numeric inputs
+*/
+int64_t argv_to_int64(const char *str) {
   char *endptr;
   errno = 0; /* Reset errno before conversion */
-  int64_t result = strtoll(str, &endptr, 10);
+  int64_t value = strtoll(str, &endptr, 10);
   /* Check for conversion errors */
   if( errno==ERANGE ) {
-    fprintf(stderr, "Error: Overflow or underflow occurred\n");
-    return 0; /* Indicate failure */
+    printf("Invalid number: Overflow or underflow occurred\n");
+    exit(EXIT_FAILURE);
   }
   if( endptr==str || *endptr!='\0' ) {
-    fprintf(stderr, "Error: Invalid input - not a valid integer string\n");
-    return 0; /* Indicate failure */
+    printf("Invalid number: Not a valid integer string\n");
+    exit(EXIT_FAILURE);
   }
-  return result;
+  return value;
 }
 
+double argv_to_double(const char *str) {
+  char *endptr;
+  double value = strtod(str, &endptr);
+  /* Check if the whole string was converted */
+  if( *endptr!='\0' ) {
+    printf("Invalid number: Non-numeric characters '%s'\n", endptr);
+    exit(EXIT_FAILURE);
+  }
+  return value;
+}
+
+/*
+** TODO dummy function
+*/
+void visualize_graph(sqlite3 *db, double lon1) {
+  printf("Visualize Graph\nBoundingbox: %f \n", lon1);
+}
+
+/*
+** Program start 
+*/
 int main(int argc, char **argv) {
   char *db_name;
   char *osm_file_name;
@@ -77,6 +100,8 @@ int main(int argc, char **argv) {
   int64_t way_id = 0;
   int64_t relation_id = 0;
   int index = 1;
+  int vgraph = 0;
+  double lon1 = 0;
   int i;
   /* Parse parameter */
   if( argc==1 ){
@@ -97,18 +122,23 @@ int main(int argc, char **argv) {
     else if( strcmp("addr", argv[i])==0 ) addr = 1;
     else if( strcmp("graph", argv[i])==0 ) graph = 1;
     else if( strcmp("node", argv[i])==0 && argc>=i+2 ){
-      node_id = str_to_int64(argv[i+1]);
+      node_id = argv_to_int64(argv[i+1]);
       i++;
     }
     else if( strcmp("way", argv[i])==0 && argc>=i+2 ){
-      way_id = str_to_int64(argv[i+1]);
+      way_id = argv_to_int64(argv[i+1]);
       i++;
     }
     else if( strcmp("relation", argv[i])==0 && argc>=i+2 ){
-      relation_id = str_to_int64(argv[i+1]);
+      relation_id = argv_to_int64(argv[i+1]);
       i++;
     }
     else if( strcmp("noindex", argv[i])==0 ) index = 0;
+    else if( strcmp("vgraph", argv[i])==0 && argc>=i+2 ){
+      vgraph = 1;
+      lon1 = argv_to_double(argv[i+1]);
+      i++;
+    }
     else {
       printf("Invalid option: %s\n", argv[i]);
       return EXIT_FAILURE;
@@ -140,6 +170,7 @@ int main(int argc, char **argv) {
   if( node_id ) show_node(db, node_id);
   if( way_id ) show_way(db, way_id);
   if( relation_id ) show_relation(db, relation_id);
+  if( vgraph ) visualize_graph(db, lon1);
   /* Close database connection */
   rc = sqlite3_close(db);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);

@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <sqlite3.h>
 
-#define PBF2SQLITE_VERSION  "0.3"
+#define PBF2SQLITE_VERSION  "0.4 ALPHA"
 
 /* Mathematical Constants */
 #ifndef M_PI
@@ -24,7 +24,6 @@ extern sqlite3_stmt *stmt_insert_nodes, *stmt_insert_node_tags, *stmt_insert_way
 */
 /* main.c */
 void abort_db_error(sqlite3 *db, int rc);
-int64_t str_to_int64(const char *str);
 /* read_data.c */
 void add_tables(sqlite3 *db);
 void add_index(sqlite3 *db);
