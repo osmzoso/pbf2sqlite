@@ -25,7 +25,10 @@ The tables created are described in the [documentation](doc/pbf2sqlite.md).
 
 OSM data can be obtained from a provider such as [Geofabrik](https://download.geofabrik.de).
 
-[Notes on compiling](doc/compiling.md)
+The [readosm library](https://www.gaia-gis.it/fossil/readosm/index)
+is used for this program.
+
+See also notes on [compilation](doc/compiling.md).
 
 |[**Download the latest version**](https://github.com/osmzoso/pbf2sqlite/releases/latest)|
 |----------------------------------------------------------------------------------------|

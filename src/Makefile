@@ -21,9 +21,6 @@ $(BIN): $(SRC)
 	mkdir -p $(dir $(BIN))
 	$(CC) $(CFILES) -lsqlite3 -lreadosm -lm -o $(BIN) $(CFLAGS)
 
-install:
-	install -m755 $(BIN) /usr/bin
-
 win64:
 	mkdir -p $(dir $(BIN))
 	x86_64-w64-mingw32-gcc \
@@ -43,7 +40,7 @@ win64:
      -I./readosm \
      -I/usr/x86_64-w64-mingw32/sys-root/mingw/include \
      -L/usr/x86_64-w64-mingw32/sys-root/mingw/lib \
-     -lexpat -lz -liconv -lpthread -lwinpthread -lws2_32 -lssp -lgcc
+     -lexpat -lz -lpthread -lwinpthread -lws2_32 -lssp -lgcc
 
 #
 # Experimental: Static binary for linux
@@ -75,8 +72,13 @@ static:
      -I./readosm \
      -lexpat -lz -lm -lgcc
 
+# install -m755 $(BIN) /usr/bin
+install:
+	cp $(BIN) /usr/bin
+	cp $(BIN)_x86_64 /usr/bin
+
 clean:
 	rm -f $(BIN) $(BIN).exe $(BIN)_x86_64
 
 
-.PHONY: install win64 static clean
+.PHONY: win64 static install clean

@@ -1,8 +1,5 @@
 # Compiling pbf2sqlite on Linux
 
-The [readosm library](https://www.gaia-gis.it/fossil/readosm/index)
-is used for this program.
-
 
 ## Dynamic binary for Linux
 
@@ -37,7 +34,9 @@ make
 The doc files are also in the **/build** directory.  
 
 
-## Build a static binary for Windows (64bit)
+## Static binaries
+
+### Build a static binary for Windows (64bit)
 
 Compilation for Windows systems with Linux and crosscompiler MinGW:
 
@@ -48,8 +47,6 @@ mingw64-expat
 mingw64-expat-static
 mingw64-zlib
 mingw64-zlib-static
-mingw64-win-iconv
-mingw64-win-iconv-static
 mingw64-winpthreads
 mingw64-winpthreads-static
 ```
@@ -87,5 +84,29 @@ Compile with
 ```
 cd ./src
 make win64
+```
+The binary is in the **/build** directory.  
+
+
+### Build a static binary for Linux (64bit)
+
+Required packages (Fedora):
+```
+expat-static
+glibc-static
+zlib-ng-compat-static
+```
+
+In ./src/readosm/readosm.c in line 50 add the following lines:  
+```
+#ifdef __linux__
+#include <strings.h>
+#endif
+```
+
+Compile with
+```
+cd ./src
+make static
 ```
 The binary is in the **/build** directory.  
