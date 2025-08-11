@@ -39,5 +39,14 @@ double distance(double lon1, double lat1, double lon2, double lat2);
 void show_node(sqlite3 *db, const int64_t node_id);
 void show_way(sqlite3 *db, const int64_t way_id);
 void show_relation(sqlite3 *db, const int64_t relation_id);
+/* leaflet.c */
+int html_graph(
+  sqlite3 *db,
+  double lon1,
+  double lat1,
+  double lon2,
+  double lat2,
+  const char *html_file
+);
 
 #endif /* PBF2SQLITE_H */

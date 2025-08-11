@@ -80,18 +80,11 @@ double argv_to_double(const char *str) {
 }
 
 /*
-** TODO dummy function
-*/
-void visualize_graph(sqlite3 *db, double lon1) {
-  printf("Visualize Graph\nBoundingbox: %f \n", lon1);
-}
-
-/*
 ** Program start 
 */
 int main(int argc, char **argv) {
-  char *db_name;
-  char *osm_file_name;
+  char *db_file;
+  char *osm_file;
   int read = 0;
   int rtree = 0;
   int addr = 0;
@@ -102,6 +95,10 @@ int main(int argc, char **argv) {
   int index = 1;
   int vgraph = 0;
   double lon1 = 0;
+  double lat1 = 0;
+  double lon2 = 0;
+  double lat2 = 0;
+  char *html_file;
   int i;
   /* Parse parameter */
   if( argc==1 ){
@@ -110,12 +107,12 @@ int main(int argc, char **argv) {
              sqlite3_libversion(), readosm_version());
     return EXIT_FAILURE;
   }
-  db_name = argv[1];
+  db_file = argv[1];
   i = 2;
   while( i<argc ){
     if( strcmp("read", argv[i])==0 && argc>=i+2 ){
       read = 1;
-      osm_file_name = argv[i+1];
+      osm_file = argv[i+1];
       i++;
     } 
     else if( strcmp("rtree", argv[i])==0 ) rtree = 1;
@@ -134,10 +131,14 @@ int main(int argc, char **argv) {
       i++;
     }
     else if( strcmp("noindex", argv[i])==0 ) index = 0;
-    else if( strcmp("vgraph", argv[i])==0 && argc>=i+2 ){
+    else if( strcmp("vgraph", argv[i])==0 && argc>=i+6 ){
       vgraph = 1;
       lon1 = argv_to_double(argv[i+1]);
-      i++;
+      lat1 = argv_to_double(argv[i+2]);
+      lon2 = argv_to_double(argv[i+3]);
+      lat2 = argv_to_double(argv[i+4]);
+      html_file = argv[i+5];
+      i = i + 5;
     }
     else {
       printf("Invalid option: %s\n", argv[i]);
@@ -146,7 +147,7 @@ int main(int argc, char **argv) {
     i++;
   }
   /* Open database connection */
-  rc = sqlite3_open(db_name, &db);
+  rc = sqlite3_open(db_file, &db);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   /* Execute options */
   if( read ){
@@ -156,7 +157,7 @@ int main(int argc, char **argv) {
     if( rc!=SQLITE_OK ) abort_db_error(db, rc);
     add_tables(db);
     create_prep_stmt(db);
-    read_osm_file(osm_file_name);
+    read_osm_file(osm_file);
     destroy_prep_stmt();
     if( index ) add_index(db);
     rc = sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
@@ -170,7 +171,7 @@ int main(int argc, char **argv) {
   if( node_id ) show_node(db, node_id);
   if( way_id ) show_way(db, way_id);
   if( relation_id ) show_relation(db, relation_id);
-  if( vgraph ) visualize_graph(db, lon1);
+  if( vgraph ) html_graph(db, lon1, lat1, lon2, lat2, html_file);
   /* Close database connection */
   rc = sqlite3_close(db);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
