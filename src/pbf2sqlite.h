@@ -2,6 +2,7 @@
 #define PBF2SQLITE_H
 
 #include <stdint.h>
+#include <stdio.h>
 #include <sqlite3.h>
 
 #define PBF2SQLITE_VERSION  "0.4 ALPHA"
@@ -47,6 +48,14 @@ int html_graph(
   double lon2,
   double lat2,
   const char *html_file
+);
+void leaflet_init(
+  FILE *html,
+  const char* mapid,
+  double lon1,
+  double lat1,
+  double lon2,
+  double lat2
 );
 
 #endif /* PBF2SQLITE_H */
