@@ -49,6 +49,7 @@ int html_graph(
   double lat2,
   const char *html_file
 );
+void leaflet_html_header(FILE *html);
 void leaflet_init(
   FILE *html,
   const char* mapid,
