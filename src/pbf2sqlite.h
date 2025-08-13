@@ -90,5 +90,14 @@ void leaflet_rectangle(
   const double lat2,
   const char *text
 );
+void leaflet_style(
+  FILE *html,
+  const char *color,
+  const double opacity,
+  const int weight,
+  const char *dasharray,
+  const char *fillcolor,
+  const double fillopacity
+);
 
 #endif /* PBF2SQLITE_H */

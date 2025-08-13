@@ -42,6 +42,8 @@ int html_graph(
   leaflet_circle(html, "map1", 7.852, 47.983, 150, "Hello I'm a circle");
   leaflet_circlemarker(html, "map1", 7.852, 47.985, "I'm a circlemarker");
   leaflet_rectangle(html, "map1", 7.824, 47.983, 7.871, 47.995, "I'm a rectangle");
+  leaflet_style(html, "#ff0000", 0.9, 2, "", "none", 1.0);
+  leaflet_rectangle(html, "map1", lon1, lat1, lon2, lat2, "Boundingbox");
   /* map2 */
   leaflet_init(html, "map2", lon1, lat1, lon2, lat2);
   leaflet_circle(html, "map2", 7.852, 47.983, 150, "Hello I'm a circle on map2");
@@ -164,3 +166,18 @@ void leaflet_rectangle(
   if( text[0]!='\0' ) fprintf(html, ".bindPopup(\"%s\")", text);
   fprintf(html, ";\n");
 }
+
+void leaflet_style(
+  FILE *html,
+  const char *color,
+  const double opacity,
+  const int weight,
+  const char *dasharray,
+  const char *fillcolor,
+  const double fillopacity
+){
+  fprintf(html,
+    "style = { color:'%s', opacity:%f, weight:%d, dashArray:'%s', fillColor:'%s', "
+    "fillOpacity:%f };\n", color, opacity, weight, dasharray, fillcolor, fillopacity);
+}
+
