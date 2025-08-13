@@ -20,8 +20,6 @@ int html_graph(
   const char *html_file
 ){
   FILE *html;
-  printf("Visualize Graph\nBoundingbox: %f %f\n", lon1, lat1);
-  printf("HTML file: %s \n", html_file);
   html = fopen(html_file, "w");
   if( html==NULL ) {
     printf("Error opening file: %s", strerror(errno));
@@ -29,14 +27,23 @@ int html_graph(
   }
   /* Write text to the file */
   leaflet_html_header(html);
+  fprintf(html,
+    "<h2>Map 1</h2>\n"
+    "<div id=\"map1\"></div>\n"
+    "<h2>Map 2</h2>\n"
+    "<div id=\"map2\"></div>\n"
+    "<h2>Map 3</h2>\n"
+    "<div id=\"map3\"></div>\n");
   fprintf(html, "<script>\n");
   leaflet_init(html, "map1", lon1, lat1, lon2, lat2);
+  fprintf(html, "</script>\n");
+  leaflet_html_footer(html);
   /* Close the file */
   if( fclose(html)!=0 ) {
     printf("Error closing file: %s", strerror(errno));
     return EXIT_FAILURE;
   }
-  printf("File written successfully.\n");
+  printf("File %s written successfully.\n", html_file);
   return EXIT_SUCCESS;
 }
 
@@ -61,6 +68,10 @@ void leaflet_html_header(FILE *html) {
   );
 }
 
+void leaflet_html_footer(FILE *html) {
+  fprintf(html, "</body>\n</html>\n");
+}
+
 void leaflet_init(
   FILE *html,
   const char* mapid,
@@ -72,7 +83,7 @@ void leaflet_init(
   fprintf(html, "// %s init\n", mapid);
   fprintf(html, "const %s = L.map('%s').fitBounds([ [%f, %f], [%f, %f] ], "
                 "{padding: [0,0], maxZoom: 19});\n",
-                 mapid, mapid, lon1, lat1, lon2, lat2);
+                 mapid, mapid, lat1, lon1, lat2, lon2);
   fprintf(html, "L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', "
                 "{maxZoom:19}).addTo(%s);\n", mapid);
   fprintf(html, "L.control.scale({ position: 'bottomleft', maxWidth: 200, "

@@ -50,6 +50,7 @@ int html_graph(
   const char *html_file
 );
 void leaflet_html_header(FILE *html);
+void leaflet_html_footer(FILE *html);
 void leaflet_init(
   FILE *html,
   const char* mapid,
