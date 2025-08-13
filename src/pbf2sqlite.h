@@ -74,5 +74,21 @@ void leaflet_circle(
   const int radius,
   const char *text
 );
+void leaflet_circlemarker(
+  FILE *html,
+  const char *mapid,
+  const double lon,
+  const double lat,
+  const char *text
+);
+void leaflet_rectangle(
+  FILE *html,
+  const char *mapid,
+  const double lon1,
+  const double lat1,
+  const double lon2,
+  const double lat2,
+  const char *text
+);
 
 #endif /* PBF2SQLITE_H */

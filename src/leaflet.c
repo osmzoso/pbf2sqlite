@@ -35,10 +35,18 @@ int html_graph(
     "<h2>Map 3</h2>\n"
     "<div id=\"map3\"></div>\n");
   fprintf(html, "<script>\n");
+  /* map1 */
   leaflet_init(html, "map1", lon1, lat1, lon2, lat2);
   leaflet_marker(html, "map1", 7.85, 47.99, "");
   leaflet_marker(html, "map1", 7.852, 47.992, "Mit Text...");
-  leaflet_circle(html, "map1", 7.852, 47.983, 150, "I' a circle...");
+  leaflet_circle(html, "map1", 7.852, 47.983, 150, "Hello I'm a circle");
+  leaflet_circlemarker(html, "map1", 7.852, 47.985, "I'm a circlemarker");
+  leaflet_rectangle(html, "map1", 7.824, 47.983, 7.871, 47.995, "I'm a rectangle");
+  /* map2 */
+  leaflet_init(html, "map2", lon1, lat1, lon2, lat2);
+  leaflet_circle(html, "map2", 7.852, 47.983, 150, "Hello I'm a circle on map2");
+  /* map3 */
+  leaflet_init(html, "map3", lon1, lat1, lon2, lat2);
   fprintf(html, "</script>\n");
   leaflet_html_footer(html);
   /* Close the file */
@@ -127,6 +135,32 @@ void leaflet_circle(
   const char *text
 ){
   fprintf(html, "L.circle([%f, %f], %d, style).addTo(%s)", lat, lon, radius, mapid);
+  if( text[0]!='\0' ) fprintf(html, ".bindPopup(\"%s\")", text);
+  fprintf(html, ";\n");
+}
+
+void leaflet_circlemarker(
+  FILE *html,
+  const char *mapid,
+  const double lon,
+  const double lat,
+  const char *text
+){
+  fprintf(html, "L.circleMarker([%f, %f], style).addTo(%s)", lat, lon,  mapid);
+  if( text[0]!='\0' ) fprintf(html, ".bindPopup(\"%s\")", text);
+  fprintf(html, ";\n");
+}
+
+void leaflet_rectangle(
+  FILE *html,
+  const char *mapid,
+  const double lon1,
+  const double lat1,
+  const double lon2,
+  const double lat2,
+  const char *text
+){
+  fprintf(html, "L.rectangle([[%f, %f], [%f, %f]], style).addTo(%s)", lat1, lon1, lat2, lon2, mapid);
   if( text[0]!='\0' ) fprintf(html, ".bindPopup(\"%s\")", text);
   fprintf(html, ";\n");
 }
