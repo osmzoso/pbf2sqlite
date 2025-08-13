@@ -43,21 +43,36 @@ void show_relation(sqlite3 *db, const int64_t relation_id);
 /* leaflet.c */
 int html_graph(
   sqlite3 *db,
-  double lon1,
-  double lat1,
-  double lon2,
-  double lat2,
+  const double lon1,
+  const double lat1,
+  const double lon2,
+  const double lat2,
   const char *html_file
 );
 void leaflet_html_header(FILE *html);
 void leaflet_html_footer(FILE *html);
 void leaflet_init(
   FILE *html,
-  const char* mapid,
-  double lon1,
-  double lat1,
-  double lon2,
-  double lat2
+  const char *mapid,
+  const double lon1,
+  const double lat1,
+  const double lon2,
+  const double lat2
+);
+void leaflet_marker(
+  FILE *html,
+  const char *mapid,
+  const double lon,
+  const double lat,
+  const char *text
+);
+void leaflet_circle(
+  FILE *html,
+  const char *mapid,
+  const double lon,
+  const double lat,
+  const int radius,
+  const char *text
 );
 
 #endif /* PBF2SQLITE_H */

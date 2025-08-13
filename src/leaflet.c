@@ -13,10 +13,10 @@
 */
 int html_graph(
   sqlite3 *db,
-  double lon1,
-  double lat1,
-  double lon2,
-  double lat2,
+  const double lon1,
+  const double lat1,
+  const double lon2,
+  const double lat2,
   const char *html_file
 ){
   FILE *html;
@@ -36,6 +36,9 @@ int html_graph(
     "<div id=\"map3\"></div>\n");
   fprintf(html, "<script>\n");
   leaflet_init(html, "map1", lon1, lat1, lon2, lat2);
+  leaflet_marker(html, "map1", 7.85, 47.99, "");
+  leaflet_marker(html, "map1", 7.852, 47.992, "Mit Text...");
+  leaflet_circle(html, "map1", 7.852, 47.983, 150, "I' a circle...");
   fprintf(html, "</script>\n");
   leaflet_html_footer(html);
   /* Close the file */
@@ -74,11 +77,11 @@ void leaflet_html_footer(FILE *html) {
 
 void leaflet_init(
   FILE *html,
-  const char* mapid,
-  double lon1,
-  double lat1,
-  double lon2,
-  double lat2
+  const char *mapid,
+  const double lon1,
+  const double lat1,
+  const double lon2,
+  const double lat2
 ){
   fprintf(html, "// %s init\n", mapid);
   fprintf(html, "const %s = L.map('%s').fitBounds([ [%f, %f], [%f, %f] ], "
@@ -103,3 +106,27 @@ void leaflet_init(
                 "dashArray:'none', fillColor:'#ff7800', fillOpacity:0.5 };\n");
 }
 
+void leaflet_marker(
+  FILE *html,
+  const char *mapid,
+  const double lon,
+  const double lat,
+  const char *text
+){
+  fprintf(html, "L.marker([%f, %f]).addTo(%s)", lat, lon, mapid);
+  if( text[0]!='\0' ) fprintf(html, ".bindPopup(\"%s\")", text);
+  fprintf(html, ";\n");
+}
+
+void leaflet_circle(
+  FILE *html,
+  const char *mapid,
+  const double lon,
+  const double lat,
+  const int radius,
+  const char *text
+){
+  fprintf(html, "L.circle([%f, %f], %d, style).addTo(%s)", lat, lon, radius, mapid);
+  if( text[0]!='\0' ) fprintf(html, ".bindPopup(\"%s\")", text);
+  fprintf(html, ";\n");
+}
