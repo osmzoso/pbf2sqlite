@@ -182,6 +182,7 @@ start_node_id   | INTEGER             | edge start node ID
 end_node_id     | INTEGER             | edge end node ID
 dist            | INTEGER             | distance in meters
 way_id          | INTEGER             | way ID
+nodes           | INTEGER             | number of nodes
 permit          | INTEGER             | bit field access
 
 Visualization of the table 'graph':  

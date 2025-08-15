@@ -114,6 +114,7 @@ void add_graph(sqlite3 *db) {
     "  end_node_id   INTEGER,              -- edge end node ID\n"
     "  dist          INTEGER,              -- distance in meters\n"
     "  way_id        INTEGER,              -- way ID\n"
+    "  nodes         INTEGER,              -- number of nodes\n"
     "  permit        INTEGER DEFAULT 15    -- bit field access\n"
     " )\n",
     NULL, NULL, NULL);
@@ -143,11 +144,12 @@ void add_graph(sqlite3 *db) {
   int edge_active = 0;
   int64_t start_node_id = -1;
   double dist = 0;
+  int nodes = 1;
 
   sqlite3_stmt *stmt_insert_graph;
   rc = sqlite3_prepare_v2(
     db,
-    "INSERT INTO graph (start_node_id,end_node_id,dist,way_id) VALUES (?1,?2,?3,?4)",
+    "INSERT INTO graph (start_node_id,end_node_id,dist,way_id,nodes) VALUES (?1,?2,?3,?4,?5)",
     -1, &stmt_insert_graph, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
 
@@ -184,6 +186,7 @@ void add_graph(sqlite3 *db) {
       sqlite3_bind_int64(stmt_insert_graph, 2, prev_node_id);
       sqlite3_bind_int  (stmt_insert_graph, 3, lroundf(dist));
       sqlite3_bind_int64(stmt_insert_graph, 4, prev_way_id);
+      sqlite3_bind_int  (stmt_insert_graph, 5, nodes);
       rc = sqlite3_step(stmt_insert_graph);
       if( rc==SQLITE_DONE ) {
         sqlite3_reset(stmt_insert_graph);
@@ -193,11 +196,13 @@ void add_graph(sqlite3 *db) {
       edge_active = 0;
     }
     dist = dist + distance(prev_lon, prev_lat, lon, lat);
+    nodes++;
     edge_active = 1;
     /* If way_id changes or crossing node is present then an edge begins or ends. */
     if( way_id != prev_way_id ) {
       start_node_id = node_id;
       dist = 0;
+      nodes = 1;
     }
     if( node_id_crossing > -1 && way_id == prev_way_id ) {
       if( start_node_id != -1 ) {
@@ -205,6 +210,7 @@ void add_graph(sqlite3 *db) {
         sqlite3_bind_int64(stmt_insert_graph, 2, node_id);
         sqlite3_bind_int  (stmt_insert_graph, 3, lroundf(dist));
         sqlite3_bind_int64(stmt_insert_graph, 4, way_id);
+        sqlite3_bind_int  (stmt_insert_graph, 5, nodes);
         rc = sqlite3_step(stmt_insert_graph);
         if( rc==SQLITE_DONE ) {
           sqlite3_reset(stmt_insert_graph);
@@ -215,6 +221,7 @@ void add_graph(sqlite3 *db) {
       }
       start_node_id = node_id;
       dist = 0;
+      nodes = 1;
     }
     prev_lon = lon;
     prev_lat = lat;
@@ -227,6 +234,7 @@ void add_graph(sqlite3 *db) {
     sqlite3_bind_int64(stmt_insert_graph, 2, node_id);
     sqlite3_bind_int  (stmt_insert_graph, 3, lroundf(dist));
     sqlite3_bind_int64(stmt_insert_graph, 4, way_id);
+    sqlite3_bind_int  (stmt_insert_graph, 5, nodes);
     rc = sqlite3_step(stmt_insert_graph);
     if( rc==SQLITE_DONE ) {
       sqlite3_reset(stmt_insert_graph);
