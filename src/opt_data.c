@@ -121,14 +121,9 @@ void add_graph(sqlite3 *db) {
   /* Create a table with all nodes that are crossing points */
   rc = sqlite3_exec(
     db,
-    " CREATE TEMP TABLE highway_nodes_crossing"
-    " ("
+    " CREATE TEMP TABLE highway_nodes_crossing ("
     "  node_id INTEGER PRIMARY KEY"
-    " )",
-    NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
-  rc = sqlite3_exec(
-    db,
+    " );"
     " INSERT INTO highway_nodes_crossing"
     " SELECT node_id FROM"
     " ("
@@ -137,7 +132,7 @@ void add_graph(sqlite3 *db) {
     "  LEFT JOIN way_nodes AS wn ON wt.way_id=wn.way_id"
     "  WHERE wt.key='highway'"
     " )"
-    " GROUP BY node_id HAVING count(*)>1",
+    " GROUP BY node_id HAVING count(*)>1;",
     NULL, NULL, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   /* */

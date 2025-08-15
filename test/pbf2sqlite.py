@@ -301,13 +301,10 @@ def add_graph(cur):
     )
     ''')
     # Create a table with all nodes that are crossing points
-    cur.execute('''
-    CREATE TEMP TABLE highway_nodes_crossing
-    (
+    cur.executescript('''
+    CREATE TEMP TABLE highway_nodes_crossing (
      node_id INTEGER PRIMARY KEY
-    )
-    ''')
-    cur.execute('''
+    );
     INSERT INTO highway_nodes_crossing
     SELECT node_id FROM
     (
@@ -316,7 +313,7 @@ def add_graph(cur):
      LEFT JOIN way_nodes AS wn ON wt.way_id=wn.way_id
      WHERE wt.key='highway'
     )
-    GROUP BY node_id HAVING count(*)>1
+    GROUP BY node_id HAVING count(*)>1;
     ''')
     #
     prev_lon = 0
