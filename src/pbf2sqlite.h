@@ -41,6 +41,11 @@ void show_node(sqlite3 *db, const int64_t node_id);
 void show_way(sqlite3 *db, const int64_t way_id);
 void show_relation(sqlite3 *db, const int64_t relation_id);
 /* leaflet.c */
+typedef struct {
+  int no;
+  double lon;
+  double lat;
+} point;
 int html_graph(
   sqlite3 *db,
   const double lon1,
@@ -64,6 +69,12 @@ void leaflet_marker(
   const char *mapid,
   const double lon,
   const double lat,
+  const char *text
+);
+void leaflet_polyline(
+  FILE *html,
+  const char *mapid,
+  point *pointlist,
   const char *text
 );
 void leaflet_circle(

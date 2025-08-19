@@ -8,8 +8,28 @@
 #include <string.h>
 #include <errno.h>
 
+/* TODO dummy function */
+point* generate_pointlist(int n) {
+  point *pointlist = malloc(n * sizeof(point));
+  if( !pointlist ){
+    fprintf(stderr, "malloc failed");
+    exit(EXIT_FAILURE);
+  }
+  pointlist[0].lon = 7.8425217;
+  pointlist[0].lat = 47.9857186;
+  pointlist[1].lon = 7.8564262;
+  pointlist[1].lat = 47.9892802;
+  pointlist[2].lon = 7.8434658;
+  pointlist[2].lat = 47.9933011;
+  pointlist[3].lon = 7.8559113;
+  pointlist[3].lat = 47.9961730;
+  pointlist[0].no = 4;
+  return pointlist;
+}
+
+
 /*
-** TODO dummy function
+** Creates visualization of the table graph TODO
 */
 int html_graph(
   sqlite3 *db,
@@ -44,6 +64,9 @@ int html_graph(
   leaflet_rectangle(html, "map1", 7.824, 47.983, 7.871, 47.995, "I'm a rectangle");
   leaflet_style(html, "#ff0000", 0.9, 2, "", "none", 1.0);
   leaflet_rectangle(html, "map1", lon1, lat1, lon2, lat2, "Boundingbox");
+  point *pointlist = generate_pointlist(5);
+  leaflet_polyline(html, "map1", pointlist, "");
+  free(pointlist);
   /* map2 */
   leaflet_init(html, "map2", lon1, lat1, lon2, lat2);
   leaflet_circle(html, "map2", 7.852, 47.983, 150, "Hello I'm a circle on map2");
@@ -59,6 +82,12 @@ int html_graph(
   printf("File %s written successfully.\n", html_file);
   return EXIT_SUCCESS;
 }
+
+
+
+/*
+** Functions for creating an HTML file with Leaflet.js
+*/
 
 void leaflet_html_header(FILE *html) {
   fprintf(html,
@@ -94,7 +123,7 @@ void leaflet_init(
   const double lat2
 ){
   fprintf(html, "// %s init\n", mapid);
-  fprintf(html, "const %s = L.map('%s').fitBounds([ [%f, %f], [%f, %f] ], "
+  fprintf(html, "const %s = L.map('%s').fitBounds([ [%.7f, %.7f], [%.7f, %.7f] ], "
                 "{padding: [0,0], maxZoom: 19});\n",
                  mapid, mapid, lat1, lon1, lat2, lon2);
   fprintf(html, "L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', "
@@ -123,7 +152,23 @@ void leaflet_marker(
   const double lat,
   const char *text
 ){
-  fprintf(html, "L.marker([%f, %f]).addTo(%s)", lat, lon, mapid);
+  fprintf(html, "L.marker([%.7f, %.7f]).addTo(%s)", lat, lon, mapid);
+  if( text[0]!='\0' ) fprintf(html, ".bindPopup(\"%s\")", text);
+  fprintf(html, ";\n");
+}
+
+void leaflet_polyline(
+  FILE *html,
+  const char *mapid,
+  point *pointlist,
+  const char *text
+){
+  fprintf(html, "L.polyline( [\n");
+  for(int i=0; i<pointlist[0].no; i++){
+    if( i>0 ) fprintf(html, ",\n");
+    fprintf(html, "[%.7f, %.7f]", pointlist[i].lat, pointlist[i].lon);
+  }
+  fprintf(html, " ], style).addTo(%s)",  mapid);
   if( text[0]!='\0' ) fprintf(html, ".bindPopup(\"%s\")", text);
   fprintf(html, ";\n");
 }
@@ -136,7 +181,7 @@ void leaflet_circle(
   const int radius,
   const char *text
 ){
-  fprintf(html, "L.circle([%f, %f], %d, style).addTo(%s)", lat, lon, radius, mapid);
+  fprintf(html, "L.circle([%.7f, %.7f], %d, style).addTo(%s)", lat, lon, radius, mapid);
   if( text[0]!='\0' ) fprintf(html, ".bindPopup(\"%s\")", text);
   fprintf(html, ";\n");
 }
@@ -148,7 +193,7 @@ void leaflet_circlemarker(
   const double lat,
   const char *text
 ){
-  fprintf(html, "L.circleMarker([%f, %f], style).addTo(%s)", lat, lon,  mapid);
+  fprintf(html, "L.circleMarker([%.7f, %.7f], style).addTo(%s)", lat, lon,  mapid);
   if( text[0]!='\0' ) fprintf(html, ".bindPopup(\"%s\")", text);
   fprintf(html, ";\n");
 }
@@ -162,7 +207,7 @@ void leaflet_rectangle(
   const double lat2,
   const char *text
 ){
-  fprintf(html, "L.rectangle([[%f, %f], [%f, %f]], style).addTo(%s)", lat1, lon1, lat2, lon2, mapid);
+  fprintf(html, "L.rectangle([[%.7f, %.7f], [%.7f, %.7f]], style).addTo(%s)", lat1, lon1, lat2, lon2, mapid);
   if( text[0]!='\0' ) fprintf(html, ".bindPopup(\"%s\")", text);
   fprintf(html, ";\n");
 }
