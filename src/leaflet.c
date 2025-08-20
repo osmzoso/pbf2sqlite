@@ -67,6 +67,7 @@ int html_graph(
   point *pointlist = generate_pointlist(5);
   leaflet_polyline(html, "map1", pointlist, "");
   free(pointlist);
+  leaflet_line(html, "map1", 7.835, 47.996, 7.863, 47.981, "Simple line");
   /* map2 */
   leaflet_init(html, "map2", lon1, lat1, lon2, lat2);
   leaflet_circle(html, "map2", 7.852, 47.983, 150, "Hello I'm a circle on map2");
@@ -169,6 +170,21 @@ void leaflet_polyline(
     fprintf(html, "[%.7f, %.7f]", pointlist[i].lat, pointlist[i].lon);
   }
   fprintf(html, " ], style).addTo(%s)",  mapid);
+  if( text[0]!='\0' ) fprintf(html, ".bindPopup(\"%s\")", text);
+  fprintf(html, ";\n");
+}
+
+void leaflet_line(
+  FILE *html,
+  const char *mapid,
+  const double lon1,
+  const double lat1,
+  const double lon2,
+  const double lat2,
+  const char *text
+){
+  fprintf(html, "L.polyline([ [%.7f, %.7f], [%.7f, %.7f] ]).addTo(%s)",
+          lat1, lon1, lat2, lon2, mapid);
   if( text[0]!='\0' ) fprintf(html, ".bindPopup(\"%s\")", text);
   fprintf(html, ";\n");
 }

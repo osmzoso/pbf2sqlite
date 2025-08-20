@@ -77,6 +77,15 @@ void leaflet_polyline(
   point *pointlist,
   const char *text
 );
+void leaflet_line(
+  FILE *html,
+  const char *mapid,
+  const double lon1,
+  const double lat1,
+  const double lon2,
+  const double lat2,
+  const char *text
+);
 void leaflet_circle(
   FILE *html,
   const char *mapid,
