@@ -93,6 +93,7 @@ int main(int argc, char **argv) {
   int64_t way_id = 0;
   int64_t relation_id = 0;
   int index = 1;
+  int vdemo = 0;
   int vgraph = 0;
   double lon1 = 0;
   double lat1 = 0;
@@ -131,6 +132,7 @@ int main(int argc, char **argv) {
       i++;
     }
     else if( strcmp("noindex", argv[i])==0 ) index = 0;
+    else if( strcmp("vdemo", argv[i])==0 ) vdemo = 1;
     else if( strcmp("vgraph", argv[i])==0 && argc>=i+6 ){
       vgraph = 1;
       lon1 = argv_to_double(argv[i+1]);
@@ -171,6 +173,7 @@ int main(int argc, char **argv) {
   if( node_id ) show_node(db, node_id);
   if( way_id ) show_way(db, way_id);
   if( relation_id ) show_relation(db, relation_id);
+  if( vdemo ) html_demo();
   if( vgraph ) html_graph(db, lon1, lat1, lon2, lat2, html_file);
   /* Close database connection */
   rc = sqlite3_close(db);

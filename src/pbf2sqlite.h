@@ -125,5 +125,7 @@ void leaflet_style(
   const char *fillcolor,
   const double fillopacity
 );
+/* visualize_data.c */
+void html_demo();
 
 #endif /* PBF2SQLITE_H */
