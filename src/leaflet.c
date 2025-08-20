@@ -26,6 +26,21 @@ point* generate_pointlist(int n) {
   pointlist[0].no = 4;
   return pointlist;
 }
+point* generate_pointlist2(int n) {
+  point *pointlist = malloc(n * sizeof(point));
+  if( !pointlist ){
+    fprintf(stderr, "malloc failed");
+    exit(EXIT_FAILURE);
+  }
+  pointlist[0].lon = 7.8252697;
+  pointlist[0].lat = 47.9868675;
+  pointlist[1].lon = 7.8383160;
+  pointlist[1].lat = 47.9810651;
+  pointlist[2].lon = 7.8327370;
+  pointlist[2].lat = 47.9962305;
+  pointlist[0].no = 3;
+  return pointlist;
+}
 
 
 /*
@@ -61,13 +76,18 @@ int html_graph(
   leaflet_marker(html, "map1", 7.852, 47.992, "Mit Text...");
   leaflet_circle(html, "map1", 7.852, 47.983, 150, "Hello I'm a circle");
   leaflet_circlemarker(html, "map1", 7.852, 47.985, "I'm a circlemarker");
-  leaflet_rectangle(html, "map1", 7.824, 47.983, 7.871, 47.995, "I'm a rectangle");
+  leaflet_rectangle(html, "map1", 7.861, 47.983, 7.871, 47.995, "I'm a rectangle");
   leaflet_style(html, "#ff0000", 0.9, 2, "", "none", 1.0);
   leaflet_rectangle(html, "map1", lon1, lat1, lon2, lat2, "Boundingbox");
-  point *pointlist = generate_pointlist(5);
+  point *pointlist;
+  pointlist = generate_pointlist(5);
   leaflet_polyline(html, "map1", pointlist, "");
   free(pointlist);
   leaflet_line(html, "map1", 7.835, 47.996, 7.863, 47.981, "Simple line");
+  leaflet_style(html, "#00ff00", 0.5, 7, "", "#ff0000", 0.2);
+  pointlist = generate_pointlist2(4);
+  leaflet_polygon(html, "map1", pointlist, "");
+  free(pointlist);
   /* map2 */
   leaflet_init(html, "map2", lon1, lat1, lon2, lat2);
   leaflet_circle(html, "map2", 7.852, 47.983, 150, "Hello I'm a circle on map2");
@@ -185,6 +205,22 @@ void leaflet_line(
 ){
   fprintf(html, "L.polyline([ [%.7f, %.7f], [%.7f, %.7f] ]).addTo(%s)",
           lat1, lon1, lat2, lon2, mapid);
+  if( text[0]!='\0' ) fprintf(html, ".bindPopup(\"%s\")", text);
+  fprintf(html, ";\n");
+}
+
+void leaflet_polygon(
+  FILE *html,
+  const char *mapid,
+  point *pointlist,
+  const char *text
+){
+  fprintf(html, "L.polygon( [\n");
+  for(int i=0; i<pointlist[0].no; i++){
+    if( i>0 ) fprintf(html, ",\n");
+    fprintf(html, "[%.7f, %.7f]", pointlist[i].lat, pointlist[i].lon);
+  }
+  fprintf(html, " ], style).addTo(%s)",  mapid);
   if( text[0]!='\0' ) fprintf(html, ".bindPopup(\"%s\")", text);
   fprintf(html, ";\n");
 }

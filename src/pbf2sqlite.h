@@ -86,6 +86,12 @@ void leaflet_line(
   const double lat2,
   const char *text
 );
+void leaflet_polygon(
+  FILE *html,
+  const char *mapid,
+  point *pointlist,
+  const char *text
+);
 void leaflet_circle(
   FILE *html,
   const char *mapid,
