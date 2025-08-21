@@ -46,14 +46,6 @@ typedef struct {
   double lon;
   double lat;
 } point;
-int html_graph(
-  sqlite3 *db,
-  const double lon1,
-  const double lat1,
-  const double lon2,
-  const double lat2,
-  const char *html_file
-);
 void leaflet_html_header(FILE *html);
 void leaflet_html_footer(FILE *html);
 void leaflet_init(
@@ -126,6 +118,14 @@ void leaflet_style(
   const double fillopacity
 );
 /* visualize_data.c */
-void html_demo();
+int html_demo();
+int html_graph(
+  sqlite3 *db,
+  const double lon1,
+  const double lat1,
+  const double lon2,
+  const double lat2,
+  const char *html_file
+);
 
 #endif /* PBF2SQLITE_H */
