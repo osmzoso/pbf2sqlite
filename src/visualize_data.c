@@ -93,6 +93,48 @@ point* generate_pointlist(int n) {
   return pointlist;
 }
 
+/* TODO */
+point* edge_points(
+  sqlite3 *db,
+  uint64_t way_id,
+  uint64_t start_node_id,
+  uint64_t end_node_id,
+  int n
+){
+  int node_start_order, node_end_order;
+  sqlite3_stmt *stmt_points, *stmt_order_pos;
+  double lon, lat;
+  point *pointlist = malloc(n * sizeof(point));
+  if( !pointlist ){
+    fprintf(stderr, "malloc failed");
+    exit(EXIT_FAILURE);
+  }
+  /*  */
+  rc = sqlite3_prepare_v2(db,
+    " SELECT node_order FROM way_nodes WHERE way_id=? AND node_id=?",
+     -1, &stmt_order_pos, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  sqlite3_bind_int64(stmt_order_pos, 1, way_id);
+  sqlite3_bind_int64(stmt_order_pos, 2, start_node_id);
+  while( sqlite3_step(stmt_order_pos)==SQLITE_ROW ){
+    node_start_order = (int)sqlite3_column_int(stmt_order_pos, 0);
+  }
+
+  rc = sqlite3_prepare_v2(db,
+    " SELECT n.lon,n.lat"
+    " FROM way_nodes AS wn"
+    " LEFT JOIN nodes AS n ON wn.node_id=n.node_id"
+    " WHERE wn.way_id=?"
+    " ORDER BY wn.node_order",
+     -1, &stmt_points, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  sqlite3_bind_int64(stmt_points, 1, way_id);
+  while( sqlite3_step(stmt_points)==SQLITE_ROW ){
+    lon = (double)sqlite3_column_double(stmt_points, 0);
+    lat = (double)sqlite3_column_double(stmt_points, 1);
+  }
+  return pointlist;
+}
 
 /*
 ** Creates visualization of the table graph TODO
@@ -106,6 +148,7 @@ int html_graph(
   const char *html_file
 ){
   FILE *html;
+  sqlite3_stmt *stmt_edges;
   html = fopen(html_file, "w");
   if( html==NULL ) {
     printf("Error opening file: %s", strerror(errno));
@@ -129,7 +172,32 @@ int html_graph(
   leaflet_rectangle(html, "map1", lon1, lat1, lon2, lat2, "");
   leaflet_rectangle(html, "map2", lon1, lat1, lon2, lat2, "");
   leaflet_rectangle(html, "map3", lon1, lat1, lon2, lat2, "");
-  /* TODO show graph edges... */
+  /* show graph edges TODO... */
+  int64_t start_node_id, end_node_id, way_id;
+  int nodes, permit;
+  rc = sqlite3_prepare_v2(db,
+    " SELECT start_node_id,end_node_id,way_id,nodes,permit"
+    " FROM graph"
+    " WHERE way_id IN ("
+    "     SELECT way_id FROM rtree_way"
+    "     WHERE max_lon>=? AND min_lon<=?"
+    "     AND max_lat>=? AND min_lat<=?"
+    "    )",
+     -1, &stmt_edges, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  sqlite3_bind_double(stmt_edges, 1, lon1);
+  sqlite3_bind_double(stmt_edges, 2, lon2);
+  sqlite3_bind_double(stmt_edges, 3, lat1);
+  sqlite3_bind_double(stmt_edges, 4, lat2);
+  while( sqlite3_step(stmt_edges)==SQLITE_ROW ){
+    start_node_id = (int64_t)sqlite3_column_int64(stmt_edges, 0);
+    end_node_id = (int64_t)sqlite3_column_int64(stmt_edges, 1);
+    way_id = (int64_t)sqlite3_column_int64(stmt_edges, 2);
+    nodes = (int)sqlite3_column_int(stmt_edges, 3);
+    permit = (int)sqlite3_column_int(stmt_edges, 4);
+  }
+  sqlite3_finalize(stmt_edges);
+  /*  */
   leaflet_line(html, "map1", 7.835, 47.996, 7.863, 47.981, "Simple line");
   leaflet_style(html, "#0000ff", 0.9, 2, "", "none", 1.0);
   point *pointlist;
