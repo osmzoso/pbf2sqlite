@@ -184,27 +184,36 @@ def boundingbox_subgraph(lon1, lat1, lon2, lat2, enlarge):
     return lon1, lat1, lon2, lat2
 
 
-def part_way_coordinates(cur, way_id, node_start, node_end):
+def edge_points(cur, way_id, start_node_id, end_node_id):
     """Returns a list with the coordinates of a part way"""
-    #
-    cur.execute("SELECT node_order FROM way_nodes WHERE way_id=? AND node_id=?", (way_id, node_start))
-    (node_start_order,) = cur.fetchone()
-    cur.execute("SELECT node_order FROM way_nodes WHERE way_id=? AND node_id=?", (way_id, node_end))
-    (node_end_order,) = cur.fetchone()
-    #
-    query = '''
-    SELECT wn.way_id,wn.node_id,wn.node_order,n.lon,n.lat
+    coordinates = []
+    cur.execute("""
+    SELECT n.lon,n.lat
     FROM way_nodes AS wn
     LEFT JOIN nodes AS n ON wn.node_id=n.node_id
-    WHERE wn.way_id=? AND wn.node_order>=? AND wn.node_order<=?
-    ORDER BY wn.node_order '''
-    if node_start_order > node_end_order:
-        node_start_order, node_end_order = node_end_order, node_start_order
-        query = query + 'DESC'
-    coordinates = []
-    cur.execute(query, (way_id, node_start_order, node_end_order))
-    for (way_id, node_id, node_order, lon, lat) in cur.fetchall():
+    WHERE wn.way_id=?
+      AND wn.node_order>=(SELECT node_order FROM way_nodes
+                          WHERE way_id=? AND node_id=?)
+      AND wn.node_order<=(SELECT node_order FROM way_nodes
+                          WHERE way_id=? AND node_id=?)
+    ORDER BY wn.node_order
+    """, (way_id, way_id, start_node_id, way_id, end_node_id))
+    for (lon, lat) in cur.fetchall():
         coordinates.append((lon, lat))
+    if len(coordinates) == 0:
+        cur.execute("""
+        SELECT n.lon,n.lat
+        FROM way_nodes AS wn
+        LEFT JOIN nodes AS n ON wn.node_id=n.node_id
+        WHERE wn.way_id=?
+          AND wn.node_order>=(SELECT node_order FROM way_nodes
+                              WHERE way_id=? AND node_id=?)
+          AND wn.node_order<=(SELECT node_order FROM way_nodes
+                              WHERE way_id=? AND node_id=?)
+        ORDER BY wn.node_order DESC  -- nodes in reverse order
+        """, (way_id, way_id, end_node_id, way_id, start_node_id))
+        for (lon, lat) in cur.fetchall():
+            coordinates.append((lon, lat))
     return coordinates
 
 
@@ -266,10 +275,10 @@ def shortest_way(cur, lon_start, lat_start, lon_dest, lat_dest, permit, csvfile)
         cur.execute('SELECT start_node_id,end_node_id,way_id FROM graph WHERE edge_id=?', (edge_id,))
         (start_node_id, end_node_id, way_id) = cur.fetchone()
         if first_node_id == start_node_id:
-            coordinates = part_way_coordinates(cur, way_id, start_node_id, end_node_id)
+            coordinates = edge_points(cur, way_id, start_node_id, end_node_id)
             first_node_id = end_node_id
         else:
-            coordinates = part_way_coordinates(cur, way_id, end_node_id, start_node_id)
+            coordinates = edge_points(cur, way_id, end_node_id, start_node_id)
             first_node_id = start_node_id
         coordinates.pop(0)  # remove the first coordinates
         path_coordinates.extend(coordinates)
