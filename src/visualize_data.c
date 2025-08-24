@@ -137,7 +137,7 @@ int html_graph(
   }
   leaflet_html_header(html);
   fprintf(html,
-    "<h3>Map 1 - Visualize Table 'graph' (boundingbox: %.3f %.3f - %.3f %.3f)</h3>\n"
+    "<h3>Map 1 - Visualization of the table 'graph' (boundingbox: %.3f %.3f - %.3f %.3f)</h3>\n"
     "<div id='map1' style='width:850px; height:500px;'></div>\n"
     "<h3>Map 2 - Graph foot</h3>\n"
     "<div id='map2' style='width:850px; height:500px;'></div>\n"

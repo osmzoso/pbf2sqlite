@@ -29,6 +29,7 @@ static char *help =
   "  way ID        Show way data\n"
   "  relation ID   Show relation data\n"
   "  noindex       Do not create indexes (not recommended)\n"
+  "  vgraph LON1 LAT1 LON2 LAT2 HTMLFILE   Visualize table graph\n"
   "\n"
   ;
 
