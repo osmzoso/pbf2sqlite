@@ -137,22 +137,26 @@ int html_graph(
   }
   leaflet_html_header(html);
   fprintf(html,
-    "<h2>Map 1 - Graph complete</h2>\n"
+    "<h2>Map 1 - Graph</h2>\n"
     "<div id='map1' style='width:800px; height:500px;'></div>\n"
     "<h2>Map 2 - Graph foot</h2>\n"
     "<div id='map2' style='width:800px; height:500px;'></div>\n"
     "<h2>Map 3 - Graph bike</h2>\n"
-    "<div id='map3' style='width:800px; height:500px;'></div>\n");
+    "<div id='map3' style='width:800px; height:500px;'></div>\n"
+    "<h2>Map 4 - Graph car</h2>\n"
+    "<div id='map4' style='width:800px; height:500px;'></div>\n");
   fprintf(html, "<script>\n");
   /* init maps */
   leaflet_init(html, "map1", lon1, lat1, lon2, lat2);
   leaflet_init(html, "map2", lon1, lat1, lon2, lat2);
   leaflet_init(html, "map3", lon1, lat1, lon2, lat2);
+  leaflet_init(html, "map4", lon1, lat1, lon2, lat2);
   /* show boundingbox */
   leaflet_style(html, "#ff0000", 1.0, 1, "", "none", 0.3);
   leaflet_rectangle(html, "map1", lon1, lat1, lon2, lat2, "");
   leaflet_rectangle(html, "map2", lon1, lat1, lon2, lat2, "");
   leaflet_rectangle(html, "map3", lon1, lat1, lon2, lat2, "");
+  leaflet_rectangle(html, "map4", lon1, lat1, lon2, lat2, "");
   /* show graph edges */
   point *pointlist = malloc(PBF2SQLITE_MAX_POINTS * sizeof(point));
   if( !pointlist ){
@@ -183,6 +187,15 @@ int html_graph(
        (int64_t)sqlite3_column_int64(stmt_edges, 3),
        pointlist);
     leaflet_polyline(html, "map1", pointlist, "");
+    if( (permit&1)==1 ){
+      leaflet_polyline(html, "map2", pointlist, "");
+    }
+    if( (permit&2)==2 ){
+      leaflet_polyline(html, "map3", pointlist, "");
+    }
+    if( (permit&4)==4 ){
+      leaflet_polyline(html, "map4", pointlist, "");
+    }
   }
   free(pointlist);
   sqlite3_finalize(stmt_edges);
