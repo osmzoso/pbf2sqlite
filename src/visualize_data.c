@@ -137,14 +137,15 @@ int html_graph(
   }
   leaflet_html_header(html);
   fprintf(html,
-    "<h2>Map 1 - Graph</h2>\n"
-    "<div id='map1' style='width:800px; height:500px;'></div>\n"
-    "<h2>Map 2 - Graph foot</h2>\n"
-    "<div id='map2' style='width:800px; height:500px;'></div>\n"
-    "<h2>Map 3 - Graph bike</h2>\n"
-    "<div id='map3' style='width:800px; height:500px;'></div>\n"
-    "<h2>Map 4 - Graph car</h2>\n"
-    "<div id='map4' style='width:800px; height:500px;'></div>\n");
+    "<h3>Map 1 - Visualize Table 'graph' (boundingbox: %.3f %.3f - %.3f %.3f)</h3>\n"
+    "<div id='map1' style='width:850px; height:500px;'></div>\n"
+    "<h3>Map 2 - Graph foot</h3>\n"
+    "<div id='map2' style='width:850px; height:500px;'></div>\n"
+    "<h3>Map 3 - Graph bike</h3>\n"
+    "<div id='map3' style='width:850px; height:500px;'></div>\n"
+    "<h3>Map 4 - Graph car</h3>\n"
+    "<div id='map4' style='width:850px; height:500px;'></div>\n",
+    lon1, lat1, lon2, lat2);
   fprintf(html, "<script>\n");
   /* init maps */
   leaflet_init(html, "map1", lon1, lat1, lon2, lat2);
@@ -187,14 +188,29 @@ int html_graph(
        (int64_t)sqlite3_column_int64(stmt_edges, 3),
        pointlist);
     leaflet_polyline(html, "map1", pointlist, "");
+    /* foot */
     if( (permit&1)==1 ){
       leaflet_polyline(html, "map2", pointlist, "");
     }
+    /* bike, draw onway dotted */
     if( (permit&2)==2 ){
-      leaflet_polyline(html, "map3", pointlist, "");
+      if( (permit&16)==16 ){
+        leaflet_style(html, "#0000ff", 0.9, 2, "5 5", "none", 1.0);
+        leaflet_polyline(html, "map3", pointlist, "");
+        leaflet_style(html, "#0000ff", 0.9, 2, "", "none", 1.0);
+      }else{
+        leaflet_polyline(html, "map3", pointlist, "");
+      }
     }
+    /* car, draw onway dotted */
     if( (permit&4)==4 ){
-      leaflet_polyline(html, "map4", pointlist, "");
+      if( (permit&32)==32 ){
+        leaflet_style(html, "#0000ff", 0.9, 2, "5 5", "none", 1.0);
+        leaflet_polyline(html, "map4", pointlist, "");
+        leaflet_style(html, "#0000ff", 0.9, 2, "", "none", 1.0);
+      }else{
+        leaflet_polyline(html, "map4", pointlist, "");
+      }
     }
   }
   free(pointlist);
