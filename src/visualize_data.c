@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <inttypes.h>
 
 /*
 ** Test leaflet.c
@@ -71,7 +72,6 @@ int html_demo(){
   return EXIT_SUCCESS;
 }
 
-#define PBF2SQLITE_MAX_POINTS 1000
 void edge_points(
   sqlite3 *db,
   uint64_t way_id,
@@ -104,19 +104,21 @@ void edge_points(
     pointlist[n].lat = (double)sqlite3_column_double(stmt_points, 1);
     n++;
     if( n >= PBF2SQLITE_MAX_POINTS ){
-      printf("More than %d points TODO way_id\n", PBF2SQLITE_MAX_POINTS);
+      printf("More than %d edge points in way %" PRId64 " "
+             "(start_node %" PRId64 ", end_node %" PRId64 ")\n",
+               PBF2SQLITE_MAX_POINTS, way_id, start_node_id, end_node_id);
       break;
     }
   }
   pointlist[0].no = n;
   sqlite3_finalize(stmt_points);
-  /* TODO */
+  /* TODO reverse order */
   if( n==0 ){
   }
 }
 
 /*
-** Creates visualization of the table graph TODO
+** Creates visualization of the table graph
 */
 int html_graph(
   sqlite3 *db,
@@ -151,17 +153,16 @@ int html_graph(
   leaflet_rectangle(html, "map1", lon1, lat1, lon2, lat2, "");
   leaflet_rectangle(html, "map2", lon1, lat1, lon2, lat2, "");
   leaflet_rectangle(html, "map3", lon1, lat1, lon2, lat2, "");
-  /* show graph edges TODO... */
+  /* show graph edges */
   point *pointlist = malloc(PBF2SQLITE_MAX_POINTS * sizeof(point));
   if( !pointlist ){
     fprintf(stderr, "malloc failed");
     exit(EXIT_FAILURE);
   }
-  int64_t start_node_id, end_node_id, way_id;
-  int nodes, permit;
+  int permit;
   leaflet_style(html, "#0000ff", 0.9, 2, "", "none", 1.0);
   rc = sqlite3_prepare_v2(db,
-    " SELECT start_node_id,end_node_id,way_id,nodes,permit"
+    " SELECT permit,way_id,start_node_id,end_node_id"
     " FROM graph"
     " WHERE way_id IN ("
     "     SELECT way_id FROM rtree_way"
@@ -175,12 +176,12 @@ int html_graph(
   sqlite3_bind_double(stmt_edges, 3, lat1);
   sqlite3_bind_double(stmt_edges, 4, lat2);
   while( sqlite3_step(stmt_edges)==SQLITE_ROW ){
-    start_node_id = (int64_t)sqlite3_column_int64(stmt_edges, 0);
-    end_node_id = (int64_t)sqlite3_column_int64(stmt_edges, 1);
-    way_id = (int64_t)sqlite3_column_int64(stmt_edges, 2);
-    nodes = (int)sqlite3_column_int(stmt_edges, 3);
-    permit = (int)sqlite3_column_int(stmt_edges, 4);
-    edge_points(db, way_id, start_node_id, end_node_id, pointlist);
+    permit = (int)sqlite3_column_int(stmt_edges, 0);
+    edge_points(db,
+       (int64_t)sqlite3_column_int64(stmt_edges, 1),
+       (int64_t)sqlite3_column_int64(stmt_edges, 2),
+       (int64_t)sqlite3_column_int64(stmt_edges, 3),
+       pointlist);
     leaflet_polyline(html, "map1", pointlist, "");
   }
   free(pointlist);

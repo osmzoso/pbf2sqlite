@@ -6,6 +6,12 @@
 #include <sqlite3.h>
 
 #define PBF2SQLITE_VERSION  "0.4 ALPHA"
+#define PBF2SQLITE_MAX_POINTS 1000
+typedef struct {
+  int no;
+  double lon;
+  double lat;
+} point;
 
 /* Mathematical Constants */
 #ifndef M_PI
@@ -41,11 +47,6 @@ void show_node(sqlite3 *db, const int64_t node_id);
 void show_way(sqlite3 *db, const int64_t way_id);
 void show_relation(sqlite3 *db, const int64_t relation_id);
 /* leaflet.c */
-typedef struct {
-  int no;
-  double lon;
-  double lat;
-} point;
 void leaflet_html_header(FILE *html);
 void leaflet_html_footer(FILE *html);
 void leaflet_init(
