@@ -71,69 +71,48 @@ int html_demo(){
   return EXIT_SUCCESS;
 }
 
-
-
-
-/* TODO dummy function */
-point* generate_pointlist(int n) {
-  point *pointlist = malloc(n * sizeof(point));
-  if( !pointlist ){
-    fprintf(stderr, "malloc failed");
-    exit(EXIT_FAILURE);
-  }
-  pointlist[0].lon = 7.8425217;
-  pointlist[0].lat = 47.9857186;
-  pointlist[1].lon = 7.8564262;
-  pointlist[1].lat = 47.9892802;
-  pointlist[2].lon = 7.8434658;
-  pointlist[2].lat = 47.9933011;
-  pointlist[3].lon = 7.8559113;
-  pointlist[3].lat = 47.9961730;
-  pointlist[0].no = 4;
-  return pointlist;
-}
-
-/* TODO */
-point* edge_points(
+#define PBF2SQLITE_MAX_POINTS 1000
+void edge_points(
   sqlite3 *db,
   uint64_t way_id,
   uint64_t start_node_id,
   uint64_t end_node_id,
-  int n
+  point *pointlist
 ){
-  int node_start_order, node_end_order;
-  sqlite3_stmt *stmt_points, *stmt_order_pos;
-  double lon, lat;
-  point *pointlist = malloc(n * sizeof(point));
-  if( !pointlist ){
-    fprintf(stderr, "malloc failed");
-    exit(EXIT_FAILURE);
-  }
-  /*  */
-  rc = sqlite3_prepare_v2(db,
-    " SELECT node_order FROM way_nodes WHERE way_id=? AND node_id=?",
-     -1, &stmt_order_pos, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
-  sqlite3_bind_int64(stmt_order_pos, 1, way_id);
-  sqlite3_bind_int64(stmt_order_pos, 2, start_node_id);
-  while( sqlite3_step(stmt_order_pos)==SQLITE_ROW ){
-    node_start_order = (int)sqlite3_column_int(stmt_order_pos, 0);
-  }
-
+  int n;
+  sqlite3_stmt *stmt_points;
+  n = 0;
   rc = sqlite3_prepare_v2(db,
     " SELECT n.lon,n.lat"
     " FROM way_nodes AS wn"
     " LEFT JOIN nodes AS n ON wn.node_id=n.node_id"
-    " WHERE wn.way_id=?"
+    " WHERE wn.way_id=?1"
+    "   AND wn.node_order>=(SELECT node_order FROM way_nodes"
+    "                       WHERE way_id=?2 AND node_id=?3)"
+    "   AND wn.node_order<=(SELECT node_order FROM way_nodes"
+    "                       WHERE way_id=?4 AND node_id=?5)"
     " ORDER BY wn.node_order",
      -1, &stmt_points, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   sqlite3_bind_int64(stmt_points, 1, way_id);
+  sqlite3_bind_int64(stmt_points, 2, way_id);
+  sqlite3_bind_int64(stmt_points, 3, start_node_id);
+  sqlite3_bind_int64(stmt_points, 4, way_id);
+  sqlite3_bind_int64(stmt_points, 5, end_node_id);
   while( sqlite3_step(stmt_points)==SQLITE_ROW ){
-    lon = (double)sqlite3_column_double(stmt_points, 0);
-    lat = (double)sqlite3_column_double(stmt_points, 1);
+    pointlist[n].lon = (double)sqlite3_column_double(stmt_points, 0);
+    pointlist[n].lat = (double)sqlite3_column_double(stmt_points, 1);
+    n++;
+    if( n >= PBF2SQLITE_MAX_POINTS ){
+      printf("More than %d points TODO way_id\n", PBF2SQLITE_MAX_POINTS);
+      break;
+    }
   }
-  return pointlist;
+  pointlist[0].no = n;
+  sqlite3_finalize(stmt_points);
+  /* TODO */
+  if( n==0 ){
+  }
 }
 
 /*
@@ -173,8 +152,14 @@ int html_graph(
   leaflet_rectangle(html, "map2", lon1, lat1, lon2, lat2, "");
   leaflet_rectangle(html, "map3", lon1, lat1, lon2, lat2, "");
   /* show graph edges TODO... */
+  point *pointlist = malloc(PBF2SQLITE_MAX_POINTS * sizeof(point));
+  if( !pointlist ){
+    fprintf(stderr, "malloc failed");
+    exit(EXIT_FAILURE);
+  }
   int64_t start_node_id, end_node_id, way_id;
   int nodes, permit;
+  leaflet_style(html, "#0000ff", 0.9, 2, "", "none", 1.0);
   rc = sqlite3_prepare_v2(db,
     " SELECT start_node_id,end_node_id,way_id,nodes,permit"
     " FROM graph"
@@ -195,15 +180,11 @@ int html_graph(
     way_id = (int64_t)sqlite3_column_int64(stmt_edges, 2);
     nodes = (int)sqlite3_column_int(stmt_edges, 3);
     permit = (int)sqlite3_column_int(stmt_edges, 4);
+    edge_points(db, way_id, start_node_id, end_node_id, pointlist);
+    leaflet_polyline(html, "map1", pointlist, "");
   }
-  sqlite3_finalize(stmt_edges);
-  /*  */
-  leaflet_line(html, "map1", 7.835, 47.996, 7.863, 47.981, "Simple line");
-  leaflet_style(html, "#0000ff", 0.9, 2, "", "none", 1.0);
-  point *pointlist;
-  pointlist = generate_pointlist(5);
-  leaflet_polyline(html, "map1", pointlist, "");
   free(pointlist);
+  sqlite3_finalize(stmt_edges);
   /*  */
   fprintf(html, "</script>\n");
   leaflet_html_footer(html);
