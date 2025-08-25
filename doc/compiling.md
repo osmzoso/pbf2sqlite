@@ -3,19 +3,12 @@
 
 ## Dynamic binary for Linux
 
-Required packages (Fedora):
+Additional required packages (Fedora):
 ```
 sqlite-libs
 sqlite-devel
 readosm
 readosm-devel
-```
-
-The dynamic libs are in the following directory:
-```
-/usr/lib64/libsqlite3.so.0
-/usr/lib64/libreadosm.so.1
-/usr/lib64/libexpat.so.1
 ```
 
 Compile with
@@ -33,32 +26,17 @@ make
 ```
 The doc files are also in the **/build** directory.  
 
+The dynamic libs are in the following directory:
+```
+/usr/lib64/libsqlite3.so.0
+/usr/lib64/libreadosm.so.1
+/usr/lib64/libexpat.so.1
+```
+
 
 ## Static binaries
 
-### Build a static binary for Windows (64bit)
-
-Compilation for Windows systems with Linux and crosscompiler MinGW:
-
-Required packages (Fedora):
-```
-mingw64-gcc
-mingw64-expat
-mingw64-expat-static
-mingw64-zlib
-mingw64-zlib-static
-mingw64-winpthreads
-mingw64-winpthreads-static
-```
-
-The static libs are in the following directories:
-```
-/usr/x86_64-w64-mingw32/sys-root/mingw/lib/libexpat.a
-/usr/x86_64-w64-mingw32/sys-root/mingw/lib/libwinpthread.a
-/usr/x86_64-w64-mingw32/sys-root/mingw/lib/libz.a
-/usr/x86_64-w64-mingw32/sys-root/mingw/lib/libws2_32.a
-/usr/lib/gcc/x86_64-w64-mingw32/12.2.1/libgcc.a
-```
+Additional source files in the /src tree are required to create a static binary.
 
 The following files must also be present in the /src path:
 
@@ -80,28 +58,21 @@ readosm_internals.h
 readosm_protobuf.h
 ```
 
-Compile with
-```
-cd ./src
-make win64
-```
-The binary is in the **/build** directory.  
-
-
-### Build a static binary for Linux (64bit)
-
-Required packages (Fedora):
-```
-expat-static
-glibc-static
-zlib-ng-compat-static
-```
-
-In ./src/readosm/readosm.c in line 50 add the following lines:  
+Unfortunately, there are compiler warnings.  
+Therefore, in ./src/readosm/readosm.c in line 50 add the following lines:  
 ```
 #ifdef __linux__
 #include <strings.h>
 #endif
+```
+
+### Build a static binary for Linux (64bit)
+
+Additional required packages (Fedora):
+```
+expat-static
+glibc-static
+zlib-ng-compat-static
 ```
 
 Compile with
@@ -110,3 +81,35 @@ cd ./src
 make static
 ```
 The binary is in the **/build** directory.  
+
+### Build a static binary for Windows (64bit)
+
+Compilation for Windows systems with Linux and crosscompiler MinGW.
+
+Additional required packages (Fedora):
+```
+mingw64-gcc
+mingw64-expat
+mingw64-expat-static
+mingw64-zlib
+mingw64-zlib-static
+mingw64-winpthreads
+mingw64-winpthreads-static
+```
+
+Compile with
+```
+cd ./src
+make win64
+```
+The binary is in the **/build** directory.  
+
+The static libs are in the following directories:
+```
+/usr/x86_64-w64-mingw32/sys-root/mingw/lib/libexpat.a
+/usr/x86_64-w64-mingw32/sys-root/mingw/lib/libwinpthread.a
+/usr/x86_64-w64-mingw32/sys-root/mingw/lib/libz.a
+/usr/x86_64-w64-mingw32/sys-root/mingw/lib/libws2_32.a
+/usr/lib/gcc/x86_64-w64-mingw32/12.2.1/libgcc.a
+```
+
