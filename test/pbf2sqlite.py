@@ -9,16 +9,13 @@ import osmium
 
 
 help = f'''
-{sys.argv[0]}
-
 Reads OpenStreetMap PBF data into a SQLite database.
 
 Usage:
 {sys.argv[0]} DATABASE [OPTION ...]
 
 Main options:
-  read FILE     Reads FILE into the database
-                (.osm.pbf or .osm)
+  read FILE     Reads FILE (.osm.pbf or .osm) into the database
   graph         Add graph table
 
 Other options:
@@ -382,7 +379,7 @@ def main():
     # Parse parameter
     if len(sys.argv) == 1:
         print(help)
-        print('(SQLite '+sqlite3.sqlite_version+' is used)\n')
+        print('SQLite '+sqlite3.sqlite_version+' is used.\n')
         sys.exit(1)
     db_name = sys.argv[1]
     i = 2

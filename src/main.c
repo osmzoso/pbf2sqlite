@@ -11,15 +11,13 @@
 #include <readosm.h>
 
 static char *help =
-  "pbf2sqlite " PBF2SQLITE_VERSION "\n"
   "\n"
   "Reads OpenStreetMap PBF data into a SQLite database.\n"
   "\n"
   "Usage:\npbf2sqlite DATABASE [OPTION ...]\n"
   "\n"
   "Main options:\n"
-  "  read FILE     Reads FILE into the database\n"
-  "                (.osm.pbf or .osm)\n"
+  "  read FILE     Reads FILE (.osm.pbf or .osm) into the database\n"
   "  rtree         Add R*Tree indexes\n"
   "  addr          Add address tables\n"
   "  graph         Add graph table\n"
@@ -29,8 +27,9 @@ static char *help =
   "  way ID        Show way data\n"
   "  relation ID   Show relation data\n"
   "  noindex       Do not create indexes (not recommended)\n"
-  "  vgraph LON1 LAT1 LON2 LAT2 HTMLFILE   Visualize table graph\n"
+  "  vgraph LON1 LAT1 LON2 LAT2 HTMLFILE    Visualize table graph\n"
   "\n"
+  "This is pbf2sqlite version " PBF2SQLITE_VERSION "\n"
   ;
 
 /*
@@ -105,7 +104,7 @@ int main(int argc, char **argv) {
   /* Parse parameter */
   if( argc==1 ){
     printf("%s", help);
-    printf("(SQLite %s and readosm %s is used)\n\n",
+    printf("SQLite %s and readosm %s are used.\n\n",
              sqlite3_libversion(), readosm_version());
     return EXIT_FAILURE;
   }

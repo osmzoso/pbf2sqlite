@@ -7,19 +7,15 @@ Usage:
 pbf2sqlite DATABASE [OPTION ...]
 
 Main options:
-  read FILE     Reads FILE into the database
-                (.osm.pbf or .osm)
+  read FILE     Reads FILE (.osm.pbf or .osm) into the database
   rtree         Add R*Tree indexes
   addr          Add address tables
   graph         Add graph table
 ```
 
-The command
-```
-pbf2sqlite test.db read country.osm.pbf
-```
-reads the [OSM PBF](https://wiki.openstreetmap.org/wiki/PBF_Format)
-file **country.osm.pbf** and creates in the database **test.db** the tables.
+The command `pbf2sqlite test.db read country.osm.pbf` reads
+the [OSM PBF](https://wiki.openstreetmap.org/wiki/PBF_Format) file **country.osm.pbf**
+and creates in the database **test.db** the tables.
 
 The tables created are described in the [documentation](doc/pbf2sqlite.md).
 
