@@ -56,7 +56,7 @@ GROUP BY key,value
 ## Access bike
 
 Get the currently used tags:  
-```
+``` sql
 SELECT key,value,count(*)
 FROM way_tags
 WHERE key||'='||value IN
@@ -97,7 +97,7 @@ GROUP BY key,value
 ## Access car
 
 Get the currently used tags:  
-```
+``` sql
 SELECT key,value,count(*)
 FROM way_tags
 WHERE key||'='||value IN
