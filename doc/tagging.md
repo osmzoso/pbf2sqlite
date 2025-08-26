@@ -7,12 +7,12 @@ Furthermore, it must be defined who is allowed to use the way.
 There are basically three types of users:  
 foot, bike, car
 
-The definition of which tags grant access is specified in the graph_permit table.
+The definition of which tags grant access is specified in the **graph_permit** table.
 
 ## Access foot
 
-Currently used tags:  
-```
+Get the currently used tags:  
+``` sql
 SELECT key,value,count(*)
 FROM way_tags
 WHERE key||'='||value IN
@@ -55,27 +55,76 @@ GROUP BY key,value
 
 ## Access bike
 
-TODO
+Get the currently used tags:  
+```
+SELECT key,value,count(*)
+FROM way_tags
+WHERE key||'='||value IN
+(
+  SELECT key||'='||value
+  FROM graph_permit
+  WHERE set_bit=2
+)
+GROUP BY key,value
+```
+
+```
++----------------+----------------+----------+
+|      key       |     value      | count(*) |
++----------------+----------------+----------+
+| bicycle        | designated     | 11882    |
+| bicycle        | yes            | 23402    |
+| cycleway       | lane           | 382      |
+| cycleway       | track          | 376      |
+| cycleway:right | lane           | 1110     |
+| cycleway:right | track          | 658      |
+| highway        | cycleway       | 2757     |
+| highway        | living_street  | 3798     |
+| highway        | residential    | 62987    |
+| highway        | secondary      | 15114    |
+| highway        | secondary_link | 544      |
+| highway        | service        | 100769   |
+| highway        | tertiary       | 16097    |
+| highway        | tertiary_link  | 432      |
+| highway        | track          | 180057   |
+| highway        | unclassified   | 14453    |
++----------------+----------------+----------+
+```
 
 <https://wiki.openstreetmap.org/wiki/Key:cycleway>
 
-**key: cycleway**  
 
-``` sql
-SELECT key,value,count(*) AS anzahl
+## Access car
+
+Get the currently used tags:  
+```
+SELECT key,value,count(*)
 FROM way_tags
-WHERE key LIKE 'cycleway%'
+WHERE key||'='||value IN
+(
+  SELECT key||'='||value
+  FROM graph_permit
+  WHERE set_bit=4
+)
 GROUP BY key,value
-ORDER BY anzahl DESC
 ```
 
-**key: bicycle**  
-
-``` sql
-SELECT key,value,count(*) AS anzahl
-FROM way_tags
-WHERE key LIKE 'bicycle%'
-GROUP BY key,value
-ORDER BY anzahl DESC
+```
++---------+----------------+----------+
+|   key   |     value      | count(*) |
++---------+----------------+----------+
+| highway | motorway       | 1455     |
+| highway | motorway_link  | 846      |
+| highway | primary        | 10034    |
+| highway | primary_link   | 908      |
+| highway | residential    | 62987    |
+| highway | secondary      | 15114    |
+| highway | secondary_link | 544      |
+| highway | tertiary       | 16097    |
+| highway | tertiary_link  | 432      |
+| highway | trunk          | 1586     |
+| highway | trunk_link     | 801      |
+| highway | unclassified   | 14453    |
++---------+----------------+----------+
 ```
 
