@@ -120,7 +120,7 @@ void leaflet_style(
 );
 /* visualize_data.c */
 int html_demo();
-int html_graph(
+void html_graph(
   sqlite3 *db,
   const double lon1,
   const double lat1,

@@ -120,7 +120,7 @@ void edge_points(
 /*
 ** Creates visualization of the table graph
 */
-int html_graph(
+void html_graph(
   sqlite3 *db,
   const double lon1,
   const double lat1,
@@ -130,10 +130,18 @@ int html_graph(
 ){
   FILE *html;
   sqlite3_stmt *stmt_edges;
+  int permit;
+  char popuptext[200];
+  int64_t way_id, start_node_id, end_node_id;
+  point *pointlist = malloc(PBF2SQLITE_MAX_POINTS * sizeof(point));
+  if( !pointlist ){
+    fprintf(stderr, "malloc failed");
+    return;
+  }
   html = fopen(html_file, "w");
   if( html==NULL ) {
     printf("Error opening file: %s", strerror(errno));
-    return EXIT_FAILURE;
+    return;
   }
   leaflet_html_header(html);
   fprintf(html,
@@ -159,12 +167,6 @@ int html_graph(
   leaflet_rectangle(html, "map3", lon1, lat1, lon2, lat2, "");
   leaflet_rectangle(html, "map4", lon1, lat1, lon2, lat2, "");
   /* show graph edges */
-  point *pointlist = malloc(PBF2SQLITE_MAX_POINTS * sizeof(point));
-  if( !pointlist ){
-    fprintf(stderr, "malloc failed");
-    exit(EXIT_FAILURE);
-  }
-  int permit;
   leaflet_style(html, "#0000ff", 0.9, 2, "", "none", 1.0);
   rc = sqlite3_prepare_v2(db,
     " SELECT permit,way_id,start_node_id,end_node_id"
@@ -182,34 +184,31 @@ int html_graph(
   sqlite3_bind_double(stmt_edges, 4, lat2);
   while( sqlite3_step(stmt_edges)==SQLITE_ROW ){
     permit = (int)sqlite3_column_int(stmt_edges, 0);
-    edge_points(db,
-       (int64_t)sqlite3_column_int64(stmt_edges, 1),
-       (int64_t)sqlite3_column_int64(stmt_edges, 2),
-       (int64_t)sqlite3_column_int64(stmt_edges, 3),
-       pointlist);
-    leaflet_polyline(html, "map1", pointlist, "");
-    /* foot */
-    if( (permit&1)==1 ){
-      leaflet_polyline(html, "map2", pointlist, "");
+    way_id = (int64_t)sqlite3_column_int64(stmt_edges, 1);
+    start_node_id = (int64_t)sqlite3_column_int64(stmt_edges, 2);
+    end_node_id = (int64_t)sqlite3_column_int64(stmt_edges, 3);
+    edge_points(db, way_id, start_node_id, end_node_id, pointlist);
+    snprintf(popuptext, sizeof(popuptext), "way_id %" PRId64, way_id);
+    leaflet_polyline(html, "map1", pointlist, popuptext);
+    if( (permit&1)==1 ){                        /* foot */
+      leaflet_polyline(html, "map2", pointlist, popuptext);
     }
-    /* bike, draw onway dotted */
-    if( (permit&2)==2 ){
+    if( (permit&2)==2 ){                        /* bike, draw onway dotted */
       if( (permit&16)==16 ){
         leaflet_style(html, "#0000ff", 0.9, 2, "5 5", "none", 1.0);
-        leaflet_polyline(html, "map3", pointlist, "");
+        leaflet_polyline(html, "map3", pointlist, popuptext);
         leaflet_style(html, "#0000ff", 0.9, 2, "", "none", 1.0);
       }else{
-        leaflet_polyline(html, "map3", pointlist, "");
+        leaflet_polyline(html, "map3", pointlist, popuptext);
       }
     }
-    /* car, draw onway dotted */
-    if( (permit&4)==4 ){
+    if( (permit&4)==4 ){                        /* car, draw onway dotted */
       if( (permit&32)==32 ){
         leaflet_style(html, "#0000ff", 0.9, 2, "5 5", "none", 1.0);
-        leaflet_polyline(html, "map4", pointlist, "");
+        leaflet_polyline(html, "map4", pointlist, popuptext);
         leaflet_style(html, "#0000ff", 0.9, 2, "", "none", 1.0);
       }else{
-        leaflet_polyline(html, "map4", pointlist, "");
+        leaflet_polyline(html, "map4", pointlist, popuptext);
       }
     }
   }
@@ -221,8 +220,6 @@ int html_graph(
   /* Close the file */
   if( fclose(html)!=0 ) {
     printf("Error closing file: %s", strerror(errno));
-    return EXIT_FAILURE;
   }
   printf("File %s written successfully.\n", html_file);
-  return EXIT_SUCCESS;
 }
