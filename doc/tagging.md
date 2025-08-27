@@ -9,9 +9,17 @@ foot, bike, car
 
 The definition of which tags grant access is specified in the **graph_permit** table.
 
-## Access foot
+## Count the defined tags in **graph_permit**
 
-Get the currently used tags:  
+``` sql
+SELECT gp.key,gp.value,count(*)
+FROM graph_permit AS gp
+LEFT JOIN way_tags AS wt ON gp.key=wt.key AND gp.value=wt.value
+GROUP BY gp.key,gp.value
+```
+
+### Access foot
+
 ``` sql
 SELECT key,value,count(*)
 FROM way_tags
@@ -50,12 +58,12 @@ GROUP BY key,value
 +----------------+---------------+----------+
 ```
 
-<https://wiki.openstreetmap.org/wiki/Key:sidewalk>
+<https://wiki.openstreetmap.org/wiki/Key:sidewalk>  
+<https://wiki.openstreetmap.org/wiki/Tag:foot%3Duse_sidepath>  
 
 
-## Access bike
+### Access bike
 
-Get the currently used tags:  
 ``` sql
 SELECT key,value,count(*)
 FROM way_tags
@@ -91,12 +99,12 @@ GROUP BY key,value
 +----------------+----------------+----------+
 ```
 
-<https://wiki.openstreetmap.org/wiki/Key:cycleway>
+<https://wiki.openstreetmap.org/wiki/Key:cycleway>  
+<https://wiki.openstreetmap.org/wiki/Tag:bicycle%3Duse_sidepath>  
 
 
-## Access car
+### Access car
 
-Get the currently used tags:  
 ``` sql
 SELECT key,value,count(*)
 FROM way_tags
