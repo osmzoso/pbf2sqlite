@@ -185,9 +185,6 @@ way_id          | INTEGER             | way ID
 nodes           | INTEGER             | number of nodes
 permit          | INTEGER             | bit field access
 
-Visualization of the table 'graph':  
-![table_graph.jpg](table_graph.jpg)
-
 The bit field **permit** determines who may use this edge:  
 
 bit   | meaning     | value decimal
@@ -204,6 +201,10 @@ Bit 7 | (not used)  | 2^7 128
 To fill the column **permit** a table **graph_permit** is needed.  
 This table specifies which tags set or clear which bits in permit.  
 
+> If table **graph_permit** doesn't exist, a new table will be created with default values.  
+> But if the table already exists, it will be used.  
+> This allows you to create your own definition for filling the permit field.  
+
 #### Table "graph_permit"
 column     | type     | description
 -----------|----------|-------------------------------------
@@ -212,9 +213,10 @@ value      | TEXT     | tag value
 set_bit    | INTEGER  | bitmask set bits
 clear_bit  | INTEGER  | bitmask clear bits
 
-> If this table doesn't exist, a new one will be created.  
-> If the table already exists, it will be used.  
-> This allows you to create your own definition for filling the permit field.  
+The **vgraph** option allows you to visualize the graph for a given area.  
+This option creates an HTML file containing maps with the graph data.  
+Usage:  
+`pbf2sqlite DATABASE vgraph LON1 LAT1 LON2 LAT2 HTMLFILE`  
 
 <https://www.sqlite.org/lang_with.html#queries_against_a_graph>
 
