@@ -32,6 +32,7 @@
 " INSERT INTO graph_permit VALUES ('highway','steps',                 1, 255);"
 " INSERT INTO graph_permit VALUES ('highway','path',                  1, 255);"
 " INSERT INTO graph_permit VALUES ('highway','construction',          1, 255);"
+" INSERT INTO graph_permit VALUES ('footway','sidewalk',              1, 255);"
 " INSERT INTO graph_permit VALUES ('foot','yes',                      1, 255);"
 " INSERT INTO graph_permit VALUES ('foot','designated',               1, 255);"
 " INSERT INTO graph_permit VALUES ('sidewalk','both',                 1, 255);"

@@ -20,7 +20,7 @@ int html_demo(){
     printf("Error opening file: %s", strerror(errno));
     exit(EXIT_FAILURE);
   }
-  leaflet_html_header(html);
+  leaflet_html_header(html, "map demo");
   fprintf(html,
     "<h2>Demo Map</h2>\n"
     "<div id=\"map1\" style=\"width:800px; height:800px;\"></div>\n");
@@ -143,7 +143,7 @@ void html_graph(
     printf("Error opening file: %s", strerror(errno));
     return;
   }
-  leaflet_html_header(html);
+  leaflet_html_header(html, "map graph");
   fprintf(html,
     "<h3>Map 1 - Visualization of the table 'graph' (boundingbox: %.3f %.3f - %.3f %.3f)</h3>\n"
     "<div id='map1' style='width:850px; height:500px;'></div>\n"
@@ -219,7 +219,6 @@ void html_graph(
   leaflet_html_footer(html);
   /* Close the file */
   if( fclose(html)!=0 ) {
-    printf("Error closing file: %s", strerror(errno));
+    printf("Error closing file %s: %s", html_file, strerror(errno));
   }
-  printf("File %s written successfully.\n", html_file);
 }
