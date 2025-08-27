@@ -59,6 +59,7 @@ GROUP BY key,value
 ```
 
 <https://wiki.openstreetmap.org/wiki/Key:sidewalk>  
+<https://wiki.openstreetmap.org/wiki/Key:foot>  
 <https://wiki.openstreetmap.org/wiki/Tag:foot%3Duse_sidepath>  
 
 
@@ -100,6 +101,7 @@ GROUP BY key,value
 ```
 
 <https://wiki.openstreetmap.org/wiki/Key:cycleway>  
+<https://wiki.openstreetmap.org/wiki/Key:bicycle>  
 <https://wiki.openstreetmap.org/wiki/Tag:bicycle%3Duse_sidepath>  
 
 
@@ -135,4 +137,6 @@ GROUP BY key,value
 | highway | unclassified   | 14453    |
 +---------+----------------+----------+
 ```
+
+<https://wiki.openstreetmap.org/wiki/Key:motorcar>  
 
