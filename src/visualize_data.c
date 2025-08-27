@@ -112,8 +112,40 @@ void edge_points(
   }
   pointlist[0].no = n;
   sqlite3_finalize(stmt_points);
-  /* TODO reverse order */
+  /*
+  ** If no nodes were found then search in the opposite direction
+  */
   if( n==0 ){
+    rc = sqlite3_prepare_v2(db,
+      " SELECT n.lon,n.lat"
+      " FROM way_nodes AS wn"
+      " LEFT JOIN nodes AS n ON wn.node_id=n.node_id"
+      " WHERE wn.way_id=?1"
+      "   AND wn.node_order>=(SELECT node_order FROM way_nodes"
+      "                       WHERE way_id=?2 AND node_id=?3)"
+      "   AND wn.node_order<=(SELECT node_order FROM way_nodes"
+      "                       WHERE way_id=?4 AND node_id=?5)"
+      " ORDER BY wn.node_order DESC  -- nodes in reverse order",
+     -1, &stmt_points, NULL);
+    if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+    sqlite3_bind_int64(stmt_points, 1, way_id);
+    sqlite3_bind_int64(stmt_points, 2, way_id);
+    sqlite3_bind_int64(stmt_points, 3, end_node_id);
+    sqlite3_bind_int64(stmt_points, 4, way_id);
+    sqlite3_bind_int64(stmt_points, 5, start_node_id);
+    while( sqlite3_step(stmt_points)==SQLITE_ROW ){
+      pointlist[n].lon = (double)sqlite3_column_double(stmt_points, 0);
+      pointlist[n].lat = (double)sqlite3_column_double(stmt_points, 1);
+      n++;
+      if( n >= PBF2SQLITE_MAX_POINTS ){
+        printf("More than %d edge points in way %" PRId64 " "
+               "(start_node %" PRId64 ", end_node %" PRId64 ")\n",
+                 PBF2SQLITE_MAX_POINTS, way_id, start_node_id, end_node_id);
+        break;
+      }
+    }
+    pointlist[0].no = n;
+    sqlite3_finalize(stmt_points);
   }
 }
 
