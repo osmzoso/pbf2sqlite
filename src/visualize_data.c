@@ -152,7 +152,7 @@ void edge_points(
 /*
 ** Creates visualization of the table graph
 */
-void html_graph(
+void html_map_graph(
   sqlite3 *db,
   const double lon1,
   const double lat1,
@@ -172,7 +172,7 @@ void html_graph(
   }
   html = fopen(html_file, "w");
   if( html==NULL ) {
-    printf("Error opening file: %s", strerror(errno));
+    printf("Error opening file %s: %s", html_file, strerror(errno));
     return;
   }
   leaflet_html_header(html, "map graph");
@@ -205,8 +205,8 @@ void html_graph(
     " FROM graph"
     " WHERE way_id IN ("
     "     SELECT way_id FROM rtree_way"
-    "     WHERE max_lon>=? AND min_lon<=?"
-    "     AND max_lat>=? AND min_lat<=?"
+    "     WHERE max_lon>=?1 AND min_lon<=?2"
+    "     AND max_lat>=?3 AND min_lat<=?4"
     "    )",
      -1, &stmt_edges, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
@@ -246,6 +246,61 @@ void html_graph(
   }
   free(pointlist);
   sqlite3_finalize(stmt_edges);
+  /*  */
+  fprintf(html, "</script>\n");
+  leaflet_html_footer(html);
+  /* Close the file */
+  if( fclose(html)!=0 ) {
+    printf("Error closing file %s: %s", html_file, strerror(errno));
+  }
+}
+
+/*
+** Creates visualization of the table addr
+*/
+void html_map_addr(
+  sqlite3 *db,
+  const double lon1,
+  const double lat1,
+  const double lon2,
+  const double lat2,
+  const char *html_file
+){
+  FILE *html;
+  sqlite3_stmt *stmt_addr;
+  html = fopen(html_file, "w");
+  if( html==NULL ) {
+    printf("Error opening file %s: %s", html_file, strerror(errno));
+    return;
+  }
+  leaflet_html_header(html, "map addr");
+  fprintf(html,
+    "<h3>Map - Visualization of the table 'addr' (boundingbox: %.3f %.3f - %.3f %.3f)</h3>\n"
+    "<div id='map' style='width:850px; height:500px;'></div>\n",
+    lon1, lat1, lon2, lat2);
+  fprintf(html, "<script>\n");
+  leaflet_init(html, "map", lon1, lat1, lon2, lat2);
+  leaflet_style(html, "#ff0000", 1.0, 1, "", "none", 0.3);
+  leaflet_rectangle(html, "map", lon1, lat1, lon2, lat2, "");
+  const char *query = 
+    " SELECT way_id,node_id,postcode,city,street,housenumber,lon,lat"
+    " FROM addr_view"
+    " WHERE lon>=?1 AND lat>=?2 AND lon<=?3 AND lat<=?4"
+    " ORDER BY postcode,street,abs(housenumber)";
+  /* 1. Map Marker */
+  rc = sqlite3_prepare_v2(db, query, -1, &stmt_addr, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  sqlite3_bind_double(stmt_addr, 1, lon1);
+  sqlite3_bind_double(stmt_addr, 2, lat1);
+  sqlite3_bind_double(stmt_addr, 3, lon2);
+  sqlite3_bind_double(stmt_addr, 4, lat2);
+  while( sqlite3_step(stmt_addr)==SQLITE_ROW ){
+    leaflet_marker(html, "map",
+       (double)sqlite3_column_double(stmt_addr, 6),
+       (double)sqlite3_column_double(stmt_addr, 7),
+       "xxx");
+  }
+  sqlite3_finalize(stmt_addr);
   /*  */
   fprintf(html, "</script>\n");
   leaflet_html_footer(html);

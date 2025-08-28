@@ -27,7 +27,8 @@ static char *help =
   "  way ID        Show way data\n"
   "  relation ID   Show relation data\n"
   "  noindex       Do not create indexes (not recommended)\n"
-  "  vgraph LON1 LAT1 LON2 LAT2 HTMLFILE    Visualize table graph\n"
+  "  vgraph LON1 LAT1 LON2 LAT2 HTMLFILE    Visualize graph data\n"
+  "  vaddr LON1 LAT1 LON2 LAT2 HTMLFILE     Visualize addr data\n"
   "\n"
   "This is pbf2sqlite version " PBF2SQLITE_VERSION "\n"
   ;
@@ -95,6 +96,7 @@ int main(int argc, char **argv) {
   int index = 1;
   int vdemo = 0;
   int vgraph = 0;
+  int vaddr = 0;
   double lon1 = 0;
   double lat1 = 0;
   double lon2 = 0;
@@ -142,6 +144,15 @@ int main(int argc, char **argv) {
       html_file = argv[i+5];
       i = i + 5;
     }
+    else if( strcmp("vaddr", argv[i])==0 && argc>=i+6 ){
+      vaddr = 1;
+      lon1 = argv_to_double(argv[i+1]);
+      lat1 = argv_to_double(argv[i+2]);
+      lon2 = argv_to_double(argv[i+3]);
+      lat2 = argv_to_double(argv[i+4]);
+      html_file = argv[i+5];
+      i = i + 5;
+    }
     else {
       printf("Invalid option: %s\n", argv[i]);
       return EXIT_FAILURE;
@@ -174,7 +185,8 @@ int main(int argc, char **argv) {
   if( way_id ) show_way(db, way_id);
   if( relation_id ) show_relation(db, relation_id);
   if( vdemo ) html_demo();
-  if( vgraph ) html_graph(db, lon1, lat1, lon2, lat2, html_file);
+  if( vgraph ) html_map_graph(db, lon1, lat1, lon2, lat2, html_file);
+  if( vaddr ) html_map_addr(db, lon1, lat1, lon2, lat2, html_file);
   /* Close database connection */
   rc = sqlite3_close(db);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);

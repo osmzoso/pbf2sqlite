@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <sqlite3.h>
 
-#define PBF2SQLITE_VERSION  "0.4 ALPHA"
+#define PBF2SQLITE_VERSION  "0.4 ALPHA2"
 #define PBF2SQLITE_MAX_POINTS 1000
 typedef struct {
   int no;
@@ -120,7 +120,15 @@ void leaflet_style(
 );
 /* visualize_data.c */
 int html_demo();
-void html_graph(
+void html_map_graph(
+  sqlite3 *db,
+  const double lon1,
+  const double lat1,
+  const double lon2,
+  const double lat2,
+  const char *html_file
+);
+void html_map_addr(
   sqlite3 *db,
   const double lon1,
   const double lat1,
