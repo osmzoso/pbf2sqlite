@@ -244,15 +244,14 @@ void html_map_graph(
       }
     }
   }
-  free(pointlist);
-  sqlite3_finalize(stmt_edges);
-  /*  */
   fprintf(html, "</script>\n");
   leaflet_html_footer(html);
   /* Close the file */
   if( fclose(html)!=0 ) {
     printf("Error closing file %s: %s", html_file, strerror(errno));
   }
+  free(pointlist);
+  sqlite3_finalize(stmt_edges);
 }
 
 /*
@@ -276,9 +275,8 @@ void html_map_addr(
   }
   leaflet_html_header(html, "map addr");
   fprintf(html,
-    "<h3>Map - Visualization of the table 'addr' (boundingbox: %.3f %.3f - %.3f %.3f)</h3>\n"
-    "<div id='map' style='width:850px; height:500px;'></div>\n",
-    lon1, lat1, lon2, lat2);
+    "<h3>Map - Visualization 'addr'</h3>\n"
+    "<div id='map' style='width:100%%; height:500px;'></div>\n");
   fprintf(html, "<script>\n");
   leaflet_init(html, "map", lon1, lat1, lon2, lat2);
   leaflet_style(html, "#ff0000", 1.0, 1, "", "none", 0.3);
@@ -297,29 +295,59 @@ void html_map_addr(
   sqlite3_bind_double(stmt_addr, 4, lat2);
   while( sqlite3_step(stmt_addr)==SQLITE_ROW ){
     snprintf(popup_text, sizeof(popup_text),
-       "<pre>"
-       "addr:postcode    : %s<br>"
-       "addr:city        : %s<br>"
-       "addr:street      : %s<br>"
-       "addr:housenumber : %s<br>"
-       "</pre>",
-       (char *)sqlite3_column_text(stmt_addr, 2),
-       (char *)sqlite3_column_text(stmt_addr, 3),
-       (char *)sqlite3_column_text(stmt_addr, 4),
-       (char *)sqlite3_column_text(stmt_addr, 5)
+        "<pre>"
+        "addr:postcode    : %s<br>"
+        "addr:city        : %s<br>"
+        "addr:street      : %s<br>"
+        "addr:housenumber : %s<br>"
+        "</pre>",
+        (char *)sqlite3_column_text(stmt_addr, 2),
+        (char *)sqlite3_column_text(stmt_addr, 3),
+        (char *)sqlite3_column_text(stmt_addr, 4),
+        (char *)sqlite3_column_text(stmt_addr, 5)
     );
     leaflet_marker(html, "map",
-       (double)sqlite3_column_double(stmt_addr, 6),
-       (double)sqlite3_column_double(stmt_addr, 7),
-       popup_text);
+        (double)sqlite3_column_double(stmt_addr, 6),
+        (double)sqlite3_column_double(stmt_addr, 7),
+        popup_text);
   }
-  sqlite3_finalize(stmt_addr);
   fprintf(html, "</script>\n");
   /* 2. Table of addresses */
-  /* TODO */
+  fprintf(html,
+      "<table border=1>\n"
+      "<tr><th>way_id</th><th>node_id</th><th>addr:postcode</th><th>addr:city</th>"
+      "<th>addr:street</th><th>addr:housenumber</th><th>lon</th><th>lat</th></tr>\n"
+  );
+  sqlite3_reset(stmt_addr);
+  sqlite3_clear_bindings(stmt_addr);
+  sqlite3_bind_double(stmt_addr, 1, lon1);
+  sqlite3_bind_double(stmt_addr, 2, lat1);
+  sqlite3_bind_double(stmt_addr, 3, lon2);
+  sqlite3_bind_double(stmt_addr, 4, lat2);
+  while( sqlite3_step(stmt_addr)==SQLITE_ROW ){
+    fprintf(html,
+        "<tr>"
+        "<td>%" PRId64 "</td><td>%" PRId64 "</td><td>%s</td><td>%s</td>"
+        "<td>%s</td><td>%s</td><td>%.7f</td><td>%.7f</td>"
+        "</tr>\n",
+        (int64_t)sqlite3_column_int64(stmt_addr, 0),
+        (int64_t)sqlite3_column_int64(stmt_addr, 1),
+        (char *)sqlite3_column_text(stmt_addr, 2),
+        (char *)sqlite3_column_text(stmt_addr, 3),
+        (char *)sqlite3_column_text(stmt_addr, 4),
+        (char *)sqlite3_column_text(stmt_addr, 5),
+        (double)sqlite3_column_double(stmt_addr, 6),
+        (double)sqlite3_column_double(stmt_addr, 7)
+    );
+  }
+  fprintf(html,
+      "</table>\n"
+      "<hr>\n"
+      "<p>Boundingbox: %f %f - %f %f</p>\n", lon1, lat1, lon2, lat2);
   leaflet_html_footer(html);
   /* Close the file */
   if( fclose(html)!=0 ) {
     printf("Error closing file %s: %s", html_file, strerror(errno));
   }
+  sqlite3_finalize(stmt_addr);
 }
