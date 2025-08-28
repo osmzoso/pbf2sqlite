@@ -177,15 +177,14 @@ void html_map_graph(
   }
   leaflet_html_header(html, "map graph");
   fprintf(html,
-    "<h3>Map 1 - Visualization of the table 'graph' (boundingbox: %.3f %.3f - %.3f %.3f)</h3>\n"
+    "<h3>Map 1 - Visualization 'graph'</h3>\n"
     "<div id='map1' style='width:850px; height:500px;'></div>\n"
     "<h3>Map 2 - Graph foot</h3>\n"
     "<div id='map2' style='width:850px; height:500px;'></div>\n"
     "<h3>Map 3 - Graph bike</h3>\n"
     "<div id='map3' style='width:850px; height:500px;'></div>\n"
     "<h3>Map 4 - Graph car</h3>\n"
-    "<div id='map4' style='width:850px; height:500px;'></div>\n",
-    lon1, lat1, lon2, lat2);
+    "<div id='map4' style='width:850px; height:500px;'></div>\n");
   fprintf(html, "<script>\n");
   /* init maps */
   leaflet_init(html, "map1", lon1, lat1, lon2, lat2);
@@ -244,7 +243,10 @@ void html_map_graph(
       }
     }
   }
-  fprintf(html, "</script>\n");
+  fprintf(html,
+      "</script>\n"
+      "<hr>\n"
+      "<p>Boundingbox: %f %f - %f %f</p>\n", lon1, lat1, lon2, lat2);
   leaflet_html_footer(html);
   /* Close the file */
   if( fclose(html)!=0 ) {
