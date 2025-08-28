@@ -268,6 +268,7 @@ void html_map_addr(
 ){
   FILE *html;
   sqlite3_stmt *stmt_addr;
+  char popup_text[1000];
   html = fopen(html_file, "w");
   if( html==NULL ) {
     printf("Error opening file %s: %s", html_file, strerror(errno));
@@ -295,14 +296,27 @@ void html_map_addr(
   sqlite3_bind_double(stmt_addr, 3, lon2);
   sqlite3_bind_double(stmt_addr, 4, lat2);
   while( sqlite3_step(stmt_addr)==SQLITE_ROW ){
+    snprintf(popup_text, sizeof(popup_text),
+       "<pre>"
+       "addr:postcode    : %s<br>"
+       "addr:city        : %s<br>"
+       "addr:street      : %s<br>"
+       "addr:housenumber : %s<br>"
+       "</pre>",
+       (char *)sqlite3_column_text(stmt_addr, 2),
+       (char *)sqlite3_column_text(stmt_addr, 3),
+       (char *)sqlite3_column_text(stmt_addr, 4),
+       (char *)sqlite3_column_text(stmt_addr, 5)
+    );
     leaflet_marker(html, "map",
        (double)sqlite3_column_double(stmt_addr, 6),
        (double)sqlite3_column_double(stmt_addr, 7),
-       "xxx");
+       popup_text);
   }
   sqlite3_finalize(stmt_addr);
-  /*  */
   fprintf(html, "</script>\n");
+  /* 2. Table of addresses */
+  /* TODO */
   leaflet_html_footer(html);
   /* Close the file */
   if( fclose(html)!=0 ) {
