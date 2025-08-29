@@ -23,7 +23,7 @@ time -p ./pbf2sqlite.py $test_dir/osm_py.db read $osm_file graph
 echo "read OSM file with C version in database 'osm_c.db'..."
 time -p ../build/pbf2sqlite $test_dir/osm_c.db read $osm_file graph
 
-echo "size of databases:"
-ls -l $test_dir/*.db
-echo "MD5 hash values of the databases:"
-md5sum $test_dir/*.db
+#echo "size of databases:"
+#ls -l $test_dir/*.db
+#echo "MD5 hash values of the databases:"
+#md5sum $test_dir/*.db
