@@ -80,6 +80,8 @@
 " INSERT INTO graph_permit VALUES ('bicycle','use_sidepath',          0, 253);"
 " INSERT INTO graph_permit VALUES ('bicycle','no',                    0, 253);"
 " /* Tags no car */"
+" INSERT INTO graph_permit VALUES ('motor_vehicle','no',              0, 251);"
+" INSERT INTO graph_permit VALUES ('motor_vehicle','forestry',        0, 251);"
 " INSERT INTO graph_permit VALUES ('motorcar','no',                   0, 251);"
 " /* Tags no oneway bike */"
 " INSERT INTO graph_permit VALUES ('oneway:bicycle','no',             0, 239);"

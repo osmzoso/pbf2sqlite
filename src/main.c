@@ -28,7 +28,7 @@ static char *help =
   "  relation ID   Show relation data\n"
   "  noindex       Do not create indexes (not recommended)\n"
   "  vgraph LON1 LAT1 LON2 LAT2 HTMLFILE    Visualize graph data\n"
-  "  vaddr LON1 LAT1 LON2 LAT2 HTMLFILE     Visualize addr data\n"
+  "  vaddr  LON1 LAT1 LON2 LAT2 HTMLFILE    Visualize addr data\n"
   "\n"
   "This is pbf2sqlite version " PBF2SQLITE_VERSION "\n"
   ;

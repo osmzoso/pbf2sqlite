@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <sqlite3.h>
 
-#define PBF2SQLITE_VERSION  "0.4 ALPHA2"
+#define PBF2SQLITE_VERSION  "0.4 ALPHA3"
 #define PBF2SQLITE_MAX_POINTS 1000
 typedef struct {
   int no;

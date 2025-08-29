@@ -29,19 +29,11 @@ FROM graph_permit AS gp
 LEFT JOIN way_tags AS wt ON gp.key=wt.key AND gp.value=wt.value
 GROUP BY gp.key,gp.value
 ;
---
--- Tags defined multiple times in graph_permit
---
-SELECT key,value,count(*) AS number
-FROM graph_permit
-GROUP BY key,value HAVING number>1
-;
 ```
 
 ## Links
 
-<https://wiki.openstreetmap.org/wiki/Key:highway>  
-<https://wiki.openstreetmap.org/wiki/Key:motorcar>  
+<https://taginfo.openstreetmap.org/>  
 
 <https://wiki.openstreetmap.org/wiki/Key:sidewalk>  
 <https://wiki.openstreetmap.org/wiki/Key:foot>  
@@ -50,4 +42,9 @@ GROUP BY key,value HAVING number>1
 <https://wiki.openstreetmap.org/wiki/Key:cycleway>  
 <https://wiki.openstreetmap.org/wiki/Key:bicycle>  
 <https://wiki.openstreetmap.org/wiki/Tag:bicycle%3Duse_sidepath>  
+<https://wiki.openstreetmap.org/wiki/Tag:bicycle%3Dyes>  
+
+<https://wiki.openstreetmap.org/wiki/Key:highway>  
+<https://wiki.openstreetmap.org/wiki/Key:motor_vehicle>  
+<https://wiki.openstreetmap.org/wiki/Key:motorcar>  
 
