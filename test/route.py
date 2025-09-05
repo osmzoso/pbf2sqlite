@@ -111,7 +111,7 @@ class Graph:
         return node_sequence, edge_sequence
 
 
-def create_subgraph_tables(cur, lon1, lat1, lon2, lat2, permit):
+def create_subgraph_tables(cur, lon1, lat1, lon2, lat2, mask_permit):
     """
     Creates subgraph for a given boundingbox.
     The result is stored in the temp. table 'subgraph'.
@@ -121,9 +121,8 @@ def create_subgraph_tables(cur, lon1, lat1, lon2, lat2, permit):
     CREATE TEMP TABLE subgraph AS
     SELECT edge_id,start_node_id,end_node_id,dist,way_id,
            CASE
-             WHEN (?=2 AND permit&16=16) OR
-                  (?=10 AND permit&16=16) OR
-                  (?=4 AND permit&32=32) THEN 1
+             WHEN (?&2=2 AND permit&16=16) OR
+                  (?&4=4 AND permit&32=32) THEN 1
              ELSE 0
            END AS directed
     FROM graph
@@ -133,7 +132,7 @@ def create_subgraph_tables(cur, lon1, lat1, lon2, lat2, permit):
                      WHERE max_lon>=? AND min_lon<=?
                        AND max_lat>=? AND min_lat<=?
                     )
-    ''', (permit, permit, permit, permit, permit, lon1, lon2, lat1, lat2))
+    ''', (mask_permit, mask_permit, mask_permit, mask_permit, lon1, lon2, lat1, lat2))
     cur.execute('DROP TABLE IF EXISTS subgraph_nodes')
     cur.execute('''
     CREATE TEMP TABLE subgraph_nodes (
