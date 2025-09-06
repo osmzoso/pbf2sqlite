@@ -150,6 +150,55 @@ void edge_points(
 }
 
 /*
+** Creates subgraph for a given boundingbox.
+** The result is stored in the temp. table 'subgraph'.
+*/
+void create_subgraph_tables(
+  sqlite3 *db,
+  const double lon1,
+  const double lat1,
+  const double lon2,
+  const double lat2,
+  const int mask_permit
+){
+  sqlite3_stmt *stmt_subgraph;
+  rc = sqlite3_exec(db, "DROP TABLE IF EXISTS subgraph", NULL, NULL, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  rc = sqlite3_prepare_v2(db,
+    " CREATE TEMP TABLE subgraph AS"
+    " SELECT edge_id,start_node_id,end_node_id,dist,way_id,"
+    "        CASE"
+    "          WHEN (?1&2=2 AND permit&16=16) OR"
+    "               (?2&4=4 AND permit&32=32) THEN 1"
+    "          ELSE 0"
+    "        END AS directed"
+    " FROM graph"
+    " WHERE permit & ?3 = ?4 AND"
+    "       way_id IN ("
+    "                  SELECT way_id FROM rtree_way"
+    "                  WHERE max_lon>=?5 AND min_lon<=?6"
+    "                    AND max_lat>=?7 AND min_lat<=?8"
+    "                 )",
+     -1, &stmt_subgraph, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  sqlite3_bind_int(stmt_subgraph, 1, mask_permit);
+  sqlite3_bind_int(stmt_subgraph, 2, mask_permit);
+  sqlite3_bind_int(stmt_subgraph, 3, mask_permit);
+  sqlite3_bind_int(stmt_subgraph, 4, mask_permit);
+  sqlite3_bind_double(stmt_subgraph, 5, lon1);
+  sqlite3_bind_double(stmt_subgraph, 6, lon2);
+  sqlite3_bind_double(stmt_subgraph, 7, lat1);
+  sqlite3_bind_double(stmt_subgraph, 8, lat2);
+  rc = sqlite3_step(stmt_subgraph);
+  if( rc==SQLITE_DONE ){
+    sqlite3_reset(stmt_subgraph);
+  }else{
+    abort_db_error(db, rc);
+  }
+  sqlite3_finalize(stmt_subgraph);
+}
+
+/*
 ** Creates visualization of the table graph
 */
 void html_map_graph(
@@ -198,6 +247,7 @@ void html_map_graph(
   leaflet_rectangle(html, "map3", lon1, lat1, lon2, lat2, "");
   leaflet_rectangle(html, "map4", lon1, lat1, lon2, lat2, "");
   /* show graph edges */
+  create_subgraph_tables(db, lon1, lat1, lon2, lat2, 1);
   leaflet_style(html, "#0000ff", 0.9, 2, "", "none", 1.0);
   rc = sqlite3_prepare_v2(db,
     " SELECT permit,way_id,start_node_id,end_node_id"
