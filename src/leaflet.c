@@ -179,6 +179,6 @@ void leaflet_style(
 ){
   fprintf(html,
     "style = { color:'%s', opacity:%f, weight:%d, dashArray:'%s', fillColor:'%s', "
-    "fillOpacity:%f };\n", color, opacity, weight, dasharray, fillcolor, fillopacity);
+    "fillOpacity:%f, radius:5};\n", color, opacity, weight, dasharray, fillcolor, fillopacity);
 }
 

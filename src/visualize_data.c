@@ -196,6 +196,25 @@ void create_subgraph_tables(
     abort_db_error(db, rc);
   }
   sqlite3_finalize(stmt_subgraph);
+  rc = sqlite3_exec(db,
+    " DROP TABLE IF EXISTS subgraph_nodes;"
+    " CREATE TEMP TABLE subgraph_nodes ("
+    "  no      INTEGER PRIMARY KEY,"
+    "  node_id INTEGER,"
+    "  lon     REAL,"
+    "  lat     REAL"
+    " );"
+    " INSERT INTO subgraph_nodes (node_id, lon, lat)"
+    " SELECT s.node_id,n.lon,n.lat FROM"
+    " ("
+    "  SELECT start_node_id AS node_id FROM subgraph"
+    "  UNION"
+    "  SELECT end_node_id AS node_id FROM subgraph"
+    " ) AS s"
+    " LEFT JOIN nodes AS n ON s.node_id=n.node_id;",
+     NULL, NULL, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  /* TODO return node number */
 }
 
 /*
@@ -210,7 +229,7 @@ void html_map_graph(
   const char *html_file
 ){
   FILE *html;
-  sqlite3_stmt *stmt_edges;
+  sqlite3_stmt *stmt_nodes, *stmt_edges;
   int directed;
   char popuptext[200];
   int64_t way_id, start_node_id, end_node_id;
@@ -248,6 +267,18 @@ void html_map_graph(
   leaflet_rectangle(html, "map4", lon1, lat1, lon2, lat2, "");
   /* subgraph 0->all edges TODO */
   create_subgraph_tables(db, lon1, lat1, lon2, lat2, 0);
+  /* show graph nodes */
+  leaflet_style(html, "none", 0.9, 2, "", "#ff0000", 0.5);
+  rc = sqlite3_prepare_v2(db,
+    "SELECT lon,lat FROM subgraph_nodes",
+     -1, &stmt_nodes, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  while( sqlite3_step(stmt_nodes)==SQLITE_ROW ){
+    leaflet_circlemarker(html, "map1",
+        (double)sqlite3_column_double(stmt_nodes, 0),
+        (double)sqlite3_column_double(stmt_nodes, 1),
+        "");
+  }
   /* show graph edges */
   leaflet_style(html, "#0000ff", 0.9, 2, "", "none", 1.0);
   rc = sqlite3_prepare_v2(db,
@@ -279,6 +310,7 @@ void html_map_graph(
     printf("Error closing file %s: %s", html_file, strerror(errno));
   }
   free(pointlist);
+  sqlite3_finalize(stmt_nodes);
   sqlite3_finalize(stmt_edges);
 }
 
