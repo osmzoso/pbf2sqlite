@@ -170,7 +170,8 @@ void write_graph(
   sqlite3_stmt *stmt_nodes, *stmt_edges;
   int directed;
   char popuptext[200];
-  int64_t way_id, start_node_id, end_node_id;
+  int64_t node_id, way_id, start_node_id, end_node_id;
+  double lon, lat;
   point *pointlist = malloc(PBF2SQLITE_MAX_POINTS * sizeof(point));
   if( !pointlist ){
     fprintf(stderr, "malloc failed");
@@ -181,14 +182,15 @@ void write_graph(
   /* show graph nodes */
   leaflet_style(html, "none", 0.9, 2, "", "#ff5348", 0.5);
   rc = sqlite3_prepare_v2(db,
-    "SELECT lon,lat FROM subgraph_nodes",
+    "SELECT node_id,lon,lat FROM subgraph_nodes",
      -1, &stmt_nodes, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   while( sqlite3_step(stmt_nodes)==SQLITE_ROW ){
-    leaflet_circlemarker(html, mapid,
-        (double)sqlite3_column_double(stmt_nodes, 0),
-        (double)sqlite3_column_double(stmt_nodes, 1),
-        "node_id xxx");  /* TODO */
+    node_id = (int64_t)sqlite3_column_int64(stmt_nodes, 0);
+    lon = (double)sqlite3_column_double(stmt_nodes, 1);
+    lat = (double)sqlite3_column_double(stmt_nodes, 2);
+    snprintf(popuptext, sizeof(popuptext), "node_id %" PRId64, node_id);
+    leaflet_circlemarker(html, mapid, lon, lat, popuptext);
   }
   /* show graph edges */
   leaflet_style(html, "#0000ff", 0.5, 3, "", "none", 1.0);
