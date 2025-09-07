@@ -217,6 +217,69 @@ void create_subgraph_tables(
   /* TODO return node number */
 }
 
+void write_graph(
+  sqlite3 *db,
+  FILE *html,
+  const char *mapid,
+  const double lon1,
+  const double lat1,
+  const double lon2,
+  const double lat2,
+  const int mask_permit
+){
+  sqlite3_stmt *stmt_nodes, *stmt_edges;
+  int directed;
+  char popuptext[200];
+  int64_t way_id, start_node_id, end_node_id;
+  point *pointlist = malloc(PBF2SQLITE_MAX_POINTS * sizeof(point));
+  if( !pointlist ){
+    fprintf(stderr, "malloc failed");
+    return;
+  }
+  /*  */
+  create_subgraph_tables(db, lon1, lat1, lon2, lat2, mask_permit);
+  /* show graph nodes */
+  leaflet_style(html, "none", 0.9, 2, "", "#ff5348", 0.5);
+  rc = sqlite3_prepare_v2(db,
+    "SELECT lon,lat FROM subgraph_nodes",
+     -1, &stmt_nodes, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  while( sqlite3_step(stmt_nodes)==SQLITE_ROW ){
+    leaflet_circlemarker(html, mapid,
+        (double)sqlite3_column_double(stmt_nodes, 0),
+        (double)sqlite3_column_double(stmt_nodes, 1),
+        "node_id xxx");  /* TODO */
+  }
+  /* show graph edges */
+  leaflet_style(html, "#0000ff", 0.5, 3, "", "none", 1.0);
+  rc = sqlite3_prepare_v2(db,
+    "SELECT start_node_id,end_node_id,way_id,directed FROM subgraph",
+     -1, &stmt_edges, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  while( sqlite3_step(stmt_edges)==SQLITE_ROW ){
+    start_node_id = (int64_t)sqlite3_column_int64(stmt_edges, 0);
+    end_node_id = (int64_t)sqlite3_column_int64(stmt_edges, 1);
+    way_id = (int64_t)sqlite3_column_int64(stmt_edges, 2);
+    directed = (int)sqlite3_column_int(stmt_edges, 3);
+    edge_points(db, way_id, start_node_id, end_node_id, pointlist);
+    snprintf(popuptext, sizeof(popuptext), "way_id %" PRId64, way_id);
+    if( directed ){
+      leaflet_style(html, "#0000ff", 0.5, 3, "5 5", "none", 1.0);
+      leaflet_polyline(html, mapid, pointlist, popuptext);
+      leaflet_style(html, "#0000ff", 0.5, 3, "", "none", 1.0);
+    }else{
+      leaflet_polyline(html, mapid, pointlist, popuptext);
+    }
+  }
+  /* show boundingbox */
+  leaflet_style(html, "#000000", 1.0, 2, "5 5", "none", 0.3);
+  leaflet_rectangle(html, mapid, lon1, lat1, lon2, lat2, "");
+  /*  */
+  free(pointlist);
+  sqlite3_finalize(stmt_nodes);
+  sqlite3_finalize(stmt_edges);
+}
+
 /*
 ** Creates visualization of the table graph
 */
@@ -262,13 +325,10 @@ void html_map_graph(
   /* show boundingbox */
   leaflet_style(html, "#ff0000", 1.0, 1, "", "none", 0.3);
   leaflet_rectangle(html, "map1", lon1, lat1, lon2, lat2, "");
-  leaflet_rectangle(html, "map2", lon1, lat1, lon2, lat2, "");
-  leaflet_rectangle(html, "map3", lon1, lat1, lon2, lat2, "");
-  leaflet_rectangle(html, "map4", lon1, lat1, lon2, lat2, "");
   /* subgraph 0->all edges TODO */
-  create_subgraph_tables(db, lon1, lat1, lon2, lat2, 0);
+  create_subgraph_tables(db, lon1, lat1, lon2, lat2, 2);
   /* show graph nodes */
-  leaflet_style(html, "none", 0.9, 2, "", "#ff0000", 0.5);
+  leaflet_style(html, "none", 0.9, 2, "", "#ff5348", 0.5);
   rc = sqlite3_prepare_v2(db,
     "SELECT lon,lat FROM subgraph_nodes",
      -1, &stmt_nodes, NULL);
@@ -277,10 +337,10 @@ void html_map_graph(
     leaflet_circlemarker(html, "map1",
         (double)sqlite3_column_double(stmt_nodes, 0),
         (double)sqlite3_column_double(stmt_nodes, 1),
-        "");
+        "node_id xxx");
   }
   /* show graph edges */
-  leaflet_style(html, "#0000ff", 0.9, 2, "", "none", 1.0);
+  leaflet_style(html, "#0000ff", 0.5, 3, "", "none", 1.0);
   rc = sqlite3_prepare_v2(db,
     "SELECT start_node_id,end_node_id,way_id,directed FROM subgraph",
      -1, &stmt_edges, NULL);
@@ -293,13 +353,18 @@ void html_map_graph(
     edge_points(db, way_id, start_node_id, end_node_id, pointlist);
     snprintf(popuptext, sizeof(popuptext), "way_id %" PRId64, way_id);
     if( directed ){
-      leaflet_style(html, "#0000ff", 0.9, 2, "5 5", "none", 1.0);
+      leaflet_style(html, "#0000ff", 0.5, 3, "5 5", "none", 1.0);
       leaflet_polyline(html, "map1", pointlist, popuptext);
-      leaflet_style(html, "#0000ff", 0.9, 2, "", "none", 1.0);
+      leaflet_style(html, "#0000ff", 0.5, 3, "", "none", 1.0);
     }else{
       leaflet_polyline(html, "map1", pointlist, popuptext);
     }
   }
+  /* TEST start */
+  write_graph(db, html, "map2", lon1, lat1, lon2, lat2, 1);  /* foot */
+  write_graph(db, html, "map3", lon1, lat1, lon2, lat2, 2);  /* bike */
+  write_graph(db, html, "map4", lon1, lat1, lon2, lat2, 4);  /* car */
+  /* TEST end */
   fprintf(html,
       "</script>\n"
       "<hr>\n"
