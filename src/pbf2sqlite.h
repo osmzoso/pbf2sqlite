@@ -116,7 +116,8 @@ void leaflet_style(
   const int weight,
   const char *dasharray,
   const char *fillcolor,
-  const double fillopacity
+  const double fillopacity,
+  const int radius
 );
 /* visualize_data.c */
 void edge_points(

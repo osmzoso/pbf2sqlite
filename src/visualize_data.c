@@ -189,7 +189,7 @@ void write_graph(
   /*  */
   create_subgraph_tables(db, lon1, lat1, lon2, lat2, mask_permit);
   /* show graph nodes */
-  leaflet_style(html, "none", 0.9, 2, "", "#ff5348", 0.5);
+  leaflet_style(html, "none", 0.9, 2, "", "#ff5348", 0.5, 5);
   rc = sqlite3_prepare_v2(db,
     "SELECT node_id,lon,lat FROM subgraph_nodes",
      -1, &stmt_nodes, NULL);
@@ -202,7 +202,7 @@ void write_graph(
     leaflet_circlemarker(html, mapid, lon, lat, popuptext);
   }
   /* show graph edges */
-  leaflet_style(html, "#0000ff", 0.5, 3, "", "none", 1.0);
+  leaflet_style(html, "#0000ff", 0.5, 3, "", "none", 1.0, 5);
   rc = sqlite3_prepare_v2(db,
     "SELECT start_node_id,end_node_id,way_id,directed FROM subgraph",
      -1, &stmt_edges, NULL);
@@ -215,15 +215,15 @@ void write_graph(
     edge_points(db, way_id, start_node_id, end_node_id, pointlist);
     snprintf(popuptext, sizeof(popuptext), "way_id %" PRId64, way_id);
     if( directed ){
-      leaflet_style(html, "#0000ff", 0.5, 3, "5 5", "none", 1.0);
+      leaflet_style(html, "#0000ff", 0.5, 3, "5 5", "none", 1.0, 5);
       leaflet_polyline(html, mapid, pointlist, popuptext);
-      leaflet_style(html, "#0000ff", 0.5, 3, "", "none", 1.0);
+      leaflet_style(html, "#0000ff", 0.5, 3, "", "none", 1.0, 5);
     }else{
       leaflet_polyline(html, mapid, pointlist, popuptext);
     }
   }
   /* show boundingbox */
-  leaflet_style(html, "#000000", 0.3, 2, "5 5", "none", 0.3);
+  leaflet_style(html, "#000000", 0.3, 2, "5 5", "none", 0.3, 5);
   leaflet_rectangle(html, mapid, lon1, lat1, lon2, lat2, "");
   /*  */
   free(pointlist);
@@ -302,7 +302,7 @@ void html_map_addr(
     "<div id='map' style='width:100%%; height:500px;'></div>\n");
   fprintf(html, "<script>\n");
   leaflet_init(html, "map", lon1, lat1, lon2, lat2);
-  leaflet_style(html, "#ff0000", 1.0, 1, "", "none", 0.3);
+  leaflet_style(html, "#ff0000", 1.0, 1, "", "none", 0.3, 5);
   leaflet_rectangle(html, "map", lon1, lat1, lon2, lat2, "");
   const char *query = 
     " SELECT way_id,node_id,postcode,city,street,housenumber,lon,lat"

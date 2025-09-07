@@ -175,10 +175,11 @@ void leaflet_style(
   const int weight,
   const char *dasharray,
   const char *fillcolor,
-  const double fillopacity
+  const double fillopacity,
+  const int radius
 ){
   fprintf(html,
     "style = { color:'%s', opacity:%f, weight:%d, dashArray:'%s', fillColor:'%s', "
-    "fillOpacity:%f, radius:5};\n", color, opacity, weight, dasharray, fillcolor, fillopacity);
+    "fillOpacity:%f, radius:%d };\n", color, opacity, weight, dasharray, fillcolor, fillopacity, radius);
 }
 
