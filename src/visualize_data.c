@@ -269,6 +269,7 @@ void html_map_graph(
   write_graph(db, html, "map4", lon1, lat1, lon2, lat2, 4);  /* graph car */
   fprintf(html,
       "</script>\n"
+      "<p>dashed line -> one way</p>\n"
       "<hr>\n"
       "<p>Boundingbox: %f %f - %f %f</p>\n", lon1, lat1, lon2, lat2);
   leaflet_html_footer(html);

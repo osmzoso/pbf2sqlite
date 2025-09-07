@@ -65,6 +65,8 @@
 " INSERT INTO graph_permit VALUES ('surface','paving_stones',         8, 255);"
 " /* Tags that show one way */"
 " INSERT INTO graph_permit VALUES ('oneway','yes',                   48, 255);"
+" INSERT INTO graph_permit VALUES ('junction','roundabout',          48, 255);"
+" INSERT INTO graph_permit VALUES ('junction','circular',            48, 255);"
 " /*"
 " ** Tags to clear permit bits"
 " */"
