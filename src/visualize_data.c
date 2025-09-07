@@ -93,7 +93,7 @@ void edge_points(
 ** Creates subgraph for a given boundingbox.
 ** The result is stored in the temp. table 'subgraph'.
 */
-void create_subgraph_tables(
+int create_subgraph_tables(
   sqlite3 *db,
   const double lon1,
   const double lat1,
@@ -101,7 +101,8 @@ void create_subgraph_tables(
   const double lat2,
   const int mask_permit
 ){
-  sqlite3_stmt *stmt_subgraph;
+  sqlite3_stmt *stmt_subgraph, *stmt_count;
+  int number_of_nodes;
   rc = sqlite3_exec(db, "DROP TABLE IF EXISTS subgraph", NULL, NULL, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   rc = sqlite3_prepare_v2(db,
@@ -154,7 +155,15 @@ void create_subgraph_tables(
     " LEFT JOIN nodes AS n ON s.node_id=n.node_id;",
      NULL, NULL, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
-  /* TODO return node number */
+  /* count nodes */
+  number_of_nodes = 0;
+  rc = sqlite3_prepare_v2(db,
+    "SELECT max(no) FROM subgraph_nodes", -1, &stmt_count, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  rc = sqlite3_step(stmt_count);
+  if( rc==SQLITE_ROW ) number_of_nodes = sqlite3_column_int(stmt_count, 0);
+  sqlite3_finalize(stmt_count);
+  return number_of_nodes;
 }
 
 void write_graph(

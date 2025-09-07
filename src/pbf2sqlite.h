@@ -119,6 +119,21 @@ void leaflet_style(
   const double fillopacity
 );
 /* visualize_data.c */
+void edge_points(
+  sqlite3 *db,
+  uint64_t way_id,
+  uint64_t start_node_id,
+  uint64_t end_node_id,
+  point *pointlist
+);
+int create_subgraph_tables(
+  sqlite3 *db,
+  const double lon1,
+  const double lat1,
+  const double lon2,
+  const double lat2,
+  const int mask_permit
+);
 void html_map_graph(
   sqlite3 *db,
   const double lon1,
