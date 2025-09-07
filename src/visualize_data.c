@@ -292,15 +292,6 @@ void html_map_graph(
   const char *html_file
 ){
   FILE *html;
-  sqlite3_stmt *stmt_nodes, *stmt_edges;
-  int directed;
-  char popuptext[200];
-  int64_t way_id, start_node_id, end_node_id;
-  point *pointlist = malloc(PBF2SQLITE_MAX_POINTS * sizeof(point));
-  if( !pointlist ){
-    fprintf(stderr, "malloc failed");
-    return;
-  }
   html = fopen(html_file, "w");
   if( html==NULL ) {
     printf("Error opening file %s: %s", html_file, strerror(errno));
@@ -308,7 +299,7 @@ void html_map_graph(
   }
   leaflet_html_header(html, "map graph");
   fprintf(html,
-    "<h3>Map 1 - Visualization 'graph'</h3>\n"
+    "<h3>Map 1 - Graph complete</h3>\n"
     "<div id='map1' style='width:850px; height:500px;'></div>\n"
     "<h3>Map 2 - Graph foot</h3>\n"
     "<div id='map2' style='width:850px; height:500px;'></div>\n"
@@ -317,66 +308,22 @@ void html_map_graph(
     "<h3>Map 4 - Graph car</h3>\n"
     "<div id='map4' style='width:850px; height:500px;'></div>\n");
   fprintf(html, "<script>\n");
-  /* init maps */
   leaflet_init(html, "map1", lon1, lat1, lon2, lat2);
   leaflet_init(html, "map2", lon1, lat1, lon2, lat2);
   leaflet_init(html, "map3", lon1, lat1, lon2, lat2);
   leaflet_init(html, "map4", lon1, lat1, lon2, lat2);
-  /* show boundingbox */
-  leaflet_style(html, "#ff0000", 1.0, 1, "", "none", 0.3);
-  leaflet_rectangle(html, "map1", lon1, lat1, lon2, lat2, "");
-  /* subgraph 0->all edges TODO */
-  create_subgraph_tables(db, lon1, lat1, lon2, lat2, 2);
-  /* show graph nodes */
-  leaflet_style(html, "none", 0.9, 2, "", "#ff5348", 0.5);
-  rc = sqlite3_prepare_v2(db,
-    "SELECT lon,lat FROM subgraph_nodes",
-     -1, &stmt_nodes, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
-  while( sqlite3_step(stmt_nodes)==SQLITE_ROW ){
-    leaflet_circlemarker(html, "map1",
-        (double)sqlite3_column_double(stmt_nodes, 0),
-        (double)sqlite3_column_double(stmt_nodes, 1),
-        "node_id xxx");
-  }
-  /* show graph edges */
-  leaflet_style(html, "#0000ff", 0.5, 3, "", "none", 1.0);
-  rc = sqlite3_prepare_v2(db,
-    "SELECT start_node_id,end_node_id,way_id,directed FROM subgraph",
-     -1, &stmt_edges, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
-  while( sqlite3_step(stmt_edges)==SQLITE_ROW ){
-    start_node_id = (int64_t)sqlite3_column_int64(stmt_edges, 0);
-    end_node_id = (int64_t)sqlite3_column_int64(stmt_edges, 1);
-    way_id = (int64_t)sqlite3_column_int64(stmt_edges, 2);
-    directed = (int)sqlite3_column_int(stmt_edges, 3);
-    edge_points(db, way_id, start_node_id, end_node_id, pointlist);
-    snprintf(popuptext, sizeof(popuptext), "way_id %" PRId64, way_id);
-    if( directed ){
-      leaflet_style(html, "#0000ff", 0.5, 3, "5 5", "none", 1.0);
-      leaflet_polyline(html, "map1", pointlist, popuptext);
-      leaflet_style(html, "#0000ff", 0.5, 3, "", "none", 1.0);
-    }else{
-      leaflet_polyline(html, "map1", pointlist, popuptext);
-    }
-  }
-  /* TEST start */
-  write_graph(db, html, "map2", lon1, lat1, lon2, lat2, 1);  /* foot */
-  write_graph(db, html, "map3", lon1, lat1, lon2, lat2, 2);  /* bike */
-  write_graph(db, html, "map4", lon1, lat1, lon2, lat2, 4);  /* car */
-  /* TEST end */
+  write_graph(db, html, "map1", lon1, lat1, lon2, lat2, 0);  /* graph complete */
+  write_graph(db, html, "map2", lon1, lat1, lon2, lat2, 1);  /* graph foot */
+  write_graph(db, html, "map3", lon1, lat1, lon2, lat2, 2);  /* graph bike */
+  write_graph(db, html, "map4", lon1, lat1, lon2, lat2, 4);  /* graph car */
   fprintf(html,
       "</script>\n"
       "<hr>\n"
       "<p>Boundingbox: %f %f - %f %f</p>\n", lon1, lat1, lon2, lat2);
   leaflet_html_footer(html);
-  /* Close the file */
   if( fclose(html)!=0 ) {
     printf("Error closing file %s: %s", html_file, strerror(errno));
   }
-  free(pointlist);
-  sqlite3_finalize(stmt_nodes);
-  sqlite3_finalize(stmt_edges);
 }
 
 /*
