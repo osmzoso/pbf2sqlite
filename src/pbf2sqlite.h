@@ -119,7 +119,6 @@ void leaflet_style(
   const double fillopacity
 );
 /* visualize_data.c */
-int html_demo();
 void html_map_graph(
   sqlite3 *db,
   const double lon1,
