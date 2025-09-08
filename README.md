@@ -32,16 +32,18 @@ The tables created are described in the [documentation](doc/pbf2sqlite.md).
 
 OSM data can be obtained from a provider such as [Geofabrik](https://download.geofabrik.de).
 
-You can then use the **vgraph** and **vaddr** options to create visualizations of the data:
+The **vgraph** option creates a zoomable map of the graph:  
 
 ![Example vgraph](doc/vgraph.png)
 
+The **vaddr** option creates a zoomable map of the addresses:  
+
 ![Example vaddr](doc/vaddr.png)
 
-See also notes on [compilation](doc/compiling.md).
+The [SQLite](https://www.sqlite.org) and the [readosm](https://www.gaia-gis.it/fossil/readosm/index)
+libraries are used for this program.
 
-The [readosm library](https://www.gaia-gis.it/fossil/readosm/index)
-is used for this program.
+See also notes on [compilation](doc/compiling.md).
 
 |[**Download the latest version**](https://github.com/osmzoso/pbf2sqlite/releases/latest)|
 |----------------------------------------------------------------------------------------|
