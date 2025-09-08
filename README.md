@@ -11,10 +11,21 @@ Main options:
   rtree         Add R*Tree indexes
   addr          Add address tables
   graph         Add graph table
+  noindex       Do not create indexes (not recommended)
+
+Other options:
+  node ID                                 Show node data
+  way ID                                  Show way data
+  relation ID                             Show relation data
+  vgraph LON1 LAT1 LON2 LAT2 HTMLFILE     Visualize graph data
+  vaddr  LON1 LAT1 LON2 LAT2 HTMLFILE     Visualize address data
 ```
 
-The command `pbf2sqlite test.db read country.osm.pbf` reads
-the [OSM PBF](https://wiki.openstreetmap.org/wiki/PBF_Format) file **country.osm.pbf**
+The command
+```
+pbf2sqlite test.db read country.osm.pbf
+```
+reads the [OSM PBF](https://wiki.openstreetmap.org/wiki/PBF_Format) file **country.osm.pbf**
 and creates in the database **test.db** the tables.
 
 The tables created are described in the [documentation](doc/pbf2sqlite.md).

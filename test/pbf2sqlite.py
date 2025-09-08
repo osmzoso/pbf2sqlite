@@ -17,8 +17,6 @@ Usage:
 Main options:
   read FILE     Reads FILE (.osm.pbf or .osm) into the database
   graph         Add graph table
-
-Other options:
   noindex       Do not create indexes (not recommended)
 '''
 
