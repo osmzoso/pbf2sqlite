@@ -251,13 +251,13 @@ void html_map_graph(
   leaflet_html_header(html, "map graph");
   fprintf(html,
     "<h3>Map 1 - Graph complete</h3>\n"
-    "<div id='map1' style='width:850px; height:500px;'></div>\n"
+    "<div id='map1' style='width:100%%; height:500px;'></div>\n"
     "<h3>Map 2 - Graph foot</h3>\n"
-    "<div id='map2' style='width:850px; height:500px;'></div>\n"
+    "<div id='map2' style='width:100%%; height:500px;'></div>\n"
     "<h3>Map 3 - Graph bike</h3>\n"
-    "<div id='map3' style='width:850px; height:500px;'></div>\n"
+    "<div id='map3' style='width:100%%; height:500px;'></div>\n"
     "<h3>Map 4 - Graph car</h3>\n"
-    "<div id='map4' style='width:850px; height:500px;'></div>\n");
+    "<div id='map4' style='width:100%%; height:500px;'></div>\n");
   fprintf(html, "<script>\n");
   leaflet_init(html, "map1", lon1, lat1, lon2, lat2);
   leaflet_init(html, "map2", lon1, lat1, lon2, lat2);
