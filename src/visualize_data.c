@@ -292,6 +292,7 @@ void html_map_addr(
   FILE *html;
   sqlite3_stmt *stmt_addr;
   char popup_text[1000];
+  int64_t way_id, node_id;
   html = fopen(html_file, "w");
   if( html==NULL ) {
     printf("Error opening file %s: %s", html_file, strerror(errno));
@@ -299,12 +300,10 @@ void html_map_addr(
   }
   leaflet_html_header(html, "map addr");
   fprintf(html,
-    "<h3>Map - Visualization 'addr'</h3>\n"
+    "<h3>Map 1 - Address</h3>\n"
     "<div id='map' style='width:100%%; height:500px;'></div>\n");
   fprintf(html, "<script>\n");
   leaflet_init(html, "map", lon1, lat1, lon2, lat2);
-  leaflet_style(html, "#ff0000", 1.0, 1, "", "none", 0.3, 5);
-  leaflet_rectangle(html, "map", lon1, lat1, lon2, lat2, "");
   const char *query = 
     " SELECT way_id,node_id,postcode,city,street,housenumber,lon,lat"
     " FROM addr_view"
@@ -335,6 +334,9 @@ void html_map_addr(
         (double)sqlite3_column_double(stmt_addr, 7),
         popup_text);
   }
+  /* show boundingbox */
+  leaflet_style(html, "#000000", 0.3, 2, "5 5", "none", 0.3, 5);
+  leaflet_rectangle(html, "map", lon1, lat1, lon2, lat2, "");
   fprintf(html, "</script>\n");
   /* 2. Table of addresses */
   fprintf(html,
@@ -349,13 +351,24 @@ void html_map_addr(
   sqlite3_bind_double(stmt_addr, 3, lon2);
   sqlite3_bind_double(stmt_addr, 4, lat2);
   while( sqlite3_step(stmt_addr)==SQLITE_ROW ){
+    fprintf(html, "<tr>");
+    way_id = (int64_t)sqlite3_column_int64(stmt_addr, 0);
+    if( way_id!=-1 ){
+      fprintf(html, "<td><a href='https://www.openstreetmap.org/way/%" PRId64 "'"
+                    " target='_blank'>%" PRId64 "</a></td>", way_id, way_id);
+    } else {
+      fprintf(html, "<td>%" PRId64 "</td>", way_id);
+    }
+    node_id = (int64_t)sqlite3_column_int64(stmt_addr, 1);
+    if( node_id!=-1 ){
+      fprintf(html, "<td><a href='https://www.openstreetmap.org/node/%" PRId64 "'"
+                    " target='_blank'>%" PRId64 "</a></td>", node_id, node_id);
+    } else {
+      fprintf(html, "<td>%" PRId64 "</td>", node_id);
+    }
     fprintf(html,
-        "<tr>"
-        "<td>%" PRId64 "</td><td>%" PRId64 "</td><td>%s</td><td>%s</td>"
-        "<td>%s</td><td>%s</td><td>%.7f</td><td>%.7f</td>"
-        "</tr>\n",
-        (int64_t)sqlite3_column_int64(stmt_addr, 0),
-        (int64_t)sqlite3_column_int64(stmt_addr, 1),
+        "<td>%s</td><td>%s</td><td>%s</td><td>%s</td>"
+        "<td>%.7f</td><td>%.7f</td></tr>\n",
         (char *)sqlite3_column_text(stmt_addr, 2),
         (char *)sqlite3_column_text(stmt_addr, 3),
         (char *)sqlite3_column_text(stmt_addr, 4),
