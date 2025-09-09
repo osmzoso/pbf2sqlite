@@ -71,6 +71,7 @@
 " ** Tags to clear permit bits"
 " */"
 " INSERT INTO graph_permit VALUES ('access','no',                     0, 248);"
+" INSERT INTO graph_permit VALUES ('area','yes',                      0, 248);"
 " /* Tags no foot */"
 " INSERT INTO graph_permit VALUES ('sidewalk','separate',             0, 254);"
 " INSERT INTO graph_permit VALUES ('sidewalk:both','separate',        0, 254);"
