@@ -27,6 +27,7 @@ $(BIN): $(SRC)
 # Static binary for Linux
 #
 static:
+	mkdir -p $(dir $(BIN))
 	$(CC) \
      -static \
      $(CFLAGS) \
