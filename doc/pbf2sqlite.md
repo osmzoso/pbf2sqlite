@@ -9,20 +9,18 @@ can also be read.
 
 OSM data can be obtained from a provider such as [Geofabrik](https://download.geofabrik.de).
 
-A simple example:  
+Read .osm.pbf file and create the tables in the database:  
 
 `pbf2sqlite test.db read country.osm.pbf`  
 
-This command reads the file **country.osm.pbf** and creates the tables
-described below in the **test.db** database.
+The created tables are described below.
 
-An extended example:  
+Read .osm.pbf file into the database and then create tables
+with address data, graph data, and R*Tree indexes:  
 
 `pbf2sqlite test.db read country.osm.pbf addr rtree graph`  
 
-This command first reads the file and then creates additional data.
-
-> The **read** option is always executed first
+The options can be entered in any order but the **read** option is always executed first.  
 
 The database can be easily queried with the [SQLite CLI tool](https://www.sqlite.org/cli.html).
 
@@ -94,8 +92,8 @@ Additional tables can be created from the tables created with the **read** optio
 
 ## 3.1. Option "rtree"
 
-This option creates additional [R*Tree](https://www.sqlite.org/rtree.html)
-indexes **rtree_node** and **rtree_way** for finding ways quickly.  
+This option creates two [R*Tree](https://www.sqlite.org/rtree.html)
+indexes **rtree_way** and **rtree_node** for finding ways and nodes quickly.  
 
 Internally, the index **rtree_way** is created as follows:  
 ``` sql
