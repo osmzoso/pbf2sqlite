@@ -181,17 +181,8 @@ int main(int argc, char **argv) {
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   /* Execute options */
   if( read ){
-    rc = sqlite3_exec(db, " PRAGMA journal_mode = OFF;"
-                          " PRAGMA page_size = 65536;"
-                          " BEGIN TRANSACTION;", NULL, NULL, NULL);
-    if( rc!=SQLITE_OK ) abort_db_error(db, rc);
     read_osm_file(db, osm_file);
-    destroy_prep_stmt();
     if( index ) add_index(db);
-    rc = sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
-    if( rc!=SQLITE_OK ) abort_db_error(db, rc);
-    rc = sqlite3_exec(db, "ANALYZE", NULL, NULL, NULL);
-    if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   }
   if( rtree ) add_rtree(db);
   if( addr ) add_addr(db);
