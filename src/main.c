@@ -80,6 +80,25 @@ double argv_to_double(const char *str) {
   return value;
 }
 
+void parse_args(sqlite3 *db, int argc, char **argv, int exec) {
+  int i;
+  i = 2;
+  while( i<argc ){
+    if( strcmp("read", argv[i])==0 && argc>=i+2 ){
+      printf("-> read %s\n", argv[i+1]);
+      i++;
+    } 
+    else if( strcmp("index", argv[i])==0 ){
+      printf("-> index\n");
+    }
+    else {
+      printf("Invalid option: %s\n", argv[i]);
+      exit(EXIT_FAILURE);
+    };
+    i++;
+  }
+}
+
 /*
 ** Program start 
 */
@@ -102,6 +121,8 @@ int main(int argc, char **argv) {
   double lat2 = 0;
   char *html_file;
   int i;
+  /* Parse args test TODO */
+  //parse_args(db, argc, argv, 0);
   /* Parse parameter */
   if( argc==1 ){
     printf("%s", help);
