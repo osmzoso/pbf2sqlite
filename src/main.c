@@ -38,8 +38,6 @@ static char *help =
 */
 sqlite3 *db;         /* SQLite Database connection */
 int rc;              /* SQLite Result code */
-sqlite3_stmt *stmt_insert_nodes, *stmt_insert_node_tags, *stmt_insert_way_nodes,
-             *stmt_insert_way_tags, *stmt_insert_relation_members, *stmt_insert_relation_tags;
 
 /*
 ** Shows last result code and then aborts the program
@@ -187,9 +185,7 @@ int main(int argc, char **argv) {
                           " PRAGMA page_size = 65536;"
                           " BEGIN TRANSACTION;", NULL, NULL, NULL);
     if( rc!=SQLITE_OK ) abort_db_error(db, rc);
-    add_tables(db);
-    create_prep_stmt(db);
-    read_osm_file(osm_file);
+    read_osm_file(db, osm_file);
     destroy_prep_stmt();
     if( index ) add_index(db);
     rc = sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);

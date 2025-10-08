@@ -32,11 +32,9 @@ extern sqlite3_stmt *stmt_insert_nodes, *stmt_insert_node_tags, *stmt_insert_way
 /* main.c */
 void abort_db_error(sqlite3 *db, int rc);
 /* read_data.c */
-void add_tables(sqlite3 *db);
 void add_index(sqlite3 *db);
-void create_prep_stmt(sqlite3 *db);
 void destroy_prep_stmt();
-int read_osm_file(char *filename);
+int read_osm_file(sqlite3 *db, char *filename);
 /* add_data.c */
 void add_rtree(sqlite3 *db);
 void add_addr(sqlite3 *db);

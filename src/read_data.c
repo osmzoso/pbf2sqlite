@@ -8,52 +8,8 @@
 #include <stddef.h>
 #include <readosm.h>
 
-/*
-** create tables, indexes and prepared insert statements
-*/
-void add_tables(sqlite3 *db) {
-  rc = sqlite3_exec(
-         db,
-         " CREATE TABLE nodes (\n"
-         "  node_id      INTEGER PRIMARY KEY,  -- node ID\n"
-         "  lon          REAL,                 -- longitude\n"
-         "  lat          REAL                  -- latitude\n"
-         " );\n"
-
-         " CREATE TABLE node_tags (\n"
-         "  node_id      INTEGER,              -- node ID\n"
-         "  key          TEXT,                 -- tag key\n"
-         "  value        TEXT                  -- tag value\n"
-         " );\n"
-
-         " CREATE TABLE way_nodes (\n"
-         "  way_id       INTEGER,              -- way ID\n"
-         "  node_id      INTEGER,              -- node ID\n"
-         "  node_order   INTEGER               -- node order\n"
-         " );\n"
-
-         " CREATE TABLE way_tags (\n"
-         "  way_id       INTEGER,              -- way ID\n"
-         "  key          TEXT,                 -- tag key\n"
-         "  value        TEXT                  -- tag value\n"
-         " );\n"
-
-         " CREATE TABLE relation_members (\n"
-         "  relation_id  INTEGER,              -- relation ID\n"
-         "  ref          TEXT,                 -- reference ('node','way','relation')\n"
-         "  ref_id       INTEGER,              -- node, way or relation ID\n"
-         "  role         TEXT,                 -- describes a particular feature\n"
-         "  member_order INTEGER               -- member order\n"
-         " );\n"
-
-         " CREATE TABLE relation_tags (\n"
-         "  relation_id  INTEGER,              -- relation ID\n"
-         "  key          TEXT,                 -- tag key\n"
-         "  value        TEXT                  -- tag value\n"
-         " );\n",
-         NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
-}
+sqlite3_stmt *stmt_insert_nodes, *stmt_insert_node_tags, *stmt_insert_way_nodes,
+             *stmt_insert_way_tags, *stmt_insert_relation_members, *stmt_insert_relation_tags;
 
 void add_index(sqlite3 *db) {
   rc = sqlite3_exec(
@@ -69,39 +25,6 @@ void add_index(sqlite3 *db) {
     " CREATE INDEX relation_tags__relation_id    ON relation_tags (relation_id);"
     " CREATE INDEX relation_tags__key            ON relation_tags (key);",
     NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
-}
-
-void create_prep_stmt(sqlite3 *db) {
-  rc = sqlite3_prepare_v2(
-         db,
-         "INSERT INTO nodes (node_id,lat,lon) VALUES (?1,?2,?3)",
-         -1, &stmt_insert_nodes, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
-  rc = sqlite3_prepare_v2(
-         db,
-         "INSERT INTO node_tags (node_id,key,value) VALUES (?1,?2,?3)",
-         -1, &stmt_insert_node_tags, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
-  rc = sqlite3_prepare_v2(
-         db,
-         "INSERT INTO way_nodes (way_id,node_id,node_order) VALUES (?1,?2,?3)",
-         -1, &stmt_insert_way_nodes, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
-  rc = sqlite3_prepare_v2(
-         db,
-         "INSERT INTO way_tags (way_id,key,value) VALUES (?1,?2,?3)",
-         -1, &stmt_insert_way_tags, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
-  rc = sqlite3_prepare_v2(
-         db,
-         "INSERT INTO relation_members (relation_id,ref,ref_id,role,member_order) VALUES (?1,?2,?3,?4,?5)",
-         -1, &stmt_insert_relation_members, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
-  rc = sqlite3_prepare_v2(
-         db,
-         "INSERT INTO relation_tags (relation_id,key,value) VALUES (?1,?2,?3)",
-         -1, &stmt_insert_relation_tags, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
 }
 
@@ -252,17 +175,79 @@ static int callback_relation (const void *user_data, const readosm_relation * re
   return READOSM_OK;
 }
 
-int read_osm_file(char *filename) {
+int read_osm_file(sqlite3 *db, char *filename) {
   const void *osm_handle;
   int ret;
-  /* Opening the OSM file */
+  /* 1. Add tables */
+  rc = sqlite3_exec(
+         db,
+         " CREATE TABLE nodes (\n"
+         "  node_id      INTEGER PRIMARY KEY,  -- node ID\n"
+         "  lon          REAL,                 -- longitude\n"
+         "  lat          REAL                  -- latitude\n"
+         " );\n"
+         " CREATE TABLE node_tags (\n"
+         "  node_id      INTEGER,              -- node ID\n"
+         "  key          TEXT,                 -- tag key\n"
+         "  value        TEXT                  -- tag value\n"
+         " );\n"
+         " CREATE TABLE way_nodes (\n"
+         "  way_id       INTEGER,              -- way ID\n"
+         "  node_id      INTEGER,              -- node ID\n"
+         "  node_order   INTEGER               -- node order\n"
+         " );\n"
+         " CREATE TABLE way_tags (\n"
+         "  way_id       INTEGER,              -- way ID\n"
+         "  key          TEXT,                 -- tag key\n"
+         "  value        TEXT                  -- tag value\n"
+         " );\n"
+         " CREATE TABLE relation_members (\n"
+         "  relation_id  INTEGER,              -- relation ID\n"
+         "  ref          TEXT,                 -- reference ('node','way','relation')\n"
+         "  ref_id       INTEGER,              -- node, way or relation ID\n"
+         "  role         TEXT,                 -- describes a particular feature\n"
+         "  member_order INTEGER               -- member order\n"
+         " );\n"
+         " CREATE TABLE relation_tags (\n"
+         "  relation_id  INTEGER,              -- relation ID\n"
+         "  key          TEXT,                 -- tag key\n"
+         "  value        TEXT                  -- tag value\n"
+         " );\n",
+         NULL, NULL, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  /* 2. Create prepared statements */
+  rc = sqlite3_prepare_v2(db,
+         "INSERT INTO nodes (node_id,lat,lon) VALUES (?1,?2,?3)",
+         -1, &stmt_insert_nodes, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  rc = sqlite3_prepare_v2(db,
+         "INSERT INTO node_tags (node_id,key,value) VALUES (?1,?2,?3)",
+         -1, &stmt_insert_node_tags, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  rc = sqlite3_prepare_v2(db,
+         "INSERT INTO way_nodes (way_id,node_id,node_order) VALUES (?1,?2,?3)",
+         -1, &stmt_insert_way_nodes, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  rc = sqlite3_prepare_v2(db,
+         "INSERT INTO way_tags (way_id,key,value) VALUES (?1,?2,?3)",
+         -1, &stmt_insert_way_tags, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  rc = sqlite3_prepare_v2(db,
+         "INSERT INTO relation_members (relation_id,ref,ref_id,role,member_order) VALUES (?1,?2,?3,?4,?5)",
+         -1, &stmt_insert_relation_members, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  rc = sqlite3_prepare_v2(db,
+         "INSERT INTO relation_tags (relation_id,key,value) VALUES (?1,?2,?3)",
+         -1, &stmt_insert_relation_tags, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  /* 3. Opening the OSM file */
   ret = readosm_open(filename, &osm_handle);
   if( ret!=READOSM_OK ) {
     fprintf(stderr, "OPEN error: %d\n", ret);
     readosm_close(osm_handle);
     return EXIT_FAILURE;
   }
-  /* Parsing the OSM file */
+  /* 4. Parsing the OSM file */
   ret = readosm_parse(osm_handle, (const void *) 0,
           callback_node, callback_way, callback_relation);
   if( ret!=READOSM_OK ) {
@@ -270,7 +255,7 @@ int read_osm_file(char *filename) {
     readosm_close(osm_handle);
     return EXIT_FAILURE;
   }
-  /* Closing the OSM file */
+  /* 5. Closing the OSM file */
   readosm_close(osm_handle);
   return EXIT_SUCCESS;
 }
