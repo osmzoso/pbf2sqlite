@@ -18,17 +18,17 @@ static char *help =
   "\n"
   "Main options:\n"
   "  read FILE     Reads FILE (.osm.pbf or .osm) into the database\n"
+  "  index         Add basic indexes\n"
   "  rtree         Add R*Tree indexes\n"
   "  addr          Add address tables\n"
   "  graph         Add graph table\n"
-  "  noindex       Do not create indexes (not recommended)\n"
   "\n"
   "Other options:\n"
   "  node ID                                 Show node data\n"
   "  way ID                                  Show way data\n"
   "  relation ID                             Show relation data\n"
-  "  vgraph LON1 LAT1 LON2 LAT2 HTMLFILE     Visualize graph data\n"
   "  vaddr  LON1 LAT1 LON2 LAT2 HTMLFILE     Visualize address data\n"
+  "  vgraph LON1 LAT1 LON2 LAT2 HTMLFILE     Visualize graph data\n"
   "\n"
   "This is pbf2sqlite version " PBF2SQLITE_VERSION "\n"
   ;
@@ -80,15 +80,57 @@ double argv_to_double(const char *str) {
 
 void parse_args(sqlite3 *db, int argc, char **argv, int exec) {
   int i;
+  int64_t id;
+  double lon1, lat1, lon2, lat2;
   i = 2;
   while( i<argc ){
     if( strcmp("read", argv[i])==0 && argc>=i+2 ){
-      printf("-> read %s\n", argv[i+1]);
+      if( exec ) read_osm_file(db, argv[i+1]);
       i++;
     } 
     else if( strcmp("index", argv[i])==0 ){
-      printf("-> index\n");
+      if( exec ) add_index(db);
     }
+    else if( strcmp("rtree", argv[i])==0 ){
+      if( exec ) add_rtree(db);
+    }
+    else if( strcmp("addr", argv[i])==0 ){
+      if( exec ) add_addr(db);
+    }
+    else if( strcmp("graph", argv[i])==0 ){
+      if( exec ) add_graph(db);
+    }
+    else if( strcmp("node", argv[i])==0 && argc>=i+2 ){
+      id = argv_to_int64(argv[i+1]);
+      if( exec ) show_node(db, id);
+      i++;
+    } 
+    else if( strcmp("way", argv[i])==0 && argc>=i+2 ){
+      id = argv_to_int64(argv[i+1]);
+      if( exec ) show_way(db, id);
+      i++;
+    } 
+    else if( strcmp("relation", argv[i])==0 && argc>=i+2 ){
+      id = argv_to_int64(argv[i+1]);
+      if( exec ) show_relation(db, id);
+      i++;
+    } 
+    else if( strcmp("vaddr", argv[i])==0 && argc>=i+6 ){
+      lon1 = argv_to_double(argv[i+1]);
+      lat1 = argv_to_double(argv[i+2]);
+      lon2 = argv_to_double(argv[i+3]);
+      lat2 = argv_to_double(argv[i+4]);
+      if( exec ) html_map_addr(db, lon1, lat1, lon2, lat2, argv[i+5]);
+      i = i + 5;
+    } 
+    else if( strcmp("vgraph", argv[i])==0 && argc>=i+6 ){
+      lon1 = argv_to_double(argv[i+1]);
+      lat1 = argv_to_double(argv[i+2]);
+      lon2 = argv_to_double(argv[i+3]);
+      lat2 = argv_to_double(argv[i+4]);
+      if( exec ) html_map_graph(db, lon1, lat1, lon2, lat2, argv[i+5]);
+      i = i + 5;
+    } 
     else {
       printf("Invalid option: %s\n", argv[i]);
       exit(EXIT_FAILURE);
@@ -101,99 +143,17 @@ void parse_args(sqlite3 *db, int argc, char **argv, int exec) {
 ** Program start 
 */
 int main(int argc, char **argv) {
-  char *db_file;
-  char *osm_file;
-  int read = 0;
-  int rtree = 0;
-  int addr = 0;
-  int graph = 0;
-  int64_t node_id = 0;
-  int64_t way_id = 0;
-  int64_t relation_id = 0;
-  int index = 1;
-  int vgraph = 0;
-  int vaddr = 0;
-  double lon1 = 0;
-  double lat1 = 0;
-  double lon2 = 0;
-  double lat2 = 0;
-  char *html_file;
-  int i;
-  /* Parse args test TODO */
-  //parse_args(db, argc, argv, 0);
-  /* Parse parameter */
   if( argc==1 ){
     printf("%s", help);
     printf("SQLite %s and readosm %s are used.\n\n",
              sqlite3_libversion(), readosm_version());
     return EXIT_FAILURE;
   }
-  db_file = argv[1];
-  i = 2;
-  while( i<argc ){
-    if( strcmp("read", argv[i])==0 && argc>=i+2 ){
-      read = 1;
-      osm_file = argv[i+1];
-      i++;
-    } 
-    else if( strcmp("rtree", argv[i])==0 ) rtree = 1;
-    else if( strcmp("addr", argv[i])==0 ) addr = 1;
-    else if( strcmp("graph", argv[i])==0 ) graph = 1;
-    else if( strcmp("node", argv[i])==0 && argc>=i+2 ){
-      node_id = argv_to_int64(argv[i+1]);
-      i++;
-    }
-    else if( strcmp("way", argv[i])==0 && argc>=i+2 ){
-      way_id = argv_to_int64(argv[i+1]);
-      i++;
-    }
-    else if( strcmp("relation", argv[i])==0 && argc>=i+2 ){
-      relation_id = argv_to_int64(argv[i+1]);
-      i++;
-    }
-    else if( strcmp("noindex", argv[i])==0 ) index = 0;
-    else if( strcmp("vgraph", argv[i])==0 && argc>=i+6 ){
-      vgraph = 1;
-      lon1 = argv_to_double(argv[i+1]);
-      lat1 = argv_to_double(argv[i+2]);
-      lon2 = argv_to_double(argv[i+3]);
-      lat2 = argv_to_double(argv[i+4]);
-      html_file = argv[i+5];
-      i = i + 5;
-    }
-    else if( strcmp("vaddr", argv[i])==0 && argc>=i+6 ){
-      vaddr = 1;
-      lon1 = argv_to_double(argv[i+1]);
-      lat1 = argv_to_double(argv[i+2]);
-      lon2 = argv_to_double(argv[i+3]);
-      lat2 = argv_to_double(argv[i+4]);
-      html_file = argv[i+5];
-      i = i + 5;
-    }
-    else {
-      printf("Invalid option: %s\n", argv[i]);
-      return EXIT_FAILURE;
-    };
-    i++;
-  }
-  /* Open database connection */
-  rc = sqlite3_open(db_file, &db);
+  parse_args(db, argc, argv, 0);       /* Check args */
+  rc = sqlite3_open(argv[1], &db);     /* Open database connection */
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
-  /* Execute options */
-  if( read ){
-    read_osm_file(db, osm_file);
-    if( index ) add_index(db);
-  }
-  if( rtree ) add_rtree(db);
-  if( addr ) add_addr(db);
-  if( graph ) add_graph(db);
-  if( node_id ) show_node(db, node_id);
-  if( way_id ) show_way(db, way_id);
-  if( relation_id ) show_relation(db, relation_id);
-  if( vgraph ) html_map_graph(db, lon1, lat1, lon2, lat2, html_file);
-  if( vaddr ) html_map_addr(db, lon1, lat1, lon2, lat2, html_file);
-  /* Close database connection */
-  rc = sqlite3_close(db);
+  parse_args(db, argc, argv, 1);       /* Execute args */
+  rc = sqlite3_close(db);              /* Close database connection */
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   return EXIT_SUCCESS;
 }
