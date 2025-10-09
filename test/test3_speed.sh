@@ -30,10 +30,12 @@ rm -f $test_dir/osm_speed.db
 
 echo "Time required for option read:"
 time -p pbf2sqlite osm_speed.db read $osm_file
-echo "Time required for option addr:"
-time -p pbf2sqlite osm_speed.db addr
+echo "Time required for option index:"
+time -p pbf2sqlite osm_speed.db index
 echo "Time required for option rtree:"
 time -p pbf2sqlite osm_speed.db rtree
+echo "Time required for option addr:"
+time -p pbf2sqlite osm_speed.db addr
 echo "Time required for option graph:"
 time -p pbf2sqlite osm_speed.db graph
 
