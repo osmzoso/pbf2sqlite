@@ -210,7 +210,18 @@ clear_bit  | INTEGER  | bitmask clear bits
 
 # 3. Other Options
 
-## 3.1. Visualizing the data
+## 3.1. Show node, way or relation data
+
+The **node**, **way** and **relation** options display information about
+the respective objects on the console.
+```
+Usage:  
+pbf2sqlite DATABASE node ID
+pbf2sqlite DATABASE way ID
+pbf2sqlite DATABASE relation ID
+```
+
+## 3.2. Visualizing the data
 
 The **vgraph** option allows you to visualize the graph for a given area.  
 This option creates an HTML file containing zoomable maps with the graph data.  
@@ -226,3 +237,10 @@ Usage:
 pbf2sqlite DATABASE vaddr LON1 LAT1 LON2 LAT2 HTMLFILE
 ```
 
+## 3.3. Execute SQL statement
+
+The **sql** option executes an SQL command.
+```
+Usage:  
+pbf2sqlite DATABASE sql STATEMENT
+```

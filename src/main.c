@@ -29,7 +29,7 @@ static char *help =
   "  relation ID                             Show relation data\n"
   "  vaddr  LON1 LAT1 LON2 LAT2 HTMLFILE     Visualize address data\n"
   "  vgraph LON1 LAT1 LON2 LAT2 HTMLFILE     Visualize graph data\n"
-  "  sql SQL_STATEMENT                       Execute SQL statement\n"
+  "  sql STATEMENT                           Execute SQL statement\n"
   "\n"
   "This is pbf2sqlite version " PBF2SQLITE_VERSION "\n"
   ;
