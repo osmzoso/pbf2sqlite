@@ -1,33 +1,28 @@
 # 1. pbf2sqlite
 
-A simple command line tool for reading a
-[OpenStreetMap PBF file](https://wiki.openstreetmap.org/wiki/PBF_Format)
-into a SQLite database.
-
-Alternatively, [OpenStreetMap XML data](https://wiki.openstreetmap.org/wiki/OSM_XML)
-can also be read.
+A simple command line tool for reading OpenStreetMap data into a SQLite database.
 
 OSM data can be obtained from a provider such as [Geofabrik](https://download.geofabrik.de).
 
-Read .osm.pbf file and create the tables in the database:  
+Examples:  
 
 `pbf2sqlite test.db read country.osm.pbf`  
 
-The created tables are described below.
-
-Read .osm.pbf file into the database and then create tables
-with address data, graph data, and R*Tree indexes:  
-
-`pbf2sqlite test.db read country.osm.pbf addr rtree graph`  
-
-The options can be entered in any order but the **read** option is always executed first.  
+`pbf2sqlite test.db read country.osm.pbf index rtree addr graph`  
 
 The database can be easily queried with the [SQLite CLI tool](https://www.sqlite.org/cli.html).
 
 
-# 2. Tables
+# 2. Main Options
 
-The **read** option creates the following tables and indexes in the database:
+The order of the options is important. All options are executed in the order given.
+
+## 2.1. Option "read"
+
+This option first creates six tables, then reads OpenStreetMap data
+([PBF](https://wiki.openstreetmap.org/wiki/PBF_Format)
+or
+[XML](https://wiki.openstreetmap.org/wiki/OSM_XML)) and fills these tables.
 
 #### Table "nodes"
 column       | type                | description
@@ -83,14 +78,13 @@ value        | TEXT                | tag value
 - INDEX relation_tags__relation_id    ON relation_tags (relation_id)
 - INDEX relation_tags__key            ON relation_tags (key)
 
-> The **noindex** option suppresses the creation of all indexes (not recommended)
+## 2.2. Option "index"
 
+This option creates basic indexes for the six tables.
 
-# 3. Create additional data
+The created indexes are described above.
 
-Additional tables can be created from the tables created with the **read** option.
-
-## 3.1. Option "rtree"
+## 2.3. Option "rtree"
 
 This option creates two [R*Tree](https://www.sqlite.org/rtree.html)
 indexes **rtree_way** and **rtree_node** for finding ways and nodes quickly.  
@@ -134,7 +128,7 @@ WHERE way_id=4872512;
 ```
 
 
-## 3.2. Option "addr"
+## 2.4. Option "addr"
 
 This option creates two tables with address data.  
 
@@ -166,7 +160,7 @@ node_id        | INTEGER             | node ID
 The view **addr_view** join the two tables.
 
 
-## 3.3. Option "graph"
+## 2.5. Option "graph"
 
 This option creates an additional table **graph** with the complete graph
 of all highways.  
@@ -214,7 +208,9 @@ clear_bit  | INTEGER  | bitmask clear bits
 <https://www.sqlite.org/lang_with.html#queries_against_a_graph>
 
 
-# 4. Visualizing the data
+# 3. Other Options
+
+## 3.1. Visualizing the data
 
 The **vgraph** option allows you to visualize the graph for a given area.  
 This option creates an HTML file containing zoomable maps with the graph data.  
