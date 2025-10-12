@@ -10,6 +10,7 @@ SRC = main.c \
       read_data.c \
       opt_data.c \
       show_data.c \
+      sql_stmt.c \
       add_addr.sql \
       add_graph_permit.sql \
       add_rtree.sql \

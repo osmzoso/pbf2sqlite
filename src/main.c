@@ -29,6 +29,7 @@ static char *help =
   "  relation ID                             Show relation data\n"
   "  vaddr  LON1 LAT1 LON2 LAT2 HTMLFILE     Visualize address data\n"
   "  vgraph LON1 LAT1 LON2 LAT2 HTMLFILE     Visualize graph data\n"
+  "  sql SQL_STATEMENT                       Execute SQL statement\n"
   "\n"
   "This is pbf2sqlite version " PBF2SQLITE_VERSION "\n"
   ;
@@ -130,6 +131,10 @@ void parse_args(sqlite3 *db, int argc, char **argv, int exec) {
       lat2 = argv_to_double(argv[i+4]);
       if( exec ) html_map_graph(db, lon1, lat1, lon2, lat2, argv[i+5]);
       i = i + 5;
+    } 
+    else if( strcmp("sql", argv[i])==0 && argc>=i+2 ){
+      if( exec ) exec_sql_stmt(db, argv[i+1]);
+      i++;
     } 
     else {
       printf("Invalid option: %s\n", argv[i]);
