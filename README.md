@@ -8,17 +8,18 @@ pbf2sqlite DATABASE [OPTION ...]
 
 Main options:
   read FILE     Reads FILE (.osm.pbf or .osm) into the database
+  index         Add basic indexes
   rtree         Add R*Tree indexes
   addr          Add address tables
   graph         Add graph table
-  noindex       Do not create indexes (not recommended)
 
 Other options:
   node ID                                 Show node data
   way ID                                  Show way data
   relation ID                             Show relation data
-  vgraph LON1 LAT1 LON2 LAT2 HTMLFILE     Visualize graph data
   vaddr  LON1 LAT1 LON2 LAT2 HTMLFILE     Visualize address data
+  vgraph LON1 LAT1 LON2 LAT2 HTMLFILE     Visualize graph data
+  sql STATEMENT                           Execute SQL statement
 ```
 
 The command
