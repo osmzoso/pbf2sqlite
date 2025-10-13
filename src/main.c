@@ -157,6 +157,7 @@ int main(int argc, char **argv) {
   parse_args(db, argc, argv, 0);       /* Check args */
   rc = sqlite3_open(argv[1], &db);     /* Open database connection */
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  register_functions(db);
   parse_args(db, argc, argv, 1);       /* Execute args */
   rc = sqlite3_close(db);              /* Close database connection */
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);

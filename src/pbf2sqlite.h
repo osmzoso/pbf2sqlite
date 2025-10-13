@@ -45,6 +45,8 @@ void show_way(sqlite3 *db, const int64_t way_id);
 void show_relation(sqlite3 *db, const int64_t relation_id);
 /* sql_stmt.c */
 void exec_sql_stmt(sqlite3 *db, const char *sql_stmt);
+/* functions.c */
+void register_functions(sqlite3 *db);
 /* leaflet.c */
 void leaflet_html_header(FILE *html, const char *title);
 void leaflet_html_footer(FILE *html);

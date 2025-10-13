@@ -7,6 +7,7 @@ CFLAGS = -Wall -O2 -s -std=c99
 # Source files
 SRC = main.c \
       pbf2sqlite.h \
+      functions.c \
       read_data.c \
       opt_data.c \
       show_data.c \
