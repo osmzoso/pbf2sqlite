@@ -22,19 +22,6 @@ void add_addr(sqlite3 *db) {
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
 }
 
-/* Calculates great circle distance between two coordinates in degrees */
-double distance(double lon1, double lat1, double lon2, double lat2) {
-  /* Avoid a acos error if the two points are identical */
-  if( lon1 == lon2 && lat1 == lat2 ) return 0;
-  lon1 = lon1 * (M_PI / 180.0);   /* Conversion degree to radians */
-  lat1 = lat1 * (M_PI / 180.0);
-  lon2 = lon2 * (M_PI / 180.0);
-  lat2 = lat2 * (M_PI / 180.0);
-  /* Use earth radius Europe 6371 km (alternatively radius equator 6378 km) */
-  double dist = acos(sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(lon2 - lon1)) * 6371000;
-  return dist;    /* distance in meters */
-}
-
 void fill_graph_permit(sqlite3 *db) {
   sqlite3_stmt *stmt, *stmt_mask, *stmt_update;
   int64_t way_id;

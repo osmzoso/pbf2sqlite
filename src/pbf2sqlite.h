@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <sqlite3.h>
 
-#define PBF2SQLITE_VERSION  "0.4.1"
+#define PBF2SQLITE_VERSION  "0.4.2"
 #define PBF2SQLITE_MAX_POINTS 1000
 typedef struct {
   int no;
@@ -38,7 +38,6 @@ int read_osm_file(sqlite3 *db, char *filename);
 void add_rtree(sqlite3 *db);
 void add_addr(sqlite3 *db);
 void add_graph(sqlite3 *db);
-double distance(double lon1, double lat1, double lon2, double lat2);
 /* show_data.c */
 void show_node(sqlite3 *db, const int64_t node_id);
 void show_way(sqlite3 *db, const int64_t way_id);
@@ -46,6 +45,11 @@ void show_relation(sqlite3 *db, const int64_t relation_id);
 /* sql_stmt.c */
 void exec_sql_stmt(sqlite3 *db, const char *sql_stmt);
 /* functions.c */
+double radians(double deg);
+double degrees(double rad);
+double distance(double lon1, double lat1, double lon2, double lat2);
+double mercator_x(double lon);
+double mercator_y(double lat);
 void register_functions(sqlite3 *db);
 /* leaflet.c */
 void leaflet_html_header(FILE *html, const char *title);
