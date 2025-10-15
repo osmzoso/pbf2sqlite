@@ -29,6 +29,7 @@ struct Node* newAdjListNode(int dest) {
 // Funktion, um einen Graphen mit V Knoten zu erstellen
 struct Graph* createGraph(int V) {
     struct Graph* graph = (struct Graph*)malloc(sizeof(struct Graph));
+  V = V+1;
     graph->numVertices = V;
 
     // Adjazenzliste initialisieren
@@ -67,19 +68,23 @@ void printGraph(struct Graph* graph) {
     }
 }
 
-int main() {
+void create_test_graph() {
     // Anzahl der Knoten im Graphen vorgegeben
-    int V = 5;
+    int V = 8;
     struct Graph* graph = createGraph(V);
 
     // Kanten hinzufügen
-    addEdge(graph, 0, 1);
-    addEdge(graph, 0, 4);
     addEdge(graph, 1, 2);
-    addEdge(graph, 1, 3);
-    addEdge(graph, 1, 4);
+    addEdge(graph, 1, 7);
+    addEdge(graph, 1, 6);
+    addEdge(graph, 2, 7);
     addEdge(graph, 2, 3);
+    addEdge(graph, 3, 7);
     addEdge(graph, 3, 4);
+    addEdge(graph, 4, 5);
+    addEdge(graph, 5, 7);
+    addEdge(graph, 5, 6);
+    addEdge(graph, 6, 7);
 
     // Graphen ausgeben
     printGraph(graph);
@@ -95,7 +100,41 @@ int main() {
     }
     free(graph->array);
     free(graph);
+}
 
-    return 0;
+void create_rand_graph(int nodes, int links) {
+  int i, n1, n2;
+  printf("Graph: %d nodes, %d links\n", nodes, links);
+
+  struct Graph* graph = createGraph(nodes);
+
+  for( i=1; i<=links; i++ ) {
+    n1 = (int) ( (float) nodes*rand()/(RAND_MAX+1.0));
+    n2 = (int) ( (float) nodes*rand()/(RAND_MAX+1.0));
+    //printf(" edge %d - %d\n", n1, n2);
+    addEdge(graph, n1, n2);
+  }
+
+  // Graphen ausgeben
+  //printGraph(graph);
+
+  // Speicher freigeben
+  for (int i = 0; i <= nodes; ++i) {
+    struct Node* current = graph->array[i].head;
+    while (current != NULL) {
+      struct Node* temp = current;
+      current = current->next;
+      free(temp);
+    }
+  }
+  free(graph->array);
+  free(graph);
+}
+
+int main() {
+  //create_test_graph();
+  create_rand_graph(10000000, 10000000);
+
+  return 0;
 }
 
