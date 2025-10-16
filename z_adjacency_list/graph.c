@@ -42,6 +42,20 @@ struct Graph* createGraph(int V) {
     return graph;
 }
 
+// Funktion, Speicher des Graphen freigeben
+void destroyGraph(struct Graph* graph) {
+  for (int i = 0; i < graph->numVertices; ++i) {
+    struct Node* current = graph->array[i].head;
+    while (current != NULL) {
+      struct Node* temp = current;
+      current = current->next;
+      free(temp);
+    }
+  }
+  free(graph->array);
+  free(graph);
+}
+
 // Funktion, um eine Kante zum Graphen hinzuzufügen
 void addEdge(struct Graph* graph, int src, int dest) {
     // Kante von src nach dest hinzufügen
@@ -59,47 +73,38 @@ void addEdge(struct Graph* graph, int src, int dest) {
 void printGraph(struct Graph* graph) {
     for (int v = 0; v < graph->numVertices; ++v) {
         struct Node* pCrawl = graph->array[v].head;
-        printf("\n Adjacency list of vertex %d\n head ", v);
+        printf("\nAdjacency list of vertex %d: head ", v);
         while (pCrawl) {
-            printf("-> %d", pCrawl->dest);
+            printf(" ->%d", pCrawl->dest);
             pCrawl = pCrawl->next;
         }
-        printf("\n");
     }
+    printf("\n");
 }
 
 void create_test_graph() {
-    // Anzahl der Knoten im Graphen vorgegeben
-    int V = 8;
-    struct Graph* graph = createGraph(V);
+  // Anzahl der Knoten im Graphen vorgegeben
+  int V = 8;
+  struct Graph* graph = createGraph(V);
 
-    // Kanten hinzufügen
-    addEdge(graph, 1, 2);
-    addEdge(graph, 1, 7);
-    addEdge(graph, 1, 6);
-    addEdge(graph, 2, 7);
-    addEdge(graph, 2, 3);
-    addEdge(graph, 3, 7);
-    addEdge(graph, 3, 4);
-    addEdge(graph, 4, 5);
-    addEdge(graph, 5, 7);
-    addEdge(graph, 5, 6);
-    addEdge(graph, 6, 7);
+  // Kanten hinzufügen
+  addEdge(graph, 1, 2);
+  addEdge(graph, 1, 7);
+  addEdge(graph, 1, 6);
+  addEdge(graph, 2, 7);
+  addEdge(graph, 2, 3);
+  addEdge(graph, 3, 7);
+  addEdge(graph, 3, 4);
+  addEdge(graph, 4, 5);
+  addEdge(graph, 5, 7);
+  addEdge(graph, 5, 6);
+  addEdge(graph, 6, 7);
 
-    // Graphen ausgeben
-    printGraph(graph);
+  // Graphen ausgeben
+  printGraph(graph);
 
-    // Speicher freigeben
-    for (int i = 0; i < V; ++i) {
-        struct Node* current = graph->array[i].head;
-        while (current != NULL) {
-            struct Node* temp = current;
-            current = current->next;
-            free(temp);
-        }
-    }
-    free(graph->array);
-    free(graph);
+  // Speicher freigeben
+  destroyGraph(graph);
 }
 
 void create_rand_graph(int nodes, int links) {
@@ -119,21 +124,12 @@ void create_rand_graph(int nodes, int links) {
   //printGraph(graph);
 
   // Speicher freigeben
-  for (int i = 0; i <= nodes; ++i) {
-    struct Node* current = graph->array[i].head;
-    while (current != NULL) {
-      struct Node* temp = current;
-      current = current->next;
-      free(temp);
-    }
-  }
-  free(graph->array);
-  free(graph);
+  destroyGraph(graph);
 }
 
 int main() {
-  //create_test_graph();
-  create_rand_graph(10000000, 10000000);
+  create_test_graph();
+  //create_rand_graph(1000000, 1000000);
 
   return 0;
 }
