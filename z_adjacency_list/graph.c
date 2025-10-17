@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 // Struktur für einen Knoten in der Adjazenzliste
 struct Node {
@@ -14,7 +15,7 @@ struct AdjList {
 
 // Struktur für den Graphen
 struct Graph {
-    int numVertices;
+    int num_nodes;
     struct AdjList* array;
 };
 
@@ -30,7 +31,7 @@ struct Node* newAdjListNode(int dest) {
 struct Graph* createGraph(int V) {
     struct Graph* graph = (struct Graph*)malloc(sizeof(struct Graph));
   V = V+1;
-    graph->numVertices = V;
+    graph->num_nodes = V;
 
     // Adjazenzliste initialisieren
     graph->array = (struct AdjList*)malloc(V * sizeof(struct AdjList));
@@ -44,7 +45,7 @@ struct Graph* createGraph(int V) {
 
 // Funktion, Speicher des Graphen freigeben
 void destroyGraph(struct Graph* graph) {
-  for (int i = 0; i < graph->numVertices; ++i) {
+  for (int i = 0; i < graph->num_nodes; ++i) {
     struct Node* current = graph->array[i].head;
     while (current != NULL) {
       struct Node* temp = current;
@@ -71,9 +72,9 @@ void addEdge(struct Graph* graph, int src, int dest) {
 
 // Funktion, um den Graphen auszugeben
 void printGraph(struct Graph* graph) {
-    for (int v = 0; v < graph->numVertices; ++v) {
-        struct Node* pCrawl = graph->array[v].head;
-        printf("\nAdjacency list of vertex %d: head ", v);
+    for (int n = 0; n < graph->num_nodes; n++) {
+        struct Node* pCrawl = graph->array[n].head;
+        printf("\nnode %d: ", n);
         while (pCrawl) {
             printf(" ->%d", pCrawl->dest);
             pCrawl = pCrawl->next;
@@ -84,7 +85,8 @@ void printGraph(struct Graph* graph) {
 
 void create_test_graph() {
   // Anzahl der Knoten im Graphen vorgegeben
-  int V = 8;
+  int V = 7;
+  printf("Demo graph: 7 nodes\n");
   struct Graph* graph = createGraph(V);
 
   // Kanten hinzufügen
@@ -107,30 +109,36 @@ void create_test_graph() {
   destroyGraph(graph);
 }
 
-void create_rand_graph(int nodes, int links) {
+void create_rand_graph(int nodes, int edges) {
   int i, n1, n2;
-  printf("Graph: %d nodes, %d links\n", nodes, links);
-
+  printf("Random graph: %d nodes, %d edges\n", nodes, edges);
+  printf("Create graph...\n");
   struct Graph* graph = createGraph(nodes);
-
-  for( i=1; i<=links; i++ ) {
+  printf("Create edges...\n");
+  for( i=1; i<=edges; i++ ) {
     n1 = (int) ( (float) nodes*rand()/(RAND_MAX+1.0));
     n2 = (int) ( (float) nodes*rand()/(RAND_MAX+1.0));
-    //printf(" edge %d - %d\n", n1, n2);
     addEdge(graph, n1, n2);
   }
-
-  // Graphen ausgeben
-  //printGraph(graph);
-
-  // Speicher freigeben
+  printf("Free memory...\n");
   destroyGraph(graph);
 }
 
-int main() {
-  create_test_graph();
-  //create_rand_graph(1000000, 1000000);
+#define HELP "Usage: %s <option>\n\n"\
+             "Options:\n"\
+             "  demo                 Creates a simple test graph\n"\
+             "  rand NODES EDGES     Creates a simple test graph\n"
 
+int main(int argc, char **argv) {
+  if( argc==1 ){
+    printf(HELP, argv[0]);
+    return(1);
+  }
+  if( strcmp("demo", argv[1])==0 && argc==2 ){
+    create_test_graph();
+  } else if( strcmp("rand", argv[1])==0 && argc==4 ){
+    create_rand_graph(atoi(argv[2]), atoi(argv[3]));
+  }
   return 0;
 }
 
