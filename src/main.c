@@ -137,7 +137,7 @@ void parse_args(sqlite3 *db, int argc, char **argv, int exec) {
       i++;
     } 
     else {
-      printf("Invalid option: %s\n", argv[i]);
+      printf("Incorrect option '%s'\n", argv[i]);
       exit(EXIT_FAILURE);
     };
     i++;
