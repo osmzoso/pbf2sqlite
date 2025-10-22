@@ -10,12 +10,13 @@ SRC = main.c \
       functions.c \
       read_data.c \
       opt_data.c \
-      show_data.c \
       sql_stmt.c \
       add_addr.sql \
       add_graph_permit.sql \
       add_rtree.sql \
       leaflet.c \
+      graph.c \
+      show_data.c \
       visualize_data.c
 CFILES = $(filter %.c, $(SRC))
 BIN = ../build/pbf2sqlite

@@ -7,6 +7,7 @@
 
 #define PBF2SQLITE_VERSION  "0.4.2"
 #define PBF2SQLITE_MAX_POINTS 1000
+
 typedef struct {
   int no;
   double lon;
@@ -51,6 +52,22 @@ double distance(double lon1, double lat1, double lon2, double lat2);
 double mercator_x(double lon);
 double mercator_y(double lat);
 void register_functions(sqlite3 *db);
+/* graph.c */
+void edge_points(
+  sqlite3 *db,
+  uint64_t way_id,
+  uint64_t start_node_id,
+  uint64_t end_node_id,
+  point *pointlist
+);
+int create_subgraph_tables(
+  sqlite3 *db,
+  const double lon1,
+  const double lat1,
+  const double lon2,
+  const double lat2,
+  const int mask_permit
+);
 /* leaflet.c */
 void leaflet_html_header(FILE *html, const char *title);
 void leaflet_html_footer(FILE *html);
@@ -125,21 +142,6 @@ void leaflet_style(
   const int radius
 );
 /* visualize_data.c */
-void edge_points(
-  sqlite3 *db,
-  uint64_t way_id,
-  uint64_t start_node_id,
-  uint64_t end_node_id,
-  point *pointlist
-);
-int create_subgraph_tables(
-  sqlite3 *db,
-  const double lon1,
-  const double lat1,
-  const double lon2,
-  const double lat2,
-  const int mask_permit
-);
 void html_map_graph(
   sqlite3 *db,
   const double lon1,
