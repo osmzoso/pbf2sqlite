@@ -244,3 +244,36 @@ The **sql** option executes an SQL command.
 Usage:  
 pbf2sqlite DATABASE sql STATEMENT
 ```
+
+A simple [SELECT](https://www.sqlite.org/lang_select.html) statement
+displays the result on the console.
+
+SQLite is extended with the following functions:
+
+function                         | description
+---------------------------------|----------------------------------------
+radians(deg)                     | Conversion from degrees to radians
+degrees(rad)                     | Conversion from radians to degrees
+distance(lon1, lat1, lon2, lat2) | Calculates distance in meters
+mercator_x(lon)                  | Web Mercator projection X (EPSG:3857)
+mercator_y(lat)                  | Web Mercator projection Y (EPSG:3857)
+
+Comparison of WGS84 (lon, lat) with Web Mercator (x, y):  
+```
+                                 ^
+               lat:  85.05112878 | y:  20037508.343
+                                 |
+x: -20037508.343                 |                 x: 20037508.343
+---------------------------------0--------------------------------->
+lon: -180°                       |                 lon: +180°
+                                 |
+               lat: -85.05112878 | y: -20037508.343
+```
+
+It can also be used to make changes to the data:  
+```
+pbf2sqlite test.db sql "ALTER TABLE nodes ADD COLUMN x"
+pbf2sqlite test.db sql "ALTER TABLE nodes ADD COLUMN y"
+pbf2sqlite test.db sql "UPDATE nodes SET x=mercator_x(lon),y=mercator_y(lat)"
+```
+
