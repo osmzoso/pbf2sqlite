@@ -40,11 +40,10 @@ void add_rtree(sqlite3 *db);
 void add_addr(sqlite3 *db);
 void add_graph(sqlite3 *db);
 /* show_data.c */
+void exec_sql_stmt(sqlite3 *db, const char *sql_stmt);
 void show_node(sqlite3 *db, const int64_t node_id);
 void show_way(sqlite3 *db, const int64_t way_id);
 void show_relation(sqlite3 *db, const int64_t relation_id);
-/* sql_stmt.c */
-void exec_sql_stmt(sqlite3 *db, const char *sql_stmt);
 /* functions.c */
 double radians(double deg);
 double degrees(double rad);
