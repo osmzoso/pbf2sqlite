@@ -12,7 +12,7 @@
 
 static char *help =
   "\n"
-  "Reads OpenStreetMap PBF data into a SQLite database.\n"
+  "Reads OpenStreetMap data into a SQLite database.\n"
   "\n"
   "Usage:\npbf2sqlite DATABASE [OPTION ...]\n"
   "\n"
