@@ -13,7 +13,7 @@ Examples:
 The database can be easily queried with the [SQLite CLI tool](https://www.sqlite.org/cli.html).
 
 
-# 2. Main Options
+# 2. Main options
 
 The order of the options is important. All options are executed in the order given.
 
@@ -82,7 +82,9 @@ value        | TEXT                | tag value
 
 This option creates basic indexes for the six tables.
 
-The created indexes are described above.
+The created indexes are described in section 2.1.
+
+Finally, the [ANALYZE](https://www.sqlite.org/lang_analyze.html) command is executed.
 
 ## 2.3. Option "rtree"
 
@@ -208,7 +210,7 @@ clear_bit  | INTEGER  | bitmask clear bits
 <https://www.sqlite.org/lang_with.html#queries_against_a_graph>
 
 
-# 3. Other Options
+# 3. Show data
 
 ## 3.1. Show node, way or relation data
 

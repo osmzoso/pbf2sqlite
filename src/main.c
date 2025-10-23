@@ -23,7 +23,7 @@ static char *help =
   "  addr          Add address tables\n"
   "  graph         Add graph table\n"
   "\n"
-  "Other options:\n"
+  "Show data:\n"
   "  node ID                                 Show node data\n"
   "  way ID                                  Show way data\n"
   "  relation ID                             Show relation data\n"
@@ -154,10 +154,10 @@ int main(int argc, char **argv) {
              sqlite3_libversion(), readosm_version());
     return EXIT_FAILURE;
   }
-  parse_args(db, argc, argv, 0);       /* Check args */
+  parse_args(db, argc, argv, 0);       /* Check args, no execution */
   rc = sqlite3_open(argv[1], &db);     /* Open database connection */
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
-  register_functions(db);
+  register_functions(db);              /* Register custom functions */
   parse_args(db, argc, argv, 1);       /* Execute args */
   rc = sqlite3_close(db);              /* Close database connection */
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);

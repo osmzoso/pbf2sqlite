@@ -6,6 +6,25 @@
 #include <math.h>
 #include <stddef.h>
 
+void add_index(sqlite3 *db) {
+  rc = sqlite3_exec(
+    db,
+    " CREATE INDEX node_tags__node_id            ON node_tags (node_id);"
+    " CREATE INDEX node_tags__key                ON node_tags (key);"
+    " CREATE INDEX way_tags__way_id              ON way_tags (way_id);"
+    " CREATE INDEX way_tags__key                 ON way_tags (key);"
+    " CREATE INDEX way_nodes__way_id             ON way_nodes (way_id, node_order);"
+    " CREATE INDEX way_nodes__node_id            ON way_nodes (node_id);"
+    " CREATE INDEX relation_members__relation_id ON relation_members (relation_id, member_order);"
+    " CREATE INDEX relation_members__ref_id      ON relation_members (ref_id);"
+    " CREATE INDEX relation_tags__relation_id    ON relation_tags (relation_id);"
+    " CREATE INDEX relation_tags__key            ON relation_tags (key);",
+    NULL, NULL, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  rc = sqlite3_exec(db, "ANALYZE", NULL, NULL, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+}
+
 void add_rtree(sqlite3 *db) {
   const char *sql = 
   #include "opt_rtree.sql"

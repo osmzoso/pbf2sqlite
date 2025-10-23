@@ -13,7 +13,7 @@ Main options:
   addr          Add address tables
   graph         Add graph table
 
-Other options:
+Show data:
   node ID                                 Show node data
   way ID                                  Show way data
   relation ID                             Show relation data
