@@ -44,6 +44,22 @@ void exec_sql_stmt(sqlite3 *db, const char *sql_stmt);
 void show_node(sqlite3 *db, const int64_t node_id);
 void show_way(sqlite3 *db, const int64_t way_id);
 void show_relation(sqlite3 *db, const int64_t relation_id);
+void html_map_addr(
+  sqlite3 *db,
+  const double lon1,
+  const double lat1,
+  const double lon2,
+  const double lat2,
+  const char *html_file
+);
+void html_map_graph(
+  sqlite3 *db,
+  const double lon1,
+  const double lat1,
+  const double lon2,
+  const double lat2,
+  const char *html_file
+);
 /* functions.c */
 double radians(double deg);
 double degrees(double rad);
@@ -139,23 +155,6 @@ void leaflet_style(
   const char *fillcolor,
   const double fillopacity,
   const int radius
-);
-/* visualize_data.c */
-void html_map_graph(
-  sqlite3 *db,
-  const double lon1,
-  const double lat1,
-  const double lon2,
-  const double lat2,
-  const char *html_file
-);
-void html_map_addr(
-  sqlite3 *db,
-  const double lon1,
-  const double lat1,
-  const double lon2,
-  const double lat2,
-  const char *html_file
 );
 
 #endif /* PBF2SQLITE_H */

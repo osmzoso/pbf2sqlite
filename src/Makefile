@@ -15,8 +15,7 @@ SRC = main.c \
       opt_rtree.sql \
       leaflet.c \
       graph.c \
-      show_data.c \
-      visualize_data.c
+      show_data.c
 CFILES = $(filter %.c, $(SRC))
 BIN = ../build/pbf2sqlite
 
