@@ -8,7 +8,7 @@
 
 void add_rtree(sqlite3 *db) {
   const char *sql = 
-  #include "add_rtree.sql"
+  #include "opt_rtree.sql"
   ;
   rc = sqlite3_exec(db, sql, NULL, NULL, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
@@ -16,7 +16,7 @@ void add_rtree(sqlite3 *db) {
 
 void add_addr(sqlite3 *db) {
   const char *sql = 
-  #include "add_addr.sql"
+  #include "opt_addr.sql"
   ;
   rc = sqlite3_exec(db, sql, NULL, NULL, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
@@ -85,7 +85,7 @@ void create_table_graph_permit(sqlite3 *db) {
   sqlite3_finalize(stmt_check);
   /* else create the table */
   const char *sql = 
-  #include "add_graph_permit.sql"
+  #include "opt_graph_permit.sql"
   ;
   rc = sqlite3_exec(db, sql, NULL, NULL, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);

@@ -9,14 +9,14 @@ SRC = main.c \
       pbf2sqlite.h \
       functions.c \
       read_data.c \
-      opt_data.c \
-      sql_stmt.c \
-      add_addr.sql \
-      add_graph_permit.sql \
-      add_rtree.sql \
+      options.c \
+      opt_addr.sql \
+      opt_graph_permit.sql \
+      opt_rtree.sql \
       leaflet.c \
       graph.c \
       show_data.c \
+      sql_stmt.c \
       visualize_data.c
 CFILES = $(filter %.c, $(SRC))
 BIN = ../build/pbf2sqlite

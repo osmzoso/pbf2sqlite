@@ -28,14 +28,14 @@ extern sqlite3_stmt *stmt_insert_nodes, *stmt_insert_node_tags, *stmt_insert_way
              *stmt_insert_way_tags, *stmt_insert_relation_members, *stmt_insert_relation_tags;
 
 /*
-**  Function prototypes
+** Function prototypes
 */
 /* main.c */
 void abort_db_error(sqlite3 *db, int rc);
 /* read_data.c */
 void add_index(sqlite3 *db);
 int read_osm_file(sqlite3 *db, char *filename);
-/* add_data.c */
+/* options.c */
 void add_rtree(sqlite3 *db);
 void add_addr(sqlite3 *db);
 void add_graph(sqlite3 *db);
