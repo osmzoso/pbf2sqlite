@@ -153,13 +153,10 @@ int read_osm_file(sqlite3 *db, char *filename) {
   const void *osm_handle;
   int ret;
   /* 1. Start transaction */
-  rc = sqlite3_exec(db, " PRAGMA journal_mode = OFF;"
-                        " PRAGMA page_size = 65536;"
-                        " BEGIN TRANSACTION;", NULL, NULL, NULL);
+  rc = sqlite3_exec(db, "BEGIN TRANSACTION;", NULL, NULL, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   /* 2. Add tables */
-  rc = sqlite3_exec(
-         db,
+  rc = sqlite3_exec(db,
          " CREATE TABLE nodes (\n"
          "  node_id      INTEGER PRIMARY KEY,  -- node ID\n"
          "  lon          REAL,                 -- longitude\n"

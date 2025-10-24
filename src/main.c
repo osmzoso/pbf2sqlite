@@ -157,6 +157,10 @@ int main(int argc, char **argv) {
   parse_args(db, argc, argv, 0);       /* Check args, no execution */
   rc = sqlite3_open(argv[1], &db);     /* Open database connection */
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  rc = sqlite3_exec(db,                /* Set PRAGMAs */
+          " PRAGMA journal_mode = OFF;"
+          " PRAGMA page_size = 65536;", NULL, NULL, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   register_functions(db);              /* Register custom functions */
   parse_args(db, argc, argv, 1);       /* Execute args */
   rc = sqlite3_close(db);              /* Close database connection */
