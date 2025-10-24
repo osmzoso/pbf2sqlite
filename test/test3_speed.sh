@@ -6,17 +6,17 @@ if [ $# != 2 ]; then
     echo "Measures the time required for each option."
     echo
     echo "Usage:"
-    echo "$0 PBF_FILE DATABASE_FILE"
+    echo "$0 DATABASE_FILE PBF_FILE"
     exit 1
 fi
-pbf=$1
-db=$2
+db=$1
+pbf=$2
 
 echo "-----------------------------------------------------------------"
 echo "Test3: Speedtest"
 echo "-----------------------------------------------------------------"
-echo "PBF file      : $pbf"
 echo "DATABASE file : $db"
+echo "PBF file      : $pbf"
 
 rm -f $db
 
