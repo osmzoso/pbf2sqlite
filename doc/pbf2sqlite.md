@@ -212,7 +212,7 @@ clear_bit  | INTEGER  | bitmask clear bits
 
 # 3. Show data
 
-## 3.1. Show node, way or relation data
+## 3.1. Option "node", "way" and "relation"
 
 The **node**, **way** and **relation** options display information about
 the respective objects on the console.
@@ -223,7 +223,7 @@ pbf2sqlite DATABASE way ID
 pbf2sqlite DATABASE relation ID
 ```
 
-## 3.2. Visualizing the data
+## 3.2. Option "vgraph" and "vaddr"
 
 The **vgraph** option allows you to visualize the graph for a given area.  
 This option creates an HTML file containing zoomable maps with the graph data.  
@@ -239,7 +239,7 @@ Usage:
 pbf2sqlite DATABASE vaddr LON1 LAT1 LON2 LAT2 HTMLFILE
 ```
 
-## 3.3. Execute SQL statement
+## 3.3. Option "sql" 
 
 The **sql** option executes an SQL command.
 ```
@@ -249,6 +249,11 @@ pbf2sqlite DATABASE sql STATEMENT
 
 A simple [SELECT](https://www.sqlite.org/lang_select.html) statement
 displays the result on the console.
+
+A large SQL command can be written to a file and executed with bash as follows:
+```
+pbf2sqlite test.db sql "`cat query.sql`"
+```
 
 SQLite is extended with the following functions:
 
