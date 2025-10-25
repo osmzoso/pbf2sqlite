@@ -7,15 +7,15 @@ CFLAGS = -Wall -O2 -s -std=c99
 # Source files
 SRC = main.c \
       pbf2sqlite.h \
-      functions.c \
-      read_data.c \
+      read_osm.c \
       options.c \
       opt_addr.sql \
       opt_graph_permit.sql \
       opt_rtree.sql \
+      show_data.c \
+      functions.c \
       leaflet.c \
-      graph.c \
-      show_data.c
+      graph.c
 CFILES = $(filter %.c, $(SRC))
 BIN = ../build/pbf2sqlite
 

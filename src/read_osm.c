@@ -1,5 +1,6 @@
 /*
-**
+** Reading OpenStreetMap data with the ReadOSM library
+** https://www.gaia-gis.it/fossil/readosm/index
 */
 #include "pbf2sqlite.h"
 
