@@ -1,10 +1,6 @@
 /*
 **
 */
-#include "pbf2sqlite.h"
-
-#include <math.h>
-#include <stddef.h>
 
 void add_index(sqlite3 *db) {
   rc = sqlite3_exec(

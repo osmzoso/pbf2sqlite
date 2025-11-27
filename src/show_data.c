@@ -1,14 +1,7 @@
 /*
 ** Show data
 */
-#include "pbf2sqlite.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <stdint.h>
-#include <inttypes.h>
 
 /*
 ** Execute SQL statement

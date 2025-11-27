@@ -1,12 +1,6 @@
 /*
 ** Functions for creating an HTML file with Leaflet.js for visualizing data
 */
-#include "pbf2sqlite.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
 
 void leaflet_html_header(FILE *html, const char *title) {
   fprintf(html,

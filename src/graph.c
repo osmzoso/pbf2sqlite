@@ -1,13 +1,7 @@
 /*
 **
 */
-#include "pbf2sqlite.h"
 
-#include <inttypes.h>
-
-/*
-**
-*/
 void edge_points(
   sqlite3 *db,
   uint64_t way_id,

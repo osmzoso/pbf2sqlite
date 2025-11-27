@@ -2,15 +2,6 @@
 ** Reading OpenStreetMap data with the ReadOSM library
 ** https://www.gaia-gis.it/fossil/readosm/index
 */
-#include "pbf2sqlite.h"
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <stddef.h>
-#include <readosm.h>
-
-sqlite3_stmt *stmt_insert_nodes, *stmt_insert_node_tags, *stmt_insert_way_nodes,
-             *stmt_insert_way_tags, *stmt_insert_relation_members, *stmt_insert_relation_tags;
 
 /*
 ** readosm tag node

@@ -1,26 +1,19 @@
 #
 #
 #
+# Source in one single file:
+# gcc -E main.c | grep -v '^#' > ../build/pbf2sqlite.c
+#
 CC = gcc
 CFLAGS = -Wall -O2 -s -std=c99
 
 # Source files
-SRC = main.c \
-      pbf2sqlite.h \
-      read_osm.c \
-      options.c \
-      opt_addr.sql \
-      opt_graph_permit.sql \
-      opt_rtree.sql \
-      show_data.c \
-      functions.c \
-      leaflet.c \
-      graph.c
+SRC = main.c
 CFILES = $(filter %.c, $(SRC))
 BIN = ../build/pbf2sqlite
 
 # Compiling
-$(BIN): $(SRC)
+all:
 	mkdir -p $(dir $(BIN))
 	$(CC) $(CFILES) -lsqlite3 -lreadosm -lm -o $(BIN) $(CFLAGS)
 

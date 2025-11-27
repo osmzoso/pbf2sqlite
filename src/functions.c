@@ -1,9 +1,7 @@
 /*
 **
 */
-#include "pbf2sqlite.h"
 
-#include <math.h>
 
 /* Conversion degree to radians */
 double radians(double deg) {

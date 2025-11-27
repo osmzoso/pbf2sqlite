@@ -1,14 +1,19 @@
 /*
 ** pbf2sqlite
 */
-#include "pbf2sqlite.h"
-
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
+#include <inttypes.h>
+#include <stddef.h>
 #include <string.h>
+#include <math.h>
 #include <errno.h>
 #include <sqlite3.h>
 #include <readosm.h>
+
+#define PBF2SQLITE_VERSION  "0.4.3 ALPHA"
+#define PBF2SQLITE_MAX_POINTS 1000
 
 static char *help =
   "\n"
@@ -39,6 +44,19 @@ static char *help =
 */
 sqlite3 *db;         /* SQLite Database connection */
 int rc;              /* SQLite Result code */
+sqlite3_stmt *stmt_insert_nodes, *stmt_insert_node_tags, *stmt_insert_way_nodes,
+             *stmt_insert_way_tags, *stmt_insert_relation_members, *stmt_insert_relation_tags;
+
+typedef struct {
+  int no;
+  double lon;
+  double lat;
+} point;
+
+/* Mathematical Constants */
+#ifndef M_PI
+# define M_PI   3.141592653589793238462643383279502884
+#endif
 
 /*
 ** Shows last result code and then aborts the program
@@ -78,6 +96,13 @@ double argv_to_double(const char *str) {
   }
   return value;
 }
+
+#include "functions.c"
+#include "leaflet.c"
+#include "graph.c"
+#include "read_osm.c"
+#include "options.c"
+#include "show_data.c"
 
 void parse_args(sqlite3 *db, int argc, char **argv, int exec) {
   int i;
