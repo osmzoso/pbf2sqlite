@@ -12,6 +12,11 @@
 #include <sqlite3.h>
 #include <readosm.h>
 
+/* Mathematical Constants */
+#ifndef M_PI
+# define M_PI   3.141592653589793238462643383279502884
+#endif
+
 #define PBF2SQLITE_VERSION  "0.4.3 ALPHA"
 #define PBF2SQLITE_MAX_POINTS 1000
 
@@ -53,11 +58,6 @@ typedef struct {
   double lat;
 } point;
 
-/* Mathematical Constants */
-#ifndef M_PI
-# define M_PI   3.141592653589793238462643383279502884
-#endif
-
 /*
 ** Shows last result code and then aborts the program
 */
@@ -70,25 +70,27 @@ void abort_db_error(sqlite3 *db, int rc) {
 /*
 ** Convert and check numeric inputs
 */
-int64_t argv_to_int64(const char *str) {
+int64_t get_arg_int64(char **argv, int i) {
+  int64_t value;
   char *endptr;
   errno = 0; /* Reset errno before conversion */
-  int64_t value = strtoll(str, &endptr, 10);
+  value = strtoll(argv[i], &endptr, 10);
   /* Check for conversion errors */
   if( errno==ERANGE ) {
     printf("Invalid number: Overflow or underflow occurred\n");
     exit(EXIT_FAILURE);
   }
-  if( endptr==str || *endptr!='\0' ) {
+  if( endptr==argv[i] || *endptr!='\0' ) {
     printf("Invalid number: Not a valid integer string\n");
     exit(EXIT_FAILURE);
   }
   return value;
 }
 
-double argv_to_double(const char *str) {
+double get_arg_double(char **argv, int i) {
+  double value;
   char *endptr;
-  double value = strtod(str, &endptr);
+  value = strtod(argv[i], &endptr);
   /* Check if the whole string was converted */
   if( *endptr!='\0' ) {
     printf("Invalid number: Non-numeric characters '%s'\n", endptr);
@@ -127,33 +129,33 @@ void parse_args(sqlite3 *db, int argc, char **argv, int exec) {
       if( exec ) add_graph(db);
     }
     else if( strcmp("node", argv[i])==0 && argc>=i+2 ){
-      id = argv_to_int64(argv[i+1]);
+      id = get_arg_int64(argv, i+1);
       if( exec ) show_node(db, id);
       i++;
     } 
     else if( strcmp("way", argv[i])==0 && argc>=i+2 ){
-      id = argv_to_int64(argv[i+1]);
+      id = get_arg_int64(argv, i+1);
       if( exec ) show_way(db, id);
       i++;
     } 
     else if( strcmp("relation", argv[i])==0 && argc>=i+2 ){
-      id = argv_to_int64(argv[i+1]);
+      id = get_arg_int64(argv, i+1);
       if( exec ) show_relation(db, id);
       i++;
     } 
     else if( strcmp("vaddr", argv[i])==0 && argc>=i+6 ){
-      lon1 = argv_to_double(argv[i+1]);
-      lat1 = argv_to_double(argv[i+2]);
-      lon2 = argv_to_double(argv[i+3]);
-      lat2 = argv_to_double(argv[i+4]);
+      lon1 = get_arg_double(argv, i+1);
+      lat1 = get_arg_double(argv, i+2);
+      lon2 = get_arg_double(argv, i+3);
+      lat2 = get_arg_double(argv, i+4);
       if( exec ) html_map_addr(db, lon1, lat1, lon2, lat2, argv[i+5]);
       i = i + 5;
     } 
     else if( strcmp("vgraph", argv[i])==0 && argc>=i+6 ){
-      lon1 = argv_to_double(argv[i+1]);
-      lat1 = argv_to_double(argv[i+2]);
-      lon2 = argv_to_double(argv[i+3]);
-      lat2 = argv_to_double(argv[i+4]);
+      lon1 = get_arg_double(argv, i+1);
+      lat1 = get_arg_double(argv, i+2);
+      lon2 = get_arg_double(argv, i+3);
+      lat2 = get_arg_double(argv, i+4);
       if( exec ) html_map_graph(db, lon1, lat1, lon2, lat2, argv[i+5]);
       i = i + 5;
     } 
