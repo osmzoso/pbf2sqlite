@@ -59,15 +59,6 @@ typedef struct {
 } point;
 
 /*
-** Shows last result code and then aborts the program
-*/
-void abort_db_error(sqlite3 *db, int rc) {
-  fprintf(stderr, "pbf2sqlite - (%i) %s - %s\n", rc, sqlite3_errstr(rc), sqlite3_errmsg(db));
-  sqlite3_close(db);
-  exit(EXIT_FAILURE);
-}
-
-/*
 ** Convert and check numeric inputs
 */
 int64_t get_arg_int64(char **argv, int i) {

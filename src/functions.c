@@ -1,9 +1,15 @@
 /*
-**
+** Program abort, displays last SQLite error message
 */
+void abort_db_error(sqlite3 *db, int rc) {
+  fprintf(stderr, "pbf2sqlite - (%i) %s - %s\n", rc, sqlite3_errstr(rc), sqlite3_errmsg(db));
+  sqlite3_close(db);
+  exit(EXIT_FAILURE);
+}
 
-
-/* Conversion degree to radians */
+/*
+** Conversion degree to radians and vice versa
+*/
 double radians(double deg) {
   return deg * (M_PI / 180.0);
 }
@@ -12,7 +18,10 @@ double degrees(double rad) {
   return rad * (180.0 / M_PI);
 }
 
-/* Calculates great circle distance between two coordinates in degrees */
+/*
+** Calculates great circle distance between two coordinates in degrees
+** The result is in meters
+*/
 double distance(double lon1, double lat1, double lon2, double lat2) {
   /* Avoid a acos error if the two points are identical */
   if( lon1 == lon2 && lat1 == lat2 ) return 0;
@@ -22,9 +31,12 @@ double distance(double lon1, double lat1, double lon2, double lat2) {
   lat2 = radians(lat2);
   /* Use earth radius Europe 6371 km (alternatively radius equator 6378 km) */
   double dist = acos(sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(lon2 - lon1)) * 6371000;
-  return dist;    /* distance in meters */
+  return dist;
 }
 
+/*
+** Converting WGS84 to Web Mercator
+*/
 double mercator_x(double lon) {
   const double r = 6378137.0;
   return r * radians(lon);
@@ -47,6 +59,7 @@ static void radians_func(sqlite3_context *context, int argc, sqlite3_value **arg
     sqlite3_result_null(context);
   }
 }
+
 static void degrees_func(sqlite3_context *context, int argc, sqlite3_value **argv) {
   if (argc == 1 && sqlite3_value_type(argv[0]) == SQLITE_FLOAT) {
     double phi = sqlite3_value_double(argv[0]);
@@ -56,6 +69,7 @@ static void degrees_func(sqlite3_context *context, int argc, sqlite3_value **arg
     sqlite3_result_null(context);
   }
 }
+
 static void distance_func(sqlite3_context *context, int argc, sqlite3_value **argv) {
   if (argc == 4 && sqlite3_value_type(argv[0]) == SQLITE_FLOAT
                 && sqlite3_value_type(argv[1]) == SQLITE_FLOAT
@@ -71,6 +85,7 @@ static void distance_func(sqlite3_context *context, int argc, sqlite3_value **ar
     sqlite3_result_null(context);
   }
 }
+
 static void mercator_x_func(sqlite3_context *context, int argc, sqlite3_value **argv) {
   if (argc == 1 && sqlite3_value_type(argv[0]) == SQLITE_FLOAT) {
     double lon = sqlite3_value_double(argv[0]);
@@ -80,6 +95,7 @@ static void mercator_x_func(sqlite3_context *context, int argc, sqlite3_value **
     sqlite3_result_null(context);
   }
 }
+
 static void mercator_y_func(sqlite3_context *context, int argc, sqlite3_value **argv) {
   if (argc == 1 && sqlite3_value_type(argv[0]) == SQLITE_FLOAT) {
     double lat = sqlite3_value_double(argv[0]);
@@ -89,7 +105,6 @@ static void mercator_y_func(sqlite3_context *context, int argc, sqlite3_value **
     sqlite3_result_null(context);
   }
 }
-
 
 void register_functions(sqlite3 *db) {
   sqlite3_create_function(db, "radians", 1, SQLITE_UTF8, NULL, radians_func, NULL, NULL);
