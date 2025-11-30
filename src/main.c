@@ -19,6 +19,13 @@
 #define PBF2SQLITE_VERSION  "0.4.3"
 #define PBF2SQLITE_MAX_POINTS 1000
 
+/*
+** Public variables
+*/
+sqlite3 *db;         /* SQLite Database connection */
+int rc;              /* SQLite Result code */
+sqlite3_stmt *stmt_insert_nodes, *stmt_insert_node_tags, *stmt_insert_way_nodes,
+             *stmt_insert_way_tags, *stmt_insert_relation_members, *stmt_insert_relation_tags;
 static char *help =
   "\n"
   "Reads OpenStreetMap data into a SQLite database.\n"
@@ -42,14 +49,6 @@ static char *help =
   "\n"
   "This is pbf2sqlite version " PBF2SQLITE_VERSION "\n"
   ;
-
-/*
-** Public variables
-*/
-sqlite3 *db;         /* SQLite Database connection */
-int rc;              /* SQLite Result code */
-sqlite3_stmt *stmt_insert_nodes, *stmt_insert_node_tags, *stmt_insert_way_nodes,
-             *stmt_insert_way_tags, *stmt_insert_relation_members, *stmt_insert_relation_tags;
 
 typedef struct {
   int no;
