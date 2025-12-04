@@ -90,6 +90,14 @@ void parse_args(sqlite3 *db, int argc, char **argv, int exec) {
       if( exec ) exec_sql_stmt(db, argv[i+1]);
       i++;
     } 
+    else if( strcmp("route", argv[i])==0 && argc>=i+7 ){
+      lon1 = get_arg_double(argv, i+1);
+      lat1 = get_arg_double(argv, i+2);
+      lon2 = get_arg_double(argv, i+3);
+      lat2 = get_arg_double(argv, i+4);
+      if( exec ) shortest_way(db, lon1, lat1, lon2, lat2, argv[i+5], argv[i+6]);
+      i = i + 6;
+    } 
     else {
       printf("Incorrect option '%s'\n", argv[i]);
       exit(EXIT_FAILURE);

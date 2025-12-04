@@ -16,7 +16,7 @@
 # define M_PI   3.141592653589793238462643383279502884
 #endif
 
-#define PBF2SQLITE_VERSION  "0.4.3"
+#define PBF2SQLITE_VERSION  "0.4.4 ALPHA"
 #define PBF2SQLITE_MAX_POINTS 1000
 
 /*
@@ -62,6 +62,7 @@ typedef struct {
 #include "read_osm.c"
 #include "options.c"
 #include "show_data.c"
+#include "routing.c"
 #include "get_args.c"
 
 /*
