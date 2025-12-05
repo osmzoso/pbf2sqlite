@@ -2,6 +2,59 @@
 **
 */
 
+typedef struct {
+  double min_lon;
+  double min_lat;
+  double max_lon;
+  double max_lat;
+} bbox;
+
+/*
+** Create a boundingbox from two points.
+** A magnification factor must be specified.
+*/
+bbox calc_boundingbox(
+  double lon1,
+  double lat1,
+  double lon2,
+  double lat2,
+  double enlarge
+){
+  bbox b;
+  if( lon1<=lon2 ) {
+    b.min_lon = lon1;
+    b.max_lon = lon2;
+  } else {
+    b.min_lon = lon2;
+    b.max_lon = lon1;
+  }
+  if( lat1<=lat2 ) {
+    b.min_lat = lat1;
+    b.max_lat = lat2;
+  } else {
+    b.min_lat = lat2;
+    b.max_lat = lat1;
+  }
+  double mp_lon = (b.min_lon + b.max_lon) / 2;
+  double mp_lat = (b.min_lat + b.max_lat) / 2;
+  double diff_mp_lon = mp_lon - b.min_lon;
+  double diff_mp_lat = mp_lat - b.min_lat;
+  double diff;
+  if( diff_mp_lat > diff_mp_lon ) {
+    diff = diff_mp_lat * enlarge;
+  } else {
+    diff = diff_mp_lon * enlarge;
+  }
+  b.min_lon = mp_lon - diff;
+  b.min_lat = mp_lat - diff;
+  b.max_lon = mp_lon + diff;
+  b.max_lat = mp_lat + diff;
+  return b;
+}
+
+/*
+**
+*/
 void shortest_way(
   sqlite3 *db,
   const double lon_start,
@@ -12,8 +65,10 @@ void shortest_way(
   const char *filename
 ){
   printf("start: %f %f dest: %f %f\n", lon_start, lat_start, lon_dest, lat_dest);
+  /* 1. Get boundingbox for the subgraph */
+  bbox b = calc_boundingbox(lon_start, lat_start, lon_dest, lat_dest, 2.0);
+  printf("bbox: %f %f %f %f\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
   // TODO:
-  // 1. Get boundingbox for the subgraph
   // 2. Get subgraph, fill adjacency list
   // 3. Find the nodes in the graph that are closest to the coordinates of the start point and end point
   // 4. Routing
