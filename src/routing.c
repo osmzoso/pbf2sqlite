@@ -65,13 +65,23 @@ void shortest_way(
   const char *filename
 ){
   printf("start: %f %f dest: %f %f\n", lon_start, lat_start, lon_dest, lat_dest);
-  /* 1. Get boundingbox for the subgraph */
+  /* 1. Get permit mask */
+  int mask_permit;
+  if     ( strcmp("foot", permit)==0 ) mask_permit = 1;
+  else if( strcmp("bike", permit)==0 ) mask_permit = 2; 
+  else if( strcmp("car",  permit)==0 ) mask_permit = 4; 
+  else mask_permit = atoi(permit);
+  printf("permit: %s -> mask_permit: %d\n", permit, mask_permit);
+  /* 2. Get boundingbox for the subgraph */
   bbox b = calc_boundingbox(lon_start, lat_start, lon_dest, lat_dest, 2.0);
   printf("bbox: %f %f %f %f\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
+  /* 3. Get subgraph */
+  int number_nodes = create_subgraph_tables(db, b.min_lon, b.min_lat, b.max_lon, b.max_lat, mask_permit);
+  printf("number nodes: %d\n", number_nodes);
   // TODO:
-  // 2. Get subgraph, fill adjacency list
-  // 3. Find the nodes in the graph that are closest to the coordinates of the start point and end point
-  // 4. Routing
-  // 5. Output the coordinates of the path
+  // 4. fill adjacency list
+  // 5. Find the nodes in the graph that are closest to the coordinates of the start point and end point
+  // 6. Routing
+  // 7. Output the coordinates of the path
 }
 
