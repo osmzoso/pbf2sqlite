@@ -78,8 +78,22 @@ void shortest_way(
   /* 3. Get subgraph */
   int number_nodes = create_subgraph_tables(db, b.min_lon, b.min_lat, b.max_lon, b.max_lat, mask_permit);
   printf("number nodes: %d\n", number_nodes);
+  /* 4. fill adjacency list */
+  struct Graph* graph = createGraph(number_nodes);
+  sqlite3_stmt *stmt = NULL;
+  rc = sqlite3_prepare_v2(db,
+    " SELECT s.edge_id,sns.no,sne.no,s.dist,s.directed"
+    " FROM subgraph AS s"
+    " LEFT JOIN subgraph_nodes AS sns ON s.start_node_id=sns.node_id"
+    " LEFT JOIN subgraph_nodes AS sne ON s.end_node_id=sne.node_id", -1, &stmt, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  while( sqlite3_step(stmt)==SQLITE_ROW ){
+    addEdge(graph, sqlite3_column_int64(stmt, 1), sqlite3_column_int64(stmt, 2));
+  }
+  sqlite3_finalize(stmt);
+  printGraph(graph);
+  destroyGraph(graph);
   // TODO:
-  // 4. fill adjacency list
   // 5. Find the nodes in the graph that are closest to the coordinates of the start point and end point
   // 6. Routing
   // 7. Output the coordinates of the path
