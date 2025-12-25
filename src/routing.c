@@ -64,6 +64,7 @@ void shortest_way(
   const char *permit,
   const char *filename
 ){
+  sqlite3_stmt *stmt;
   printf("start: %f %f dest: %f %f\n", lon_start, lat_start, lon_dest, lat_dest);
   /* 1. Get permit mask */
   int mask_permit;
@@ -80,7 +81,6 @@ void shortest_way(
   printf("number nodes: %d\n", number_nodes);
   /* 4. fill adjacency list */
   struct Graph* graph = createGraph(number_nodes);
-  sqlite3_stmt *stmt = NULL;
   rc = sqlite3_prepare_v2(db,
     " SELECT sns.no,sne.no,s.dist,s.edge_id,s.directed"
     " FROM subgraph AS s"
@@ -95,11 +95,36 @@ void shortest_way(
                    sqlite3_column_int64(stmt, 4));
   }
   sqlite3_finalize(stmt);
-  printGraph(graph);
+  //printGraph(graph);
+  /* 5. Find the nodes in the graph that are closest to the coordinates of the start point and end point */
+  double dist_node_start = DBL_MAX;
+  int graph_node_start = -1;
+  double dist_node_end = DBL_MAX;
+  int graph_node_end = -1;
+  int no;
+  double lon, lat, dist;
+  rc = sqlite3_prepare_v2(db, "SELECT no,lon,lat FROM subgraph_nodes", -1, &stmt, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  while( sqlite3_step(stmt)==SQLITE_ROW ){
+    no = sqlite3_column_int64(stmt, 0);
+    lon = sqlite3_column_double(stmt, 1);
+    lat = sqlite3_column_double(stmt, 2);
+    dist = sqrt(pow(lon_start-lon, 2) + pow(lat_start-lat, 2));
+    if( dist < dist_node_start ){
+      graph_node_start = no;
+      dist_node_start = dist;
+    }
+    dist = sqrt(pow(lon_dest-lon, 2) + pow(lat_dest-lat, 2));
+    if( dist < dist_node_end ){
+      graph_node_end = no;
+      dist_node_end = dist;
+    }
+  }
+  sqlite3_finalize(stmt);
+  printf("node_start: %d    node_end: %d\n", graph_node_start, graph_node_end);
+  /* 6. Routing */
+  Dijkstra(graph, graph_node_start, graph_node_end);
   // TODO:
-  // 5. Find the nodes in the graph that are closest to the coordinates of the start point and end point
-  // 6. Routing
-  Dijkstra(graph, 1, 2);
   // 7. Output the coordinates of the path
   // 8. Cleanup
   destroyGraph(graph);
