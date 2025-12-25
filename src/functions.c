@@ -60,26 +60,6 @@ double mercator_y(double lat) {
 /*
 ** Register the functions in SQLite
 */
-static void radians_func(sqlite3_context *context, int argc, sqlite3_value **argv) {
-  if (argc == 1 && sqlite3_value_type(argv[0]) == SQLITE_FLOAT) {
-    double phi = sqlite3_value_double(argv[0]);
-    phi = radians(phi);
-    sqlite3_result_double(context, phi);
-  } else {
-    sqlite3_result_null(context);
-  }
-}
-
-static void degrees_func(sqlite3_context *context, int argc, sqlite3_value **argv) {
-  if (argc == 1 && sqlite3_value_type(argv[0]) == SQLITE_FLOAT) {
-    double phi = sqlite3_value_double(argv[0]);
-    phi = degrees(phi);
-    sqlite3_result_double(context, phi);
-  } else {
-    sqlite3_result_null(context);
-  }
-}
-
 static void distance_func(sqlite3_context *context, int argc, sqlite3_value **argv) {
   if (argc == 4 && sqlite3_value_type(argv[0]) == SQLITE_FLOAT
                 && sqlite3_value_type(argv[1]) == SQLITE_FLOAT
@@ -117,8 +97,6 @@ static void mercator_y_func(sqlite3_context *context, int argc, sqlite3_value **
 }
 
 void register_functions(sqlite3 *db) {
-  sqlite3_create_function(db, "radians", 1, SQLITE_UTF8, NULL, radians_func, NULL, NULL);
-  sqlite3_create_function(db, "degrees", 1, SQLITE_UTF8, NULL, degrees_func, NULL, NULL);
   sqlite3_create_function(db, "distance", 4, SQLITE_UTF8, NULL, distance_func, NULL, NULL);
   sqlite3_create_function(db, "mercator_x", 1, SQLITE_UTF8, NULL, mercator_x_func, NULL, NULL);
   sqlite3_create_function(db, "mercator_y", 1, SQLITE_UTF8, NULL, mercator_y_func, NULL, NULL);

@@ -259,8 +259,6 @@ SQLite is extended with the following functions:
 
 function                         | description
 ---------------------------------|----------------------------------------
-radians(deg)                     | Conversion from degrees to radians
-degrees(rad)                     | Conversion from radians to degrees
 distance(lon1, lat1, lon2, lat2) | Calculates distance in meters
 mercator_x(lon)                  | Web Mercator projection X (EPSG:3857)
 mercator_y(lat)                  | Web Mercator projection Y (EPSG:3857)

@@ -26,7 +26,10 @@ static:
      $(CFLAGS) \
      -O2 \
      -s \
-     -DSQLITE_THREADSAFE=0 -DSQLITE_OMIT_LOAD_EXTENSION -DSQLITE_ENABLE_RTREE \
+     -DSQLITE_THREADSAFE=0 \
+     -DSQLITE_OMIT_LOAD_EXTENSION \
+     -DSQLITE_ENABLE_RTREE \
+     -DSQLITE_ENABLE_MATH_FUNCTIONS \
      main.c \
      ./sqlite3/sqlite3.c \
      ./readosm/osm_objects.c \
@@ -49,7 +52,10 @@ win64:
      $(CFLAGS) \
      -O2 \
      -s \
-     -DSQLITE_THREADSAFE=0 -DSQLITE_OMIT_LOAD_EXTENSION -DSQLITE_ENABLE_RTREE \
+     -DSQLITE_THREADSAFE=0 \
+     -DSQLITE_OMIT_LOAD_EXTENSION \
+     -DSQLITE_ENABLE_RTREE \
+     -DSQLITE_ENABLE_MATH_FUNCTIONS \
      -D_FORTIFY_SOURCE=2 \
      main.c \
      ./sqlite3/sqlite3.c \
