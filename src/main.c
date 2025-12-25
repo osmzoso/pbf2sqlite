@@ -59,6 +59,7 @@ typedef struct {
 #include "functions.c"
 #include "leaflet.c"
 #include "graph.c"
+#include "dijkstra.c"
 #include "read_osm.c"
 #include "options.c"
 #include "show_data.c"
