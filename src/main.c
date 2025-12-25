@@ -8,6 +8,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <math.h>
+#include <limits.h>
 #include <errno.h>
 #include <sqlite3.h>
 #include <readosm.h>

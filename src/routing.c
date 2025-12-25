@@ -82,20 +82,27 @@ void shortest_way(
   struct Graph* graph = createGraph(number_nodes);
   sqlite3_stmt *stmt = NULL;
   rc = sqlite3_prepare_v2(db,
-    " SELECT s.edge_id,sns.no,sne.no,s.dist,s.directed"
+    " SELECT sns.no,sne.no,s.dist,s.edge_id,s.directed"
     " FROM subgraph AS s"
     " LEFT JOIN subgraph_nodes AS sns ON s.start_node_id=sns.node_id"
     " LEFT JOIN subgraph_nodes AS sne ON s.end_node_id=sne.node_id", -1, &stmt, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   while( sqlite3_step(stmt)==SQLITE_ROW ){
-    addEdge(graph, sqlite3_column_int64(stmt, 1), sqlite3_column_int64(stmt, 2));
+    addEdge(graph, sqlite3_column_int64(stmt, 0),
+                   sqlite3_column_int64(stmt, 1),
+                   sqlite3_column_int64(stmt, 2),
+                   sqlite3_column_int64(stmt, 3),
+                   sqlite3_column_int64(stmt, 4));
   }
   sqlite3_finalize(stmt);
   printGraph(graph);
-  destroyGraph(graph);
   // TODO:
   // 5. Find the nodes in the graph that are closest to the coordinates of the start point and end point
   // 6. Routing
+  Dijkstra(graph, 1, 2);
   // 7. Output the coordinates of the path
+  // 8. Cleanup
+  destroyGraph(graph);
+  destroyDijkstra();
 }
 

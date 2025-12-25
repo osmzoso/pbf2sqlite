@@ -1,52 +1,54 @@
 
 /*
-** Implementing a graph as an adjacency list
+** Graph data structures
+** Terms: A graph is a set of vertices (nodes/points) connected by edges (links/lines)
+** Implementation as an adjacency list
 */
-
-/* struct node adjacency list */
-struct Node {
+struct AdjNode {
   int dest;
-  struct Node* next;
+  int dist;
+  int edge;
+  struct AdjNode* next;
 };
 
-/* struct adjacency list */
 struct AdjList {
-  struct Node* head;
+  struct AdjNode* head;
 };
 
-/* struct graph */
 struct Graph {
   int num_nodes;
   struct AdjList* array;
 };
 
-/* add new node */
-struct Node* newAdjListNode(int dest) {
-  struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+struct AdjNode* newAdjListNode(int dest, int dist, int edge) {
+  struct AdjNode* newNode = (struct AdjNode*)malloc(sizeof(struct AdjNode));
+  if(!newNode) abort_oom();
   newNode->dest = dest;
+  newNode->dist = dist;
+  newNode->edge = edge;
   newNode->next = NULL;
   return newNode;
 }
 
-/* create new graph with V nodes */
 struct Graph* createGraph(int V) {
   struct Graph* graph = (struct Graph*)malloc(sizeof(struct Graph));
+  if(!graph) abort_oom();
   V = V+1;
   graph->num_nodes = V;
   /* init adjacency list */
   graph->array = (struct AdjList*)malloc(V * sizeof(struct AdjList));
+  if(!graph->array) abort_oom();
   /* set head of all lists to NULL */
   for (int i = 0; i < V; ++i)
     graph->array[i].head = NULL;
   return graph;
 }
 
-/* release graph memory */
 void destroyGraph(struct Graph* graph) {
   for (int i = 0; i < graph->num_nodes; ++i) {
-    struct Node* current = graph->array[i].head;
+    struct AdjNode* current = graph->array[i].head;
     while (current != NULL) {
-      struct Node* temp = current;
+      struct AdjNode* temp = current;
       current = current->next;
       free(temp);
     }
@@ -55,29 +57,192 @@ void destroyGraph(struct Graph* graph) {
   free(graph);
 }
 
-/* add an edge to the graph TODO */
-void addEdge(struct Graph* graph, int src, int dest) {
-  /* edge from src to dest */
-  struct Node* newNode = newAdjListNode(dest);
+void addEdge(struct Graph* graph, int src, int dest, int dist, int edge, int dir) {
+  struct AdjNode* newNode;
+  newNode = newAdjListNode(dest, dist, edge);  /* add edge from src to dest */
   newNode->next = graph->array[src].head;
   graph->array[src].head = newNode;
-
-  /* if edge undirected then edge from dest to src TODO */
-  newNode = newAdjListNode(src);
-  newNode->next = graph->array[dest].head;
-  graph->array[dest].head = newNode;
+  if(!dir){
+    newNode = newAdjListNode(src, dist, edge);  /* add edge from dest to src */
+    newNode->next = graph->array[dest].head;
+    graph->array[dest].head = newNode;
+  }
 }
 
-/* show graph */
 void printGraph(struct Graph* graph) {
+  printf("Graph (%d nodes):\n", graph->num_nodes);
   for (int n = 0; n < graph->num_nodes; n++) {
-    struct Node* pCrawl = graph->array[n].head;
-    printf("\nnode %d: ", n);
+    struct AdjNode* pCrawl = graph->array[n].head;
+    printf("node %d\n", n);
     while (pCrawl) {
-      printf(" ->%d", pCrawl->dest);
+      printf("        -> node %d, dist %d, edge %d\n", pCrawl->dest, pCrawl->dist, pCrawl->edge);
       pCrawl = pCrawl->next;
     }
   }
   printf("\n");
+}
+
+/*
+** Structures for the Dijkstra Algorithm
+*/
+struct Dijkstra {
+  int d;         /* Total distance to the node */
+  int v_node;    /* Predecessor node (shortest path tree) */
+  int v_edge;    /* Predecessor edge (shortest path tree) */
+  int pos_heap;  /* Contains the position of the node in b[] */
+};
+
+/* Public variables */
+struct Dijkstra* node;
+int *b;          /* Array b[] contains the nodes in the priority queue */
+int b_size;      /* Contains the current number of nodes in the priority queue */
+
+/*
+** Priority Queue
+**
+** b_insert() : Insert node in priority queue
+** b_remove() : Remove the node with minimal distance from priority queue
+** b_relax()  : Reduce the distance, adjust priority queue
+**
+*/
+#define PRIORITY_QUEUE_HEAP 1
+#if PRIORITY_QUEUE_HEAP
+void downheap(int k) {
+  int j, v, v_k;
+
+  v = node[ b[k] ].d;
+  v_k = b[k];
+  while ( k <= b_size/2 ) {
+    j = k + k;
+    if ( j < b_size && node[ b[j] ].d > node[ b[j+1] ].d ) j++;
+    if ( v <= node[ b[j] ].d ) break;
+    b[k] = b[j];
+    node[ b[k] ].pos_heap = k;
+    k = j;
+  }
+  b[k] = v_k;
+  node[ b[k] ].pos_heap = k;
+}
+
+void upheap(int k) {
+  int v, v_k;
+
+  v = node[ b[k] ].d;
+  v_k = b[k];
+  node[ 0 ].d = 0;
+  while ( node[ b[k/2] ].d > v ) {
+    b[k] = b[k/2];
+    node[ b[k] ].pos_heap = k;
+    k = k/2;
+  }
+  b[k] = v_k;
+  node[ b[k] ].pos_heap = k;
+}
+
+void b_insert(int v) {
+  b[++b_size] = v;
+  upheap( b_size );
+}
+
+int b_remove(void) {
+  int v;
+
+  v = b[1];
+  b[1] = b[b_size--];
+  downheap( 1 );
+  node[v].pos_heap = 0;
+  return v;
+}
+
+void b_relax(int k, int v) {
+  if ( node[ k ].d > v ) {
+    node[ k ].d = v;
+    if ( node[k].pos_heap > 0 ) upheap( node[k].pos_heap );
+  }
+  if ( node[ k ].d < v ) {
+    node[ k ].d = v;
+    if ( node[k].pos_heap > 0 ) downheap( node[k].pos_heap );
+  }
+}
+#else
+void b_insert(int node) {
+  b_size++;
+  b[b_size] = node;
+}
+
+int b_remove() {
+  int i, minD, min_i, minB;
+  minD = INT_MAX;
+  min_i = 0;
+  for (i = 1; i<=b_size; i++) {
+    if ( node[ b[i] ].d < minD) {
+      minD = node[ b[i] ].d;
+      min_i = i;
+    }
+  }
+  minB = b[min_i];
+  b[min_i] = b[b_size];
+  b[b_size] = 0;
+  b_size--;
+  return minB;
+}
+
+void b_relax(int n, int d) {
+  node[n].d = d;
+}
+#endif
+
+/*
+** Dijkstra Algorithm
+** https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
+*/
+void Dijkstra(struct Graph* graph, int start_node, int dest_node) {
+  int i, minD=0, minB=0;
+  /* Allocate memory */
+  node = (struct Dijkstra*) malloc(graph->num_nodes * sizeof(struct Dijkstra));
+  if(!node) abort_oom();
+  b = (int *) malloc(graph->num_nodes * sizeof(int));
+  if(!b) abort_oom();
+  /* Initialize distances and heap */
+  for (i = 0; i < graph->num_nodes; i++) {
+    node[i].d = INT_MAX;
+    node[i].v_node = 0;
+    node[i].v_edge = 0;
+    b[i] = 0;
+  }
+  b_size = 0;
+  /* Insert start node in priority queue */
+  b_insert(start_node);
+  node[start_node].d = 0;
+  /* While priority queue is not empty */
+  while( b_size!=0 ){
+    /* Remove node u with minimal distance from priority queue */
+    minB = b_remove();
+    minD = node[minB].d;
+    /* If node u is the destination node, the algorithm can be aborted */
+    if (minB == dest_node) break;
+    /* Get each neighbor v of node u */
+    struct AdjNode* pCrawl = graph->array[minB].head;
+    while (pCrawl) {
+      /* If node v has not yet been visited, then add it to the priority queue */
+      if (node[pCrawl->dest].d == INT_MAX) b_insert(pCrawl->dest);
+      /* If this path is shorter, then relax */
+      if (minD + pCrawl->dist < node[pCrawl->dest].d) {
+        /* Enter new distance in the priority queue, adjust priority */
+        b_relax(pCrawl->dest, minD + pCrawl->dist );
+        /* Saving the predecessor node and edge */
+        node[pCrawl->dest].v_node = minB;
+        node[pCrawl->dest].v_edge = pCrawl->edge;
+      }
+      pCrawl = pCrawl->next;
+    }
+
+  }
+  /* Free memory for the heap */
+  free(b);
+}
+
+void destroyDijkstra() {
+  free(node);
 }
 
