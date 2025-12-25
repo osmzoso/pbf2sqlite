@@ -284,10 +284,7 @@ void write_graph(
   int64_t node_id, way_id, start_node_id, end_node_id;
   double lon, lat;
   point *pointlist = malloc(PBF2SQLITE_MAX_POINTS * sizeof(point));
-  if( !pointlist ){
-    fprintf(stderr, "malloc failed");
-    return;
-  }
+  if( !pointlist ) abort_oom();
   /*  */
   create_subgraph_tables(db, lon1, lat1, lon2, lat2, mask_permit);
   /* show graph nodes */

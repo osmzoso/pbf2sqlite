@@ -1,8 +1,18 @@
 /*
-** Program abort, displays last SQLite error message
+** Program abort - Database error
+** Displays last SQLite error message
 */
 void abort_db_error(sqlite3 *db, int rc) {
   fprintf(stderr, "pbf2sqlite - (%i) %s - %s\n", rc, sqlite3_errstr(rc), sqlite3_errmsg(db));
+  sqlite3_close(db);
+  exit(EXIT_FAILURE);
+}
+
+/*
+** Program abort - Out of memory
+*/
+void abort_oom() {
+  perror("malloc failed");
   sqlite3_close(db);
   exit(EXIT_FAILURE);
 }
