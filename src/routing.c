@@ -65,20 +65,20 @@ void shortest_way(
   const char *filename
 ){
   sqlite3_stmt *stmt;
-  printf("start: %f %f dest: %f %f\n", lon_start, lat_start, lon_dest, lat_dest);
+  printf("# start: %f %f dest: %f %f\n", lon_start, lat_start, lon_dest, lat_dest);
   /* 1. Get permit mask */
   int mask_permit;
   if     ( strcmp("foot", permit)==0 ) mask_permit = 1;
   else if( strcmp("bike", permit)==0 ) mask_permit = 2; 
   else if( strcmp("car",  permit)==0 ) mask_permit = 4; 
   else mask_permit = atoi(permit);
-  printf("permit: %s -> mask_permit: %d\n", permit, mask_permit);
+  printf("# permit: %s -> mask_permit: %d\n", permit, mask_permit);
   /* 2. Get boundingbox for the subgraph */
   bbox b = calc_boundingbox(lon_start, lat_start, lon_dest, lat_dest, 2.0);
-  printf("bbox: %f %f %f %f\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
+  printf("# bbox: %f %f %f %f\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
   /* 3. Get subgraph */
   int number_nodes = create_subgraph_tables(db, b.min_lon, b.min_lat, b.max_lon, b.max_lat, mask_permit);
-  printf("number nodes: %d\n", number_nodes);
+  printf("# number nodes: %d\n", number_nodes);
   /* 4. fill adjacency list */
   struct Graph* graph = createGraph(number_nodes);
   rc = sqlite3_prepare_v2(db,
@@ -121,12 +121,28 @@ void shortest_way(
     }
   }
   sqlite3_finalize(stmt);
-  printf("node_start: %d    node_end: %d\n", graph_node_start, graph_node_end);
+  printf("# node_start: %d    node_end: %d\n", graph_node_start, graph_node_end);
   /* 6. Routing */
   Dijkstra(graph, graph_node_start, graph_node_end);
+  printf("# distance: %dm\n", node[graph_node_end].d);
+  /* 7. Output the coordinates of the path */
   // TODO:
-  // 7. Output the coordinates of the path
-  // 8. Cleanup
+  FILE *txt;
+  txt = fopen(filename, "w");
+  if( txt==NULL ) {
+    printf("Error opening file %s: %s", filename, strerror(errno));
+    return;
+  }
+  /* get edge list */
+  int v = graph_node_end;
+  while ( node[v].v_edge != 0 ) {
+    fprintf(txt, "edge %d\n", node[v].v_edge );
+    v = node[v].v_node;
+  }
+  if( fclose(txt)!=0 ) {
+    printf("Error closing file %s: %s", filename, strerror(errno));
+  }
+  /* 8. Cleanup */
   destroyGraph(graph);
   destroyDijkstra();
 }
