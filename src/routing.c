@@ -124,19 +124,38 @@ void shortest_way(
   printf("# node_start: %d    node_end: %d\n", graph_node_start, graph_node_end);
   /* 6. Routing */
   Dijkstra(graph, graph_node_start, graph_node_end);
-  printf("# distance: %dm\n", node[graph_node_end].d);
+  printf("# distance: %d m\n", node[graph_node_end].d);
   /* 7. Output the coordinates of the path */
-  // TODO:
   FILE *txt;
   txt = fopen(filename, "w");
   if( txt==NULL ) {
     printf("Error opening file %s: %s", filename, strerror(errno));
     return;
   }
-  /* get edge list */
+  /* get all edges of the path */
+  int edge_id;
   int v = graph_node_end;
   while ( node[v].v_edge != 0 ) {
-    fprintf(txt, "edge %d\n", node[v].v_edge );
+    edge_id = node[v].v_edge;
+    /*  */
+    int64_t way_id = 0;
+    int64_t start_node_id = 0;
+    int64_t end_node_id = 0;
+    rc = sqlite3_prepare_v2(db,
+      "SELECT way_id,start_node_id,end_node_id FROM graph WHERE edge_id=?", -1, &stmt, NULL);
+    if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+    sqlite3_bind_int64(stmt, 1, edge_id);
+    while( sqlite3_step(stmt)==SQLITE_ROW ){
+      way_id = (int64_t)sqlite3_column_int64(stmt, 0);
+      start_node_id = (int64_t)sqlite3_column_int64(stmt, 1);
+      end_node_id = (int64_t)sqlite3_column_int64(stmt, 2);
+    }
+    sqlite3_finalize(stmt);
+    /* Test */
+    fprintf(txt, "edge %d - way %" PRId64 " start_node %" PRId64 " end_node %" PRId64 "\n", edge_id, way_id, start_node_id, end_node_id);
+    /* TODO */
+
+    /* get previous node of the path */
     v = node[v].v_node;
   }
   if( fclose(txt)!=0 ) {
