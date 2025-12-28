@@ -78,7 +78,7 @@ void shortest_way(
   printf("# bbox: %f %f %f %f\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
   /* 3. Get subgraph */
   int number_nodes = create_subgraph_tables(db, b.min_lon, b.min_lat, b.max_lon, b.max_lat, mask_permit);
-  printf("# number nodes: %d\n", number_nodes);
+  printf("# graph number nodes : %d\n", number_nodes);
   /* 4. fill adjacency list */
   struct Graph* graph = createGraph(number_nodes);
   rc = sqlite3_prepare_v2(db,
@@ -99,29 +99,36 @@ void shortest_way(
   /* 5. Find the nodes in the graph that are closest to the coordinates of the start point and end point */
   double dist_node_start = DBL_MAX;
   int graph_node_start = -1;
+  int64_t node_id_start = -1;
   double dist_node_end = DBL_MAX;
   int graph_node_end = -1;
+  int64_t node_id_end = -1;
   int no;
+  int64_t node_id;
   double lon, lat, dist;
-  rc = sqlite3_prepare_v2(db, "SELECT no,lon,lat FROM subgraph_nodes", -1, &stmt, NULL);
+  rc = sqlite3_prepare_v2(db, "SELECT no,node_id,lon,lat FROM subgraph_nodes", -1, &stmt, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   while( sqlite3_step(stmt)==SQLITE_ROW ){
     no = sqlite3_column_int64(stmt, 0);
-    lon = sqlite3_column_double(stmt, 1);
-    lat = sqlite3_column_double(stmt, 2);
+    node_id = sqlite3_column_int64(stmt, 1);
+    lon = sqlite3_column_double(stmt, 2);
+    lat = sqlite3_column_double(stmt, 3);
     dist = sqrt(pow(lon_start-lon, 2) + pow(lat_start-lat, 2));
     if( dist < dist_node_start ){
       graph_node_start = no;
+      node_id_start = node_id;
       dist_node_start = dist;
     }
     dist = sqrt(pow(lon_dest-lon, 2) + pow(lat_dest-lat, 2));
     if( dist < dist_node_end ){
       graph_node_end = no;
+      node_id_end = node_id;
       dist_node_end = dist;
     }
   }
   sqlite3_finalize(stmt);
-  printf("# node_start: %d    node_end: %d\n", graph_node_start, graph_node_end);
+  printf("# graph node_start   : %d (OSM node_id %" PRId64 ")\n", graph_node_start, node_id_start);
+  printf("# graph node_end     : %d (OSM node_id %" PRId64 ")\n", graph_node_end, node_id_end);
   /* 6. Routing */
   Dijkstra(graph, graph_node_start, graph_node_end);
   printf("# distance: %d m\n", node[graph_node_end].d);
