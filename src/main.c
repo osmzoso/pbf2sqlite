@@ -59,6 +59,7 @@ typedef struct {
 } point;
 
 #include "functions.c"
+#include "nodelist.c"
 #include "leaflet.c"
 #include "graph.c"
 #include "dijkstra.c"
