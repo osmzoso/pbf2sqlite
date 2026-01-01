@@ -18,6 +18,7 @@ void nodelist_init(NodeList *list) {
   list->size = 0;
   list->capacity = 4;  /* initial capacity */
   list->node = malloc(list->capacity * sizeof(Node));
+  if (!list->node) abort_oom();
 }
 
 /* Add a node */

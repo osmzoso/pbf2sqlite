@@ -48,6 +48,9 @@ static char *help =
   "  vgraph LON1 LAT1 LON2 LAT2 HTMLFILE     Visualize graph data\n"
   "  sql STATEMENT                           Execute SQL statement\n"
   "\n"
+  "Shortest way:\n"
+  "  route LON1 LAT1 LON2 LAT2 PERMIT FILE\n"
+  "\n"
   "This is pbf2sqlite version " PBF2SQLITE_VERSION "\n"
   ;
 
