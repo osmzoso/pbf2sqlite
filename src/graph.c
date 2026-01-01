@@ -31,20 +31,11 @@ void edge_points(
   sqlite3_bind_int64(stmt_points, 5, end_node_id);
   nodelist_clear(nl);
   while( sqlite3_step(stmt_points)==SQLITE_ROW ){
-    //pointlist[n].lon = (double)sqlite3_column_double(stmt_points, 0);
-    //pointlist[n].lat = (double)sqlite3_column_double(stmt_points, 1);
     nodelist_add(nl, (double)sqlite3_column_double(stmt_points, 0),
                      (double)sqlite3_column_double(stmt_points, 1),
                      (double)sqlite3_column_int64(stmt_points, 2) );
     n++;
-    //if( n >= PBF2SQLITE_MAX_POINTS ){
-    //  printf("More than %d edge points in way %" PRId64 " "
-    //         "(start_node %" PRId64 ", end_node %" PRId64 ")\n",
-    //           PBF2SQLITE_MAX_POINTS, way_id, start_node_id, end_node_id);
-    //  break;
-    //}
   }
-  //pointlist[0].no = n;
   sqlite3_finalize(stmt_points);
   /*
   ** If no nodes were found then search in the opposite direction
@@ -69,20 +60,11 @@ void edge_points(
     sqlite3_bind_int64(stmt_points, 5, start_node_id);
     nodelist_clear(nl);
     while( sqlite3_step(stmt_points)==SQLITE_ROW ){
-      //pointlist[n].lon = (double)sqlite3_column_double(stmt_points, 0);
-      //pointlist[n].lat = (double)sqlite3_column_double(stmt_points, 1);
       nodelist_add(nl, (double)sqlite3_column_double(stmt_points, 0),
                        (double)sqlite3_column_double(stmt_points, 1),
                        (double)sqlite3_column_int64(stmt_points, 2) );
       n++;
-      //if( n >= PBF2SQLITE_MAX_POINTS ){
-      //  printf("More than %d edge points in way %" PRId64 " "
-      //         "(start_node %" PRId64 ", end_node %" PRId64 ")\n",
-      //           PBF2SQLITE_MAX_POINTS, way_id, start_node_id, end_node_id);
-      //  break;
-      //}
     }
-    //pointlist[0].no = n;
     sqlite3_finalize(stmt_points);
   }
 }

@@ -105,10 +105,6 @@ void leaflet_polyline(
   const char *text
 ){
   fprintf(html, "L.polyline( [\n");
-  //for(int i=0; i<pointlist[0].no; i++){
-  //  if( i>0 ) fprintf(html, ",\n");
-  //  fprintf(html, "[%.7f, %.7f]", pointlist[i].lat, pointlist[i].lon);
-  //}
   for(int i=0; i<pointlist->size; i++){
     if( i>0 ) fprintf(html, ",\n");
     fprintf(html, "[%.7f, %.7f]", pointlist->node[i].lat, pointlist->node[i].lon);
@@ -136,13 +132,13 @@ void leaflet_line(
 void leaflet_polygon(
   FILE *html,
   const char *mapid,
-  point *pointlist,
+  NodeList *pointlist,
   const char *text
 ){
   fprintf(html, "L.polygon( [\n");
-  for(int i=0; i<pointlist[0].no; i++){
+  for(int i=0; i<pointlist->size; i++){
     if( i>0 ) fprintf(html, ",\n");
-    fprintf(html, "[%.7f, %.7f]", pointlist[i].lat, pointlist[i].lon);
+    fprintf(html, "[%.7f, %.7f]", pointlist->node[i].lat, pointlist->node[i].lon);
   }
   fprintf(html, " ], style).addTo(%s)",  mapid);
   if( text[0]!='\0' ) fprintf(html, ".bindPopup(\"%s\")", text);

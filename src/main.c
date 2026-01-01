@@ -19,7 +19,6 @@
 #endif
 
 #define PBF2SQLITE_VERSION  "0.4.4 ALPHA"
-#define PBF2SQLITE_MAX_POINTS 1000
 
 /*
 ** Public variables
@@ -51,12 +50,6 @@ static char *help =
   "\n"
   "This is pbf2sqlite version " PBF2SQLITE_VERSION "\n"
   ;
-
-typedef struct {
-  int no;
-  double lon;
-  double lat;
-} point;
 
 #include "functions.c"
 #include "nodelist.c"
