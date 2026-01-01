@@ -283,8 +283,8 @@ void write_graph(
   char popuptext[200];
   int64_t node_id, way_id, start_node_id, end_node_id;
   double lon, lat;
-  point *pointlist = malloc(PBF2SQLITE_MAX_POINTS * sizeof(point));
-  if( !pointlist ) abort_oom();
+  //point *pointlist = malloc(PBF2SQLITE_MAX_POINTS * sizeof(point));
+  //if( !pointlist ) abort_oom();
   /*  */
   create_subgraph_tables(db, lon1, lat1, lon2, lat2, mask_permit);
   /* show graph nodes */
@@ -301,6 +301,8 @@ void write_graph(
     leaflet_circlemarker(html, mapid, lon, lat, popuptext);
   }
   /* show graph edges */
+  NodeList nodelist;
+  nodelist_init(&nodelist);
   leaflet_style(html, "#0000ff", 0.5, 3, "", "none", 1.0, 5);
   rc = sqlite3_prepare_v2(db,
     "SELECT start_node_id,end_node_id,way_id,directed FROM subgraph",
@@ -311,21 +313,21 @@ void write_graph(
     end_node_id = (int64_t)sqlite3_column_int64(stmt_edges, 1);
     way_id = (int64_t)sqlite3_column_int64(stmt_edges, 2);
     directed = (int)sqlite3_column_int(stmt_edges, 3);
-    edge_points(db, way_id, start_node_id, end_node_id, pointlist);
+    edge_points(db, way_id, start_node_id, end_node_id, &nodelist);
     snprintf(popuptext, sizeof(popuptext), "way_id %" PRId64, way_id);
     if( directed ){
       leaflet_style(html, "#0000ff", 0.5, 3, "5 5", "none", 1.0, 5);
-      leaflet_polyline(html, mapid, pointlist, popuptext);
+      leaflet_polyline(html, mapid, &nodelist, popuptext);
       leaflet_style(html, "#0000ff", 0.5, 3, "", "none", 1.0, 5);
     }else{
-      leaflet_polyline(html, mapid, pointlist, popuptext);
+      leaflet_polyline(html, mapid, &nodelist, popuptext);
     }
   }
   /* show boundingbox */
   leaflet_style(html, "#000000", 0.3, 2, "5 5", "none", 0.3, 5);
   leaflet_rectangle(html, mapid, lon1, lat1, lon2, lat2, "");
   /*  */
-  free(pointlist);
+  nodelist_free(&nodelist);
   sqlite3_finalize(stmt_nodes);
   sqlite3_finalize(stmt_edges);
 }

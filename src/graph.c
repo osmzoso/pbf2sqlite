@@ -7,13 +7,13 @@ void edge_points(
   uint64_t way_id,
   uint64_t start_node_id,
   uint64_t end_node_id,
-  point *pointlist
+  NodeList *nl
 ){
   int n;
   sqlite3_stmt *stmt_points;
   n = 0;
   rc = sqlite3_prepare_v2(db,
-    " SELECT n.lon,n.lat"
+    " SELECT n.lon,n.lat,n.node_id"
     " FROM way_nodes AS wn"
     " LEFT JOIN nodes AS n ON wn.node_id=n.node_id"
     " WHERE wn.way_id=?1"
@@ -29,25 +29,29 @@ void edge_points(
   sqlite3_bind_int64(stmt_points, 3, start_node_id);
   sqlite3_bind_int64(stmt_points, 4, way_id);
   sqlite3_bind_int64(stmt_points, 5, end_node_id);
+  nodelist_clear(nl);
   while( sqlite3_step(stmt_points)==SQLITE_ROW ){
-    pointlist[n].lon = (double)sqlite3_column_double(stmt_points, 0);
-    pointlist[n].lat = (double)sqlite3_column_double(stmt_points, 1);
+    //pointlist[n].lon = (double)sqlite3_column_double(stmt_points, 0);
+    //pointlist[n].lat = (double)sqlite3_column_double(stmt_points, 1);
+    nodelist_add(nl, (double)sqlite3_column_double(stmt_points, 0),
+                     (double)sqlite3_column_double(stmt_points, 1),
+                     (double)sqlite3_column_int64(stmt_points, 2) );
     n++;
-    if( n >= PBF2SQLITE_MAX_POINTS ){
-      printf("More than %d edge points in way %" PRId64 " "
-             "(start_node %" PRId64 ", end_node %" PRId64 ")\n",
-               PBF2SQLITE_MAX_POINTS, way_id, start_node_id, end_node_id);
-      break;
-    }
+    //if( n >= PBF2SQLITE_MAX_POINTS ){
+    //  printf("More than %d edge points in way %" PRId64 " "
+    //         "(start_node %" PRId64 ", end_node %" PRId64 ")\n",
+    //           PBF2SQLITE_MAX_POINTS, way_id, start_node_id, end_node_id);
+    //  break;
+    //}
   }
-  pointlist[0].no = n;
+  //pointlist[0].no = n;
   sqlite3_finalize(stmt_points);
   /*
   ** If no nodes were found then search in the opposite direction
   */
   if( n==0 ){
     rc = sqlite3_prepare_v2(db,
-      " SELECT n.lon,n.lat"
+      " SELECT n.lon,n.lat,n.node_id"
       " FROM way_nodes AS wn"
       " LEFT JOIN nodes AS n ON wn.node_id=n.node_id"
       " WHERE wn.way_id=?1"
@@ -63,18 +67,22 @@ void edge_points(
     sqlite3_bind_int64(stmt_points, 3, end_node_id);
     sqlite3_bind_int64(stmt_points, 4, way_id);
     sqlite3_bind_int64(stmt_points, 5, start_node_id);
+    nodelist_clear(nl);
     while( sqlite3_step(stmt_points)==SQLITE_ROW ){
-      pointlist[n].lon = (double)sqlite3_column_double(stmt_points, 0);
-      pointlist[n].lat = (double)sqlite3_column_double(stmt_points, 1);
+      //pointlist[n].lon = (double)sqlite3_column_double(stmt_points, 0);
+      //pointlist[n].lat = (double)sqlite3_column_double(stmt_points, 1);
+      nodelist_add(nl, (double)sqlite3_column_double(stmt_points, 0),
+                       (double)sqlite3_column_double(stmt_points, 1),
+                       (double)sqlite3_column_int64(stmt_points, 2) );
       n++;
-      if( n >= PBF2SQLITE_MAX_POINTS ){
-        printf("More than %d edge points in way %" PRId64 " "
-               "(start_node %" PRId64 ", end_node %" PRId64 ")\n",
-                 PBF2SQLITE_MAX_POINTS, way_id, start_node_id, end_node_id);
-        break;
-      }
+      //if( n >= PBF2SQLITE_MAX_POINTS ){
+      //  printf("More than %d edge points in way %" PRId64 " "
+      //         "(start_node %" PRId64 ", end_node %" PRId64 ")\n",
+      //           PBF2SQLITE_MAX_POINTS, way_id, start_node_id, end_node_id);
+      //  break;
+      //}
     }
-    pointlist[0].no = n;
+    //pointlist[0].no = n;
     sqlite3_finalize(stmt_points);
   }
 }
