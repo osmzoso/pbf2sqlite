@@ -14,7 +14,7 @@ all:
 
 debug:
 	mkdir -p $(BDIR)
-	$(CC) $(CFLAGS) -O0 -g main.c -lsqlite3 -lreadosm -lm -o $(BDIR)$(BNAME)
+	$(CC) $(CFLAGS) -O0 -g main.c -fsanitize=address -lasan -lsqlite3 -lreadosm -lm -o $(BDIR)$(BNAME)
 
 #
 # Static binary for Linux

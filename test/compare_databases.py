@@ -44,9 +44,7 @@ def compare_table(cur, table, columns):
 
 def compare_pbf2sqlite_db(db1, db2):
     """Establishing database connection, compare each table"""
-    print("-----------------------------------------------------------------\n"
-          "Test2: Compare two databases\n"
-          "-----------------------------------------------------------------\n"
+    print("Compare two databases\n"
           f"db1 : {db1}\ndb2 : {db2}")
     con = sqlite3.connect(":memory:")
     cur = con.cursor()
@@ -70,8 +68,6 @@ def main():
     """entry point"""
     if len(sys.argv) != 3:
         print('\n'
-              'Test2: Compare databases\n'
-              '\n'
               'Comparison of all tables of two pbf2sqlite databases.\n\n'
               'Usage:\n'
               f'{sys.argv[0]} DB1 DB2')
