@@ -139,12 +139,16 @@ void shortest_way(
     printf("Error opening file %s: %s", filename, strerror(errno));
     return;
   }
+  /*  */
+  NodeList path_points;          /* contains all points of the path in reverse order */
+  nodelist_init(&path_points);
+  int64_t first_node_id = node_id_end;
   /* get all edges of the path */
   int edge_id;
   int v = graph_node_end;
   while ( node[v].v_edge != 0 ) {
     edge_id = node[v].v_edge;
-    /*  */
+    /* get all infos of the edge */
     int64_t way_id = 0;
     int64_t start_node_id = 0;
     int64_t end_node_id = 0;
@@ -158,8 +162,15 @@ void shortest_way(
       end_node_id = (int64_t)sqlite3_column_int64(stmt, 2);
     }
     sqlite3_finalize(stmt);
-    /* Test */
-    fprintf(txt, "edge %d - way %" PRId64 " start_node %" PRId64 " end_node %" PRId64 "\n", edge_id, way_id, start_node_id, end_node_id);
+    /* Join edges together to form a continuous path */
+    //fprintf(txt, "edge %d - way %" PRId64 " start_node %" PRId64 " end_node %" PRId64 "\n", edge_id, way_id, start_node_id, end_node_id);
+    if( first_node_id==start_node_id ) {
+      printf("%" PRId64 ": %" PRId64 " - %" PRId64 "\n", way_id, start_node_id, end_node_id);
+      first_node_id = end_node_id;
+    }else{
+      printf("%" PRId64 ": %" PRId64 " - %" PRId64 "\n", way_id, end_node_id, start_node_id);
+      first_node_id = start_node_id;
+    }
     /* TODO */
 
     /* get previous node of the path */
@@ -169,6 +180,7 @@ void shortest_way(
     printf("Error closing file %s: %s", filename, strerror(errno));
   }
   /* 8. Cleanup */
+  nodelist_free(&path_points);
   destroyGraph(graph);
   destroyDijkstra();
 }
