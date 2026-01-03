@@ -72,8 +72,8 @@ void shortest_way(
     printf("Error opening file %s: %s", filename, strerror(errno));
     return;
   }
-  leaflet_html_header(html, "map addr");
-  fprintf(html, "<h3>Shortest way</h3>\n<pre>\n");
+  leaflet_html_header(html, "map route");
+  fprintf(html, "<h3>Routing</h3>\n<pre>\n");
   fprintf(html, "# start: %f %f   dest: %f %f\n", lon_start, lat_start, lon_dest, lat_dest);
   /* 1. Get permit mask */
   int mask_permit;
@@ -168,17 +168,17 @@ void shortest_way(
     sqlite3_finalize(stmt);
     /* Join edges together to form a continuous path */
     if( first_node_id==start_node_id ) {
-      printf("%" PRId64 ": %" PRId64 " - %" PRId64 "\n", way_id, start_node_id, end_node_id);
+      //printf("%" PRId64 ": %" PRId64 " - %" PRId64 "\n", way_id, start_node_id, end_node_id);
       edge_points(db, way_id, start_node_id, end_node_id, &edge);
       first_node_id = end_node_id;
     }else{
-      printf("%" PRId64 ": %" PRId64 " - %" PRId64 "\n", way_id, end_node_id, start_node_id);
+      //printf("%" PRId64 ": %" PRId64 " - %" PRId64 "\n", way_id, end_node_id, start_node_id);
       edge_points(db, way_id, end_node_id, start_node_id, &edge);
       first_node_id = start_node_id;
     }
     /* Add all edge points to the path, avoid the last node */
     for (int i=0; i<edge.size-1; i++) {
-      printf("  %f %f   %" PRId64 "\n", edge.node[i].lon, edge.node[i].lat, edge.node[i].node_id);
+      //printf("  %f %f   %" PRId64 "\n", edge.node[i].lon, edge.node[i].lat, edge.node[i].node_id);
       nodelist_add(&path, edge.node[i].lon, edge.node[i].lat, edge.node[i].node_id);
     }
     /* get previous node of the path */
@@ -186,7 +186,7 @@ void shortest_way(
   }
   /* Add last point of the last edge to the path */
   nodelist_add(&path, edge.node[edge.size-1].lon, edge.node[edge.size-1].lat, edge.node[edge.size-1].node_id);
-  nodelist_show(&path);  /* Show all nodes of the path TODO */
+  //nodelist_show(&path);  /* Show all nodes of the path TODO */
   /* Show path on the map */
   fprintf(html, "<div id='map' style='width:100%%; height:500px;'></div>\n");
   fprintf(html, "<script>\n");

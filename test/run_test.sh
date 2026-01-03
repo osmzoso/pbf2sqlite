@@ -69,4 +69,8 @@ echo "-----------------------------------------------------------------"
 
 echo "Test option 'route'..."
 ../build/pbf2sqlite $dir/osm_c.db route 1.522 42.505 1.549 42.517 foot $dir/route1.html
+firefox $dir/route1.html
+
+../build/pbf2sqlite $dir/osm_c.db route 1.530 42.507 1.549 42.517 car $dir/route2.html
+firefox $dir/route2.html
 
