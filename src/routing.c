@@ -65,20 +65,29 @@ void shortest_way(
   const char *filename
 ){
   sqlite3_stmt *stmt;
-  printf("# start: %f %f   dest: %f %f\n", lon_start, lat_start, lon_dest, lat_dest);
+  FILE *html;
+  /* Open HTML file */
+  html = fopen(filename, "w");
+  if( html==NULL ) {
+    printf("Error opening file %s: %s", filename, strerror(errno));
+    return;
+  }
+  leaflet_html_header(html, "map addr");
+  fprintf(html, "<h3>Shortest way</h3>\n<pre>\n");
+  fprintf(html, "# start: %f %f   dest: %f %f\n", lon_start, lat_start, lon_dest, lat_dest);
   /* 1. Get permit mask */
   int mask_permit;
   if     ( strcmp("foot", permit)==0 ) mask_permit = 1;
   else if( strcmp("bike", permit)==0 ) mask_permit = 2; 
   else if( strcmp("car",  permit)==0 ) mask_permit = 4; 
   else mask_permit = atoi(permit);
-  printf("# permit: %s -> mask_permit: %d\n", permit, mask_permit);
+  fprintf(html, "# permit: %s -> mask_permit: %d\n", permit, mask_permit);
   /* 2. Get boundingbox for the subgraph */
   bbox b = calc_boundingbox(lon_start, lat_start, lon_dest, lat_dest, 2.0);
-  printf("# boundingbox: %f %f   %f %f\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
+  fprintf(html, "# boundingbox: %f %f   %f %f\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
   /* 3. Get subgraph */
   int number_nodes = create_subgraph_tables(db, b.min_lon, b.min_lat, b.max_lon, b.max_lat, mask_permit);
-  printf("# graph number nodes : %d\n", number_nodes);
+  fprintf(html, "# graph number nodes : %d\n", number_nodes);
   /* 4. fill adjacency list */
   struct Graph* graph = createGraph(number_nodes);
   rc = sqlite3_prepare_v2(db,
@@ -95,7 +104,6 @@ void shortest_way(
                    sqlite3_column_int64(stmt, 4));
   }
   sqlite3_finalize(stmt);
-  //printGraph(graph);
   /* 5. Find the nodes in the graph that are closest to the coordinates of the start point and end point */
   double dist_node_start = DBL_MAX;
   int graph_node_start = -1;
@@ -127,19 +135,13 @@ void shortest_way(
     }
   }
   sqlite3_finalize(stmt);
-  printf("# graph node_start   : %d (OSM node_id %" PRId64 ")\n", graph_node_start, node_id_start);
-  printf("# graph node_end     : %d (OSM node_id %" PRId64 ")\n", graph_node_end, node_id_end);
+  fprintf(html, "# graph node_start   : %d (OSM node_id %" PRId64 ")\n", graph_node_start, node_id_start);
+  fprintf(html, "# graph node_end     : %d (OSM node_id %" PRId64 ")\n", graph_node_end, node_id_end);
   /* 6. Routing */
   Dijkstra(graph, graph_node_start, graph_node_end);
-  printf("# distance: %d m\n", node[graph_node_end].d);
+  fprintf(html, "# distance: %d m\n", node[graph_node_end].d);
+  fprintf(html, "</pre>\n");
   /* 7. Output the coordinates of the path */
-  FILE *txt;
-  txt = fopen(filename, "w");
-  if( txt==NULL ) {
-    printf("Error opening file %s: %s", filename, strerror(errno));
-    return;
-  }
-  /*  */
   NodeList path;          /* contains all points of the path in reverse order */
   NodeList edge;          /* contains all points of an edge */
   nodelist_init(&path);
@@ -165,7 +167,6 @@ void shortest_way(
     }
     sqlite3_finalize(stmt);
     /* Join edges together to form a continuous path */
-    //fprintf(txt, "edge %d - way %" PRId64 " start_node %" PRId64 " end_node %" PRId64 "\n", edge_id, way_id, start_node_id, end_node_id);
     if( first_node_id==start_node_id ) {
       printf("%" PRId64 ": %" PRId64 " - %" PRId64 "\n", way_id, start_node_id, end_node_id);
       edge_points(db, way_id, start_node_id, end_node_id, &edge);
@@ -185,13 +186,21 @@ void shortest_way(
   }
   /* Add last point of the last edge to the path */
   nodelist_add(&path, edge.node[edge.size-1].lon, edge.node[edge.size-1].lat, edge.node[edge.size-1].node_id);
-  /* Test, show all nodes of the path TODO */
-  nodelist_show(&path);
-  /*  */
-  if( fclose(txt)!=0 ) {
+  nodelist_show(&path);  /* Show all nodes of the path TODO */
+  /* Show path on the map */
+  fprintf(html, "<div id='map' style='width:100%%; height:500px;'></div>\n");
+  fprintf(html, "<script>\n");
+  leaflet_init(html, "map", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
+  leaflet_style(html, "#000000", 0.3, 2, "5 5", "none", 0.3, 5);  /* boundingbox */
+  leaflet_rectangle(html, "map", b.min_lon, b.min_lat, b.max_lon, b.max_lat, "");
+  leaflet_style(html, "#ff0000", 0.5, 6, "", "none", 1.0, 5);
+  leaflet_polyline(html, "map", &path, "Shortest way");
+  fprintf(html, "</script>\n");
+  leaflet_html_footer(html);
+  /* 8. Cleanup */
+  if( fclose(html)!=0 ) {
     printf("Error closing file %s: %s", filename, strerror(errno));
   }
-  /* 8. Cleanup */
   nodelist_free(&path);
   nodelist_free(&edge);
   destroyGraph(graph);
