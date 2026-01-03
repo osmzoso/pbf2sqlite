@@ -65,7 +65,7 @@ void shortest_way(
   const char *filename
 ){
   sqlite3_stmt *stmt;
-  printf("# start: %f %f dest: %f %f\n", lon_start, lat_start, lon_dest, lat_dest);
+  printf("# start: %f %f   dest: %f %f\n", lon_start, lat_start, lon_dest, lat_dest);
   /* 1. Get permit mask */
   int mask_permit;
   if     ( strcmp("foot", permit)==0 ) mask_permit = 1;
@@ -75,7 +75,7 @@ void shortest_way(
   printf("# permit: %s -> mask_permit: %d\n", permit, mask_permit);
   /* 2. Get boundingbox for the subgraph */
   bbox b = calc_boundingbox(lon_start, lat_start, lon_dest, lat_dest, 2.0);
-  printf("# bbox: %f %f %f %f\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
+  printf("# boundingbox: %f %f   %f %f\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
   /* 3. Get subgraph */
   int number_nodes = create_subgraph_tables(db, b.min_lon, b.min_lat, b.max_lon, b.max_lat, mask_permit);
   printf("# graph number nodes : %d\n", number_nodes);
@@ -140,8 +140,10 @@ void shortest_way(
     return;
   }
   /*  */
-  NodeList path_points;          /* contains all points of the path in reverse order */
-  nodelist_init(&path_points);
+  NodeList path;          /* contains all points of the path in reverse order */
+  NodeList edge;          /* contains all points of an edge */
+  nodelist_init(&path);
+  nodelist_init(&edge);
   int64_t first_node_id = node_id_end;
   /* get all edges of the path */
   int edge_id;
@@ -166,21 +168,32 @@ void shortest_way(
     //fprintf(txt, "edge %d - way %" PRId64 " start_node %" PRId64 " end_node %" PRId64 "\n", edge_id, way_id, start_node_id, end_node_id);
     if( first_node_id==start_node_id ) {
       printf("%" PRId64 ": %" PRId64 " - %" PRId64 "\n", way_id, start_node_id, end_node_id);
+      edge_points(db, way_id, start_node_id, end_node_id, &edge);
       first_node_id = end_node_id;
     }else{
       printf("%" PRId64 ": %" PRId64 " - %" PRId64 "\n", way_id, end_node_id, start_node_id);
+      edge_points(db, way_id, end_node_id, start_node_id, &edge);
       first_node_id = start_node_id;
     }
-    /* TODO */
-
+    /* Add all edge points to the path, avoid the last node */
+    for (int i=0; i<edge.size-1; i++) {
+      printf("  %f %f   %" PRId64 "\n", edge.node[i].lon, edge.node[i].lat, edge.node[i].node_id);
+      nodelist_add(&path, edge.node[i].lon, edge.node[i].lat, edge.node[i].node_id);
+    }
     /* get previous node of the path */
     v = node[v].v_node;
   }
+  /* Add last point of the last edge to the path */
+  nodelist_add(&path, edge.node[edge.size-1].lon, edge.node[edge.size-1].lat, edge.node[edge.size-1].node_id);
+  /* Test, show all nodes of the path TODO */
+  nodelist_show(&path);
+  /*  */
   if( fclose(txt)!=0 ) {
     printf("Error closing file %s: %s", filename, strerror(errno));
   }
   /* 8. Cleanup */
-  nodelist_free(&path_points);
+  nodelist_free(&path);
+  nodelist_free(&edge);
   destroyGraph(graph);
   destroyDijkstra();
 }
