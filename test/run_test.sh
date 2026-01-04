@@ -60,7 +60,8 @@ echo "Test option 'vgraph'..."
 firefox $dir/vgraph.html
 
 echo "Test option 'sql'..."
-../build/pbf2sqlite $dir/osm_c.db sql "SELECT * FROM nodes LIMIT 10"
+../build/pbf2sqlite $dir/osm_c.db sql "SELECT * FROM nodes LIMIT 5"
+../build/pbf2sqlite $dir/osm_c.db sql "SELECT radians(lat),sin(radians(lat)) FROM nodes LIMIT 5"
 
 
 echo "-----------------------------------------------------------------"
@@ -68,9 +69,9 @@ echo "Test 3: Routing"
 echo "-----------------------------------------------------------------"
 
 echo "Test option 'route'..."
-../build/pbf2sqlite $dir/osm_c.db route 1.522 42.505 1.549 42.517 foot $dir/route1.html
+../build/pbf2sqlite $dir/osm_c.db route 1.522 42.505 1.549 42.517 foot $dir/route1
 firefox $dir/route1.html
 
-../build/pbf2sqlite $dir/osm_c.db route 1.530 42.507 1.549 42.517 car $dir/route2.html
+../build/pbf2sqlite $dir/osm_c.db route 1.530 42.507 1.549 42.517 car $dir/route2
 firefox $dir/route2.html
 
