@@ -282,3 +282,22 @@ pbf2sqlite test.db sql "ALTER TABLE nodes ADD COLUMN y"
 pbf2sqlite test.db sql "UPDATE nodes SET x=mercator_x(lon),y=mercator_y(lat)"
 ```
 
+
+# 4. Find shortest way
+
+## 4.1. Option "route"
+
+```
+Usage:
+pbf2sqlite DATABASE route LON_START LAT_START LON_DEST LAT_DEST PERMIT FILE
+```
+
+PERMIT can be "foot", "bike" or "car".  
+
+The result is written to two files (HTML and CSV).  
+Therefore, FILE is supplemented with the file extensions .html and .csv.  
+
+Links:  
+<https://www.geofabrik.de/data/routeable-vector-data.html>  
+<https://www.geofabrik.de/data/routable-shapefile.pdf>  
+
