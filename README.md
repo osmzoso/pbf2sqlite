@@ -1,6 +1,10 @@
 # pbf2sqlite
 
-A simple command line tool for reading OpenStreetMap .osm.pbf files into a SQLite database.
+A simple command line tool for importing OpenStreetMap
+[PBF](https://wiki.openstreetmap.org/wiki/PBF_Format)
+or
+[XML](https://wiki.openstreetmap.org/wiki/OSM_XML)
+files into a SQLite database.
 
 ```
 Usage:
@@ -20,6 +24,10 @@ Show data:
   vaddr  LON1 LAT1 LON2 LAT2 HTMLFILE     Visualize address data
   vgraph LON1 LAT1 LON2 LAT2 HTMLFILE     Visualize graph data
   sql STATEMENT                           Execute SQL statement
+
+Find shortest way:
+  route LON_START LAT_START LON_DEST LAT_DEST PERMIT FILE
+  (PERMIT: 'foot', 'bike' or 'car')
 ```
 
 The command
