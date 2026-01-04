@@ -70,6 +70,7 @@ void write_file_csv(
     printf("Error opening file %s: %s", filename, strerror(errno));
     return;
   }
+  /* Write the list in reverse order */
   for (int i=list->size-1; i>=0; i--) {
     fprintf(csv, "%f,%f,0,%" PRId64 "\n", list->node[i].lon, list->node[i].lat, list->node[i].node_id);
   }
@@ -90,11 +91,15 @@ void shortest_way(
   const double lon_dest,
   const double lat_dest,
   const char *permit,
-  const char *filename
+  const char *name
 ){
   sqlite3_stmt *stmt;
   FILE *html;
-  /* Open HTML file */
+  char *ext = ".html";
+  char *filename = malloc(strlen(name) + strlen(ext) + 1);
+  if (!filename) abort_oom();
+  strcpy(filename, name);
+  strcat(filename, ext);
   html = fopen(filename, "w");
   if( html==NULL ) {
     printf("Error opening file %s: %s", filename, strerror(errno));
@@ -225,8 +230,9 @@ void shortest_way(
     printf("Error closing file %s: %s", filename, strerror(errno));
   }
   /* Write path coordinates to a CSV file */
-  write_file_csv(filename, &path);
+  write_file_csv(name, &path);
   /* 8. Cleanup */
+  free(filename);
   nodelist_free(&path);
   nodelist_free(&edge);
   destroyGraph(graph);

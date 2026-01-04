@@ -18,7 +18,7 @@
 # define M_PI   3.141592653589793238462643383279502884
 #endif
 
-#define PBF2SQLITE_VERSION  "0.4.4 BETA"
+#define PBF2SQLITE_VERSION  "0.4.4"
 
 /*
 ** Public variables
