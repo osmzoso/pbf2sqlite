@@ -18,7 +18,7 @@
 # define M_PI   3.141592653589793238462643383279502884
 #endif
 
-#define PBF2SQLITE_VERSION  "0.4.4 ALPHA"
+#define PBF2SQLITE_VERSION  "0.4.4 BETA"
 
 /*
 ** Public variables
@@ -57,12 +57,12 @@ static char *help =
 #include "functions.c"
 #include "nodelist.c"
 #include "leaflet.c"
-#include "graph.c"
 #include "dijkstra.c"
+#include "graph.c"
+#include "routing.c"
 #include "read_osm.c"
 #include "options.c"
 #include "show_data.c"
-#include "routing.c"
 #include "get_args.c"
 
 /*
