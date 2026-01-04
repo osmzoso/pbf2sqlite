@@ -48,8 +48,9 @@ static char *help =
   "  vgraph LON1 LAT1 LON2 LAT2 HTMLFILE     Visualize graph data\n"
   "  sql STATEMENT                           Execute SQL statement\n"
   "\n"
-  "Shortest way:\n"
-  "  route LON1 LAT1 LON2 LAT2 PERMIT FILE\n"
+  "Find shortest way:\n"
+  "  route LON_START LAT_START LON_DEST LAT_DEST PERMIT FILE\n"
+  "  (PERMIT: 'foot', 'bike' or 'car')\n"
   "\n"
   "This is pbf2sqlite version " PBF2SQLITE_VERSION "\n"
   ;
