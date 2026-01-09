@@ -207,7 +207,10 @@ clear_bit  | INTEGER  | bitmask clear bits
 > But if the table already exists, it will be used.  
 > This allows you to create your own definition for filling the permit field.  
 
-<https://www.sqlite.org/lang_with.html#queries_against_a_graph>
+Links:  
+<https://www.sqlite.org/lang_with.html#queries_against_a_graph>  
+<https://www.geofabrik.de/data/routeable-vector-data.html>  
+<https://www.geofabrik.de/data/routable-shapefile.pdf>  
 
 
 # 3. Show data
@@ -297,7 +300,5 @@ PERMIT can be "foot", "bike" or "car".
 The result is written to two files (HTML and CSV).  
 Therefore, FILE is supplemented with the file extensions .html and .csv.  
 
-Links:  
-<https://www.geofabrik.de/data/routeable-vector-data.html>  
-<https://www.geofabrik.de/data/routable-shapefile.pdf>  
+Table **graph** and **rtree_way** are required.
 

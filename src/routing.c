@@ -216,14 +216,21 @@ void shortest_way(
   }
   /* Add last point of the last edge to the path */
   nodelist_add(&path, edge.node[edge.size-1].lon, edge.node[edge.size-1].lat, edge.node[edge.size-1].node_id);
-  /* Show path on the map */
+  /* Show map */
   fprintf(html, "<div id='map' style='width:100%%; height:500px;'></div>\n");
   fprintf(html, "<script>\n");
   leaflet_init(html, "map", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
-  leaflet_style(html, "#000000", 0.3, 2, "5 5", "none", 0.3, 5);  /* boundingbox */
+  /* boundingbox */
+  leaflet_style(html, "#000000", 0.3, 2, "5 5", "none", 0.3, 5);
   leaflet_rectangle(html, "map", b.min_lon, b.min_lat, b.max_lon, b.max_lat, "");
+  /* path */
   leaflet_style(html, "#ff0000", 0.5, 6, "", "none", 1.0, 5);
   leaflet_polyline(html, "map", &path, "Shortest way");
+  /* start and dest points */
+  leaflet_style(html, "none", 0.9, 2, "", "#ff0000", 1.0, 5);
+  leaflet_circlemarker(html, "map", lon_start, lat_start, "Start");
+  leaflet_style(html, "none", 0.9, 2, "", "#00ff00", 1.0, 5);
+  leaflet_circlemarker(html, "map", lon_dest, lat_dest, "Dest");
   fprintf(html, "</script>\n");
   leaflet_html_footer(html);
   if( fclose(html)!=0 ) {
