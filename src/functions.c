@@ -1,19 +1,25 @@
 /*
-** Program abort - Database error
-** Displays last SQLite error message
+** Program abort
 */
 void abort_db_error(sqlite3 *db, int rc) {
+  /* Database error - display last SQLite error message */
   fprintf(stderr, "pbf2sqlite - (%i) %s - %s\n", rc, sqlite3_errstr(rc), sqlite3_errmsg(db));
   sqlite3_close(db);
   exit(EXIT_FAILURE);
 }
 
-/*
-** Program abort - Out of memory
-*/
 void abort_oom() {
-  perror("malloc failed");
-  sqlite3_close(db);
+  fprintf(stderr, "pbf2sqlite - out of memory");
+  exit(EXIT_FAILURE);
+}
+
+void abort_fopen() {
+  fprintf(stderr, "pbf2sqlite - error opening file");
+  exit(EXIT_FAILURE);
+}
+
+void abort_fclose() {
+  fprintf(stderr, "pbf2sqlite - error closing file");
   exit(EXIT_FAILURE);
 }
 

@@ -66,17 +66,12 @@ void write_file_csv(
   strcpy(filename, name);
   strcat(filename, ext);
   csv = fopen(filename, "w");
-  if( csv==NULL ) {
-    printf("Error opening file %s: %s", filename, strerror(errno));
-    return;
-  }
+  if( csv==NULL ) abort_fopen();
   /* Write the list in reverse order */
   for (int i=list->size-1; i>=0; i--) {
     fprintf(csv, "%f,%f,0,%" PRId64 "\n", list->node[i].lon, list->node[i].lat, list->node[i].node_id);
   }
-  if( fclose(csv)!=0 ) {
-    printf("Error closing file %s: %s", filename, strerror(errno));
-  }
+  if( fclose(csv)!=0 ) abort_fclose();
   free(filename);
 }
 
@@ -101,10 +96,7 @@ void shortest_way(
   strcpy(filename, name);
   strcat(filename, ext);
   html = fopen(filename, "w");
-  if( html==NULL ) {
-    printf("Error opening file %s: %s", filename, strerror(errno));
-    return;
-  }
+  if( html==NULL ) abort_fopen();
   leaflet_html_header(html, "map route");
   fprintf(html, "<h3>Routing</h3>\n<pre>\n");
   fprintf(html, "# start: %f %f   dest: %f %f\n", lon_start, lat_start, lon_dest, lat_dest);
@@ -233,9 +225,7 @@ void shortest_way(
   leaflet_circlemarker(html, "map", lon_dest, lat_dest, "Dest");
   fprintf(html, "</script>\n");
   leaflet_html_footer(html);
-  if( fclose(html)!=0 ) {
-    printf("Error closing file %s: %s", filename, strerror(errno));
-  }
+  if( fclose(html)!=0 ) abort_fclose();
   /* Write path coordinates to a CSV file */
   write_file_csv(name, &path);
   /* 8. Cleanup */

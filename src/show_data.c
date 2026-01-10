@@ -170,10 +170,7 @@ void html_map_addr(
   char popup_text[1000];
   int64_t way_id, node_id;
   html = fopen(html_file, "w");
-  if( html==NULL ) {
-    printf("Error opening file %s: %s", html_file, strerror(errno));
-    return;
-  }
+  if( html==NULL ) abort_fopen();
   leaflet_html_header(html, "map addr");
   fprintf(html,
     "<h3>Map 1 - Address</h3>\n"
@@ -259,9 +256,7 @@ void html_map_addr(
       "<p>Boundingbox: %f %f - %f %f</p>\n", lon1, lat1, lon2, lat2);
   leaflet_html_footer(html);
   /* Close the file */
-  if( fclose(html)!=0 ) {
-    printf("Error closing file %s: %s", html_file, strerror(errno));
-  }
+  if( fclose(html)!=0 ) abort_fclose();
   sqlite3_finalize(stmt_addr);
 }
 
@@ -340,10 +335,7 @@ void html_map_graph(
 ){
   FILE *html;
   html = fopen(html_file, "w");
-  if( html==NULL ) {
-    printf("Error opening file %s: %s", html_file, strerror(errno));
-    return;
-  }
+  if( html==NULL ) abort_fopen();
   leaflet_html_header(html, "map graph");
   fprintf(html,
     "<h3>Map 1 - Graph complete</h3>\n"
@@ -369,7 +361,5 @@ void html_map_graph(
       "<hr>\n"
       "<p>Boundingbox: %f %f - %f %f</p>\n", lon1, lat1, lon2, lat2);
   leaflet_html_footer(html);
-  if( fclose(html)!=0 ) {
-    printf("Error closing file %s: %s", html_file, strerror(errno));
-  }
+  if( fclose(html)!=0 ) abort_fclose();
 }
