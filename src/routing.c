@@ -53,7 +53,11 @@ bbox calc_boundingbox(
 }
 
 /*
-** Write the path coordinates to a CSV file
+** Write the path coordinates to CSV and GPX files
+**
+** https://en.wikipedia.org/wiki/Comma-separated_values
+** https://en.wikipedia.org/wiki/GPS_Exchange_Format
+**
 */
 void write_file_csv(
   const char *name,
@@ -67,11 +71,48 @@ void write_file_csv(
   strcat(filename, ext);
   csv = fopen(filename, "w");
   if( csv==NULL ) abort_fopen();
+  fprintf(csv, "lon,lat,ele,node_id\r\n");
   /* Write the list in reverse order */
   for (int i=list->size-1; i>=0; i--) {
-    fprintf(csv, "%f,%f,0,%" PRId64 "\n", list->node[i].lon, list->node[i].lat, list->node[i].node_id);
+    fprintf(csv, "%.7f,%.7f,0,%" PRId64 "\r\n", list->node[i].lon, list->node[i].lat, list->node[i].node_id);
   }
   if( fclose(csv)!=0 ) abort_fclose();
+  free(filename);
+}
+
+void write_file_gpx(
+  const char *name,
+  const NodeList *list
+){
+  FILE *gpx;
+  char *ext = ".gpx";
+  char *filename = malloc(strlen(name) + strlen(ext) + 1);
+  if (!filename) abort_oom();
+  strcpy(filename, name);
+  strcat(filename, ext);
+  gpx = fopen(filename, "w");
+  if( gpx==NULL ) abort_fopen();
+  fprintf(gpx,
+    "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n"
+    "<gpx version=\"1.1\" xmlns=\"http://www.topografix.com/GPX/1/1\" creator=\"pbf2sqlite\">\n"
+    "  <metadata></metadata>\n"
+    "  <trk>\n"
+    "    <name>Track</name>\n"
+    "    <extensions>\n"
+    "    </extensions>\n"
+    "    <trkseg>\n"
+  );
+  /* Write the list in reverse order */
+  for (int i=list->size-1; i>=0; i--) {
+    fprintf(gpx, "      <trkpt lat=\"%.7f\" lon=\"%.7f\">\n", list->node[i].lat, list->node[i].lon);
+    fprintf(gpx, "        <ele>0.0</ele>\n      </trkpt>\n");
+  }
+  fprintf(gpx,
+    "    </trkseg>\n"
+    "  </trk>\n"
+    "</gpx>"
+  );
+  if( fclose(gpx)!=0 ) abort_fclose();
   free(filename);
 }
 
@@ -226,8 +267,9 @@ void shortest_way(
   fprintf(html, "</script>\n");
   leaflet_html_footer(html);
   if( fclose(html)!=0 ) abort_fclose();
-  /* Write path coordinates to a CSV file */
+  /* Write path coordinates to CSV and GPX files */
   write_file_csv(name, &path);
+  write_file_gpx(name, &path);
   /* 8. Cleanup */
   free(filename);
   nodelist_free(&path);
