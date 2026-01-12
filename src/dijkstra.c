@@ -105,8 +105,6 @@ int b_size;      /* Contains the current number of nodes in the priority queue *
 ** b_relax()  : Reduce the distance, adjust priority queue
 **
 */
-#define PRIORITY_QUEUE_HEAP 1
-#if PRIORITY_QUEUE_HEAP
 void downheap(int k) {
   int j, v, v_k;
 
@@ -164,33 +162,6 @@ void b_relax(int k, int v) {
     if ( node[k].pos_heap > 0 ) downheap( node[k].pos_heap );
   }
 }
-#else
-void b_insert(int node) {
-  b_size++;
-  b[b_size] = node;
-}
-
-int b_remove() {
-  int i, minD, min_i, minB;
-  minD = INT_MAX;
-  min_i = 0;
-  for (i = 1; i<=b_size; i++) {
-    if ( node[ b[i] ].d < minD) {
-      minD = node[ b[i] ].d;
-      min_i = i;
-    }
-  }
-  minB = b[min_i];
-  b[min_i] = b[b_size];
-  b[b_size] = 0;
-  b_size--;
-  return minB;
-}
-
-void b_relax(int n, int d) {
-  node[n].d = d;
-}
-#endif
 
 /*
 ** Dijkstra Algorithm
