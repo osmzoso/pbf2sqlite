@@ -56,7 +56,7 @@ def compare_pbf2sqlite_db(db1, db2):
     rc = compare_table(cur, 'way_tags', 'way_id,key,value')
     rc = compare_table(cur, 'relation_members', 'relation_id,ref,ref_id,role,member_order')
     rc = compare_table(cur, 'relation_tags', 'relation_id,key,value')
-    rc = compare_table(cur, 'graph', 'edge_id,start_node_id,end_node_id,dist,way_id,nodes')
+    rc = compare_table(cur, 'graph_edges', 'edge_id,start_node_id,end_node_id,dist,way_id,nodes')
     if not rc:
         print(" Due to floating point rounding, the 'dist' column in the 'graph' table\n"
               " may have in rare cases different values.\n"

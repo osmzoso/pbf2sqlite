@@ -144,7 +144,7 @@ def add_graph(cur):
     """Create the graph table in the database"""
     cur.execute('BEGIN TRANSACTION')
     cur.execute('''
-    CREATE TABLE graph (
+    CREATE TABLE graph_edges (
      edge_id       INTEGER PRIMARY KEY,  -- edge ID
      start_node_id INTEGER,              -- edge start node ID
      end_node_id   INTEGER,              -- edge end node ID
@@ -193,7 +193,7 @@ def add_graph(cur):
     for (way_id, node_id, node_id_crossing, lon, lat) in cur.fetchall():
         # If a new way is active but there are still remnants of the previous way, create a new edge.
         if way_id != prev_way_id and edge_active:
-            cur.execute('INSERT INTO graph (start_node_id,end_node_id,dist,way_id,nodes) VALUES (?,?,?,?,?)',
+            cur.execute('INSERT INTO graph_edges (start_node_id,end_node_id,dist,way_id,nodes) VALUES (?,?,?,?,?)',
                         (start_node_id, prev_node_id, round(dist), prev_way_id, nodes))
             edge_active = False
         dist = dist + distance(prev_lon, prev_lat, lon, lat)
@@ -206,7 +206,7 @@ def add_graph(cur):
             nodes = 1
         if node_id_crossing > -1 and way_id == prev_way_id:
             if start_node_id != -1:
-                cur.execute('INSERT INTO graph (start_node_id,end_node_id,dist,way_id,nodes) VALUES (?,?,?,?,?)',
+                cur.execute('INSERT INTO graph_edges (start_node_id,end_node_id,dist,way_id,nodes) VALUES (?,?,?,?,?)',
                             (start_node_id, node_id, round(dist), way_id, nodes))
                 edge_active = False
             start_node_id = node_id
@@ -217,9 +217,9 @@ def add_graph(cur):
         prev_way_id = way_id
         prev_node_id = node_id
     if edge_active:
-        cur.execute('INSERT INTO graph (start_node_id,end_node_id,dist,way_id,nodes) VALUES (?,?,?,?,?)',
+        cur.execute('INSERT INTO graph_edges (start_node_id,end_node_id,dist,way_id,nodes) VALUES (?,?,?,?,?)',
                     (start_node_id, node_id, round(dist), way_id, nodes))
-    cur.execute('CREATE INDEX graph__way_id ON graph (way_id)')
+    cur.execute('CREATE INDEX graph__way_id ON graph_edges (way_id)')
     cur.execute('COMMIT TRANSACTION')
 
 

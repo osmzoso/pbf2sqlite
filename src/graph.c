@@ -93,7 +93,7 @@ int create_subgraph_tables(
     "               (?2&4=4 AND permit&32=32) THEN 1"
     "          ELSE 0"
     "        END AS directed"
-    " FROM graph"
+    " FROM graph_edges"
     " WHERE permit & ?3 = ?4 AND"
     "       way_id IN ("
     "                  SELECT way_id FROM rtree_way"

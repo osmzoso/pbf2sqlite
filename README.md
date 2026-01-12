@@ -15,7 +15,7 @@ Main options:
   index         Add basic indexes
   rtree         Add R*Tree indexes
   addr          Add address tables
-  graph         Add graph table
+  graph         Add graph tables
 
 Show data:
   node ID                                 Show node data

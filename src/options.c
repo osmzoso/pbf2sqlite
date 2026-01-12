@@ -43,7 +43,7 @@ void fill_graph_permit(sqlite3 *db) {
   int mask_set, mask_clear, set_bit, clear_bit, permit;
   rc = sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, NULL);
   /* prepare statements */
-  rc = sqlite3_prepare_v2(db, "SELECT DISTINCT way_id FROM graph", -1, &stmt, NULL);
+  rc = sqlite3_prepare_v2(db, "SELECT DISTINCT way_id FROM graph_edges", -1, &stmt, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   rc = sqlite3_prepare_v2(db,
     " SELECT gp.set_bit,gp.clear_bit"
@@ -52,7 +52,7 @@ void fill_graph_permit(sqlite3 *db) {
     " WHERE wt.way_id=?",
      -1, &stmt_mask, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
-  rc = sqlite3_prepare_v2(db, "UPDATE graph SET permit=? WHERE way_id=?", -1, &stmt_update, NULL);
+  rc = sqlite3_prepare_v2(db, "UPDATE graph_edges SET permit=? WHERE way_id=?", -1, &stmt_update, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   /* get the ways */
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
@@ -110,7 +110,7 @@ void add_graph(sqlite3 *db) {
   rc = sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, NULL);
   rc = sqlite3_exec(
     db,
-    " CREATE TABLE graph (\n"
+    " CREATE TABLE graph_edges (\n"
     "  edge_id       INTEGER PRIMARY KEY,  -- edge ID\n"
     "  start_node_id INTEGER,              -- edge start node ID\n"
     "  end_node_id   INTEGER,              -- edge end node ID\n"
@@ -151,7 +151,7 @@ void add_graph(sqlite3 *db) {
   sqlite3_stmt *stmt_insert_graph;
   rc = sqlite3_prepare_v2(
     db,
-    "INSERT INTO graph (start_node_id,end_node_id,dist,way_id,nodes) VALUES (?1,?2,?3,?4,?5)",
+    "INSERT INTO graph_edges (start_node_id,end_node_id,dist,way_id,nodes) VALUES (?1,?2,?3,?4,?5)",
     -1, &stmt_insert_graph, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
 
@@ -245,7 +245,7 @@ void add_graph(sqlite3 *db) {
     }
   }
   sqlite3_finalize(stmt_insert_graph);
-  rc = sqlite3_exec(db, "CREATE INDEX graph__way_id ON graph (way_id)", NULL, NULL, NULL);
+  rc = sqlite3_exec(db, "CREATE INDEX graph__way_id ON graph_edges (way_id)", NULL, NULL, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   rc = sqlite3_exec(db, "COMMIT TRANSACTION", NULL, NULL, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);

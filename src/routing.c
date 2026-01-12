@@ -223,7 +223,7 @@ void shortest_way(
     int64_t start_node_id = 0;
     int64_t end_node_id = 0;
     rc = sqlite3_prepare_v2(db,
-      "SELECT way_id,start_node_id,end_node_id FROM graph WHERE edge_id=?", -1, &stmt, NULL);
+      "SELECT way_id,start_node_id,end_node_id FROM graph_edges WHERE edge_id=?", -1, &stmt, NULL);
     if( rc!=SQLITE_OK ) abort_db_error(db, rc);
     sqlite3_bind_int64(stmt, 1, edge_id);
     while( sqlite3_step(stmt)==SQLITE_ROW ){

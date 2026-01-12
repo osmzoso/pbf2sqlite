@@ -38,7 +38,7 @@ static char *help =
   "  index         Add basic indexes\n"
   "  rtree         Add R*Tree indexes\n"
   "  addr          Add address tables\n"
-  "  graph         Add graph table\n"
+  "  graph         Add graph tables\n"
   "\n"
   "Show data:\n"
   "  node ID                                 Show node data\n"

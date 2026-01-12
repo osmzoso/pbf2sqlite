@@ -164,11 +164,10 @@ The view **addr_view** join the two tables.
 
 ## 2.5. Option "graph"
 
-This option creates an additional table **graph** with the complete graph
-of all highways.  
+This option creates additional tables with the complete graph of all highways.  
 This data is required for routing purposes, for example.  
 
-#### Table "graph"
+#### Table "graph_edges"
 column          | type                | description
 ----------------|---------------------|-------------------------------------
 edge_id         | INTEGER PRIMARY KEY | edge ID
@@ -297,8 +296,8 @@ pbf2sqlite DATABASE route LON_START LAT_START LON_DEST LAT_DEST PERMIT FILE
 
 PERMIT can be "foot", "bike" or "car".  
 
-The result is written to two files (HTML and CSV).  
-Therefore, FILE is supplemented with the file extensions .html and .csv.  
+The result is written to three files (HTML, CSV and GPX).  
+Therefore, FILE is supplemented with the file extensions **.html**, **.csv** and **.gpx**.  
 
 Table **graph** and **rtree_way** are required.
 
