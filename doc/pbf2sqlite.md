@@ -177,6 +177,7 @@ dist            | INTEGER             | distance in meters
 way_id          | INTEGER             | way ID
 nodes           | INTEGER             | number of nodes
 permit          | INTEGER             | bit field access
+- INDEX graph_edges__way_id ON graph_edges (way_id)
 
 The bit field **permit** determines who may use this edge:  
 
@@ -205,6 +206,14 @@ clear_bit  | INTEGER  | bitmask clear bits
 > If table **graph_permit** doesn't exist, a new table will be created with default values.  
 > But if the table already exists, it will be used.  
 > This allows you to create your own definition for filling the permit field.  
+
+#### Table "graph_vertices"
+column     | type                | description
+-----------|---------------------|-------------------------------------
+vertex_id  | INTEGER PRIMARY KEY | vertex ID
+node_id    | INTEGER             | node ID
+num_edges  | INTEGER             | number of edges
+- INDEX graph_vertices__node_id ON graph_vertices (node_id)
 
 Links:  
 <https://www.sqlite.org/lang_with.html#queries_against_a_graph>  

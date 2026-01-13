@@ -245,7 +245,25 @@ void add_graph(sqlite3 *db) {
     }
   }
   sqlite3_finalize(stmt_insert_graph);
-  rc = sqlite3_exec(db, "CREATE INDEX graph__way_id ON graph_edges (way_id)", NULL, NULL, NULL);
+  rc = sqlite3_exec(db, "CREATE INDEX graph_edges__way_id ON graph_edges (way_id)", NULL, NULL, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  rc = sqlite3_exec(db,
+    " CREATE TABLE graph_vertices (\n"
+    "  vertex_id INTEGER PRIMARY KEY,  -- vertex ID\n"
+    "  node_id   INTEGER,              -- node ID\n"
+    "  num_edges INTEGER               -- number of edges\n"
+    " );\n"
+    " INSERT INTO graph_vertices (node_id, num_edges)"
+    " SELECT node_id,count(*) AS num_edges FROM"
+    " ("
+    "   SELECT start_node_id AS node_id FROM graph_edges"
+    "   UNION ALL"
+    "   SELECT end_node_id AS node_id FROM graph_edges"
+    " )"
+    " GROUP BY node_id;",
+     NULL, NULL, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  rc = sqlite3_exec(db, "CREATE INDEX graph_vertices__node_id ON graph_vertices (node_id)", NULL, NULL, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   rc = sqlite3_exec(db, "COMMIT TRANSACTION", NULL, NULL, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
