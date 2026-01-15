@@ -1,16 +1,15 @@
 # 1. pbf2sqlite
 
-A simple command line tool for reading OpenStreetMap data into a SQLite database.
+A simple command line tool for reading OpenStreetMap data into a SQLite database.  
+OSM data can be obtained from a provider such as [Geofabrik](https://download.geofabrik.de).  
 
-OSM data can be obtained from a provider such as [Geofabrik](https://download.geofabrik.de).
-
-Examples:  
-
+Simple example:  
 `pbf2sqlite test.db read country.osm.pbf`  
 
+Advanced example with all available options:  
 `pbf2sqlite test.db read country.osm.pbf index rtree addr graph`  
 
-The database can be easily queried with the [SQLite CLI tool](https://www.sqlite.org/cli.html).
+The database can be easily queried with the [SQLite CLI tool](https://www.sqlite.org/cli.html).  
 
 
 # 2. Main options
@@ -80,11 +79,9 @@ value        | TEXT                | tag value
 
 ## 2.2. Option "index"
 
-This option creates basic indexes for the six tables.
-
-The created indexes are described in section 2.1.
-
-Finally, the [ANALYZE](https://www.sqlite.org/lang_analyze.html) command is executed.
+This option creates basic indexes for the six tables.  
+The created indexes are described in section 2.1.  
+Finally, the [ANALYZE](https://www.sqlite.org/lang_analyze.html) command is executed.  
 
 ## 2.3. Option "rtree"
 
@@ -303,6 +300,8 @@ pbf2sqlite test.db sql "UPDATE nodes SET x=mercator_x(lon),y=mercator_y(lat)"
 
 ## 4.1. Option "route"
 
+Table **graph_edges** and **rtree_way** are required.
+
 ```
 Usage:
 pbf2sqlite DATABASE route LON_START LAT_START LON_DEST LAT_DEST PERMIT FILE
@@ -312,6 +311,4 @@ PERMIT can be "foot", "bike" or "car".
 
 The result is written to three files (HTML, CSV and GPX).  
 Therefore, FILE is supplemented with the file extensions **.html**, **.csv** and **.gpx**.  
-
-Table **graph** and **rtree_way** are required.
 
