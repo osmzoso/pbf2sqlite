@@ -165,6 +165,7 @@ The view **addr_view** join the two tables.
 ## 2.5. Option "graph"
 
 This option creates additional tables with the complete graph of all highways.  
+A graph is a set of vertices (nodes/points) connected by edges (links/lines).  
 This data is required for routing purposes, for example.  
 
 #### Table "graph_edges"
@@ -193,7 +194,7 @@ Bit 6 | (not used)  | 2^6  64
 Bit 7 | (not used)  | 2^7 128
 
 To fill the column **permit** a table **graph_permit** is needed.  
-This table specifies which tags set or clear which bits in permit.  
+This table specifies which tags set or clear which bits in **permit**.  
 
 #### Table "graph_permit"
 column     | type     | description
@@ -202,6 +203,10 @@ key        | TEXT     | tag key
 value      | TEXT     | tag value
 set_bit    | INTEGER  | bitmask set bits
 clear_bit  | INTEGER  | bitmask clear bits
+
+Initially, no bits are set in **permit**.  
+Then, the bits are set according to the tags found (set_bit).  
+Finally, the bits are cleared according to the tags found (clear_bit).  
 
 > If table **graph_permit** doesn't exist, a new table will be created with default values.  
 > But if the table already exists, it will be used.  
