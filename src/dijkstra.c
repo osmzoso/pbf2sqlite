@@ -1,8 +1,5 @@
-
 /*
-** Graph data structures
-** Terms: A graph is a set of vertices (nodes/points) connected by edges (links/lines)
-** Implementation as an adjacency list
+** Graph data structures as an adjacency list
 */
 struct AdjNode {
   int dest;

@@ -1,7 +1,6 @@
 /*
-**
+** Data type boundingbox
 */
-
 typedef struct {
   double min_lon;
   double min_lat;

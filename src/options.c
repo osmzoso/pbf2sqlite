@@ -1,7 +1,6 @@
 /*
-**
+** Add additional data in the database
 */
-
 void add_index(sqlite3 *db) {
   rc = sqlite3_exec(
     db,

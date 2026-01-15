@@ -2,7 +2,6 @@
 ** Show data
 */
 
-
 /*
 ** Execute SQL statement
 */

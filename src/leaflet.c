@@ -1,7 +1,6 @@
 /*
 ** Functions for creating an HTML file with Leaflet.js for visualizing data
 */
-
 void leaflet_html_header(FILE *html, const char *title) {
   fprintf(html,
     "<!DOCTYPE html>\n"

@@ -1,7 +1,6 @@
 /*
-**
+** Determines all waypoints along an edge
 */
-
 void edge_points(
   sqlite3 *db,
   uint64_t way_id,
