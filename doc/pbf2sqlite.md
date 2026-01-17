@@ -312,3 +312,48 @@ PERMIT can be "foot", "bike" or "car".
 The result is written to three files (HTML, CSV and GPX).  
 Therefore, FILE is supplemented with the file extensions **.html**, **.csv** and **.gpx**.  
 
+
+# Appendix
+
+## Option duration
+
+| Option    | germany.osm.pbf (4,4G) | andorra.osm.pbf (3,2M) |
+|-----------|-----------------------:|-----------------------:|
+| read      | 14 min                 |                 0,85 s |
+| index     | 20 min                 |                 0,62 s |
+| rtree     | 2 h 7 min              |                 0,49 s |
+| addr      | 11 min                 |                 0,04 s |
+| graph     | 17 min                 |                 0,81 s |
+
+## Table size
+
+```
+/** Disk-Space Utilization Report For germany.db
+
+Page size in bytes................................ 65536     
+
+*** Page counts for all tables with their indices *****************************
+
+WAY_NODES......................................... 472076      42.1% 
+WAY_TAGS.......................................... 233117      20.8% 
+NODES............................................. 182308      16.2% 
+NODE_TAGS......................................... 84723        7.6% 
+RTREE_WAY_NODE.................................... 42350        3.8% 
+GRAPH_EDGES....................................... 20515        1.8% 
+RELATION_MEMBERS.................................. 17670        1.6% 
+RTREE_WAY_ROWID................................... 16892        1.5% 
+ADDR_HOUSENUMBER.................................. 16581        1.5% 
+RTREE_NODE_NODE................................... 12331        1.1% 
+GRAPH_VERTICES.................................... 10975        0.98% 
+RTREE_NODE_ROWID.................................. 5185         0.46% 
+RELATION_TAGS..................................... 4772         0.43% 
+ADDR_STREET....................................... 2010         0.18% 
+RTREE_WAY_PARENT.................................. 458          0.041% 
+RTREE_NODE_PARENT................................. 138          0.012% 
+GRAPH_PERMIT...................................... 2            0.0% 
+SQLITE_SCHEMA..................................... 1            0.0% 
+SQLITE_STAT1...................................... 1            0.0% 
+
+*/
+```
+
