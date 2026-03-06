@@ -55,48 +55,48 @@ void parse_args(sqlite3 *db, int argc, char **argv, int exec) {
     else if( strcmp("graph", argv[i])==0 ){
       if( exec ) add_graph(db);
     }
-    else if( strcmp("node", argv[i])==0 && argc>=i+2 ){
-      id = get_arg_int64(argv, i+1);
+    else if( strcmp("node", argv[2])==0 && argc==4 ){
+      id = get_arg_int64(argv, 3);
       if( exec ) show_node(db, id);
-      i++;
+      break;
     } 
-    else if( strcmp("way", argv[i])==0 && argc>=i+2 ){
-      id = get_arg_int64(argv, i+1);
+    else if( strcmp("way", argv[2])==0 && argc==4 ){
+      id = get_arg_int64(argv, 3);
       if( exec ) show_way(db, id);
-      i++;
+      break;
     } 
-    else if( strcmp("relation", argv[i])==0 && argc>=i+2 ){
-      id = get_arg_int64(argv, i+1);
+    else if( strcmp("relation", argv[2])==0 && argc==4 ){
+      id = get_arg_int64(argv, 3);
       if( exec ) show_relation(db, id);
-      i++;
+      break;
     } 
-    else if( strcmp("vaddr", argv[i])==0 && argc>=i+6 ){
-      lon1 = get_arg_double(argv, i+1);
-      lat1 = get_arg_double(argv, i+2);
-      lon2 = get_arg_double(argv, i+3);
-      lat2 = get_arg_double(argv, i+4);
-      if( exec ) html_map_addr(db, lon1, lat1, lon2, lat2, argv[i+5]);
-      i = i + 5;
+    else if( strcmp("vaddr", argv[2])==0 && argc==8 ){
+      lon1 = get_arg_double(argv, 3);
+      lat1 = get_arg_double(argv, 4);
+      lon2 = get_arg_double(argv, 5);
+      lat2 = get_arg_double(argv, 6);
+      if( exec ) html_map_addr(db, lon1, lat1, lon2, lat2, argv[7]);
+      break;
     } 
-    else if( strcmp("vgraph", argv[i])==0 && argc>=i+6 ){
-      lon1 = get_arg_double(argv, i+1);
-      lat1 = get_arg_double(argv, i+2);
-      lon2 = get_arg_double(argv, i+3);
-      lat2 = get_arg_double(argv, i+4);
-      if( exec ) html_map_graph(db, lon1, lat1, lon2, lat2, argv[i+5]);
-      i = i + 5;
+    else if( strcmp("vgraph", argv[2])==0 && argc==8 ){
+      lon1 = get_arg_double(argv, 3);
+      lat1 = get_arg_double(argv, 4);
+      lon2 = get_arg_double(argv, 5);
+      lat2 = get_arg_double(argv, 6);
+      if( exec ) html_map_graph(db, lon1, lat1, lon2, lat2, argv[7]);
+      break;
     } 
-    else if( strcmp("sql", argv[i])==0 && argc>=i+2 ){
-      if( exec ) exec_sql_stmt(db, argv[i+1]);
-      i++;
+    else if( strcmp("sql", argv[2])==0 && argc==4 ){
+      if( exec ) exec_sql_stmt(db, argv[3]);
+      break;
     } 
-    else if( strcmp("route", argv[i])==0 && argc>=i+7 ){
-      lon1 = get_arg_double(argv, i+1);
-      lat1 = get_arg_double(argv, i+2);
-      lon2 = get_arg_double(argv, i+3);
-      lat2 = get_arg_double(argv, i+4);
-      if( exec ) shortest_way(db, lon1, lat1, lon2, lat2, argv[i+5], argv[i+6]);
-      i = i + 6;
+    else if( strcmp("route", argv[2])==0 && argc==9 ){
+      lon1 = get_arg_double(argv, 3);
+      lat1 = get_arg_double(argv, 4);
+      lon2 = get_arg_double(argv, 5);
+      lat2 = get_arg_double(argv, 6);
+      if( exec ) shortest_way(db, lon1, lat1, lon2, lat2, argv[7], argv[8]);
+      break;
     } 
     else {
       printf("Incorrect option '%s'\n", argv[i]);
