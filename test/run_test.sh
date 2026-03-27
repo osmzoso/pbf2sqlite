@@ -63,6 +63,9 @@ echo "Test option 'sql'..."
 ../build/pbf2sqlite $dir/osm_c.db sql "SELECT * FROM nodes LIMIT 5"
 ../build/pbf2sqlite $dir/osm_c.db sql "SELECT radians(lat),sin(radians(lat)) FROM nodes LIMIT 5"
 
+echo "Test option 'sql' (read from stdin)..."
+echo "SELECT * FROM nodes LIMIT 5" | ../build/pbf2sqlite $dir/osm_c.db sql
+
 
 echo "-----------------------------------------------------------------"
 echo "Test 3: Routing"

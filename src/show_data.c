@@ -5,7 +5,7 @@
 /*
 ** Execute SQL statement
 */
-static int print_row(void *NotUsed, int argc, char **argv, char **azColName){
+static int sql_print_row(void *NotUsed, int argc, char **argv, char **azColName){
   int i;
   for(i=0; i<argc; i++){
     if( i>0 ) printf("|");
@@ -15,13 +15,38 @@ static int print_row(void *NotUsed, int argc, char **argv, char **azColName){
   return 0;
 }
 
-void exec_sql_stmt(sqlite3 *db, const char *sql_stmt){
+void sql_exec_stmt(sqlite3 *db, const char *sql){
   char *zErrMsg = 0;
-  rc = sqlite3_exec(db, sql_stmt, print_row, 0, &zErrMsg);
+  rc = sqlite3_exec(db, sql, sql_print_row, 0, &zErrMsg);
   if( rc!=SQLITE_OK ){
     fprintf(stderr, "SQL error: %s\n", zErrMsg);
     sqlite3_free(zErrMsg);
   }
+}
+
+void sql_read_stdin(sqlite3 *db){
+  char *sql = NULL;
+  size_t sql_size = 0;
+  size_t len;
+  /* Read entire stdin into a buffer */
+  while (!feof(stdin)) {
+    char buffer[1024];
+    len = fread(buffer, 1, sizeof(buffer), stdin);
+    if (len > 0) {
+      char *new_sql = realloc(sql, sql_size + len + 1);
+      if (!new_sql) {
+        free(sql);
+        sqlite3_close(db);
+        abort_oom();
+      }
+      sql = new_sql;
+      memcpy(sql + sql_size, buffer, len);
+      sql_size += len;
+      sql[sql_size] = '\0';
+    }
+  }
+  sql_exec_stmt(db, sql);
+  free(sql);
 }
 
 /*
