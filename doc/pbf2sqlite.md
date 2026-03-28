@@ -9,7 +9,7 @@ Simple example:
 Advanced example with all available options:  
 `pbf2sqlite test.db read country.osm.pbf index rtree addr graph`  
 
-The database can be easily queried with the [SQLite CLI tool](https://www.sqlite.org/cli.html).  
+The created database can be easily queried using the [SQLite CLI tool](https://www.sqlite.org/cli.html).  
 
 
 # 2. Main options
@@ -36,8 +36,6 @@ column       | type                | description
 node_id      | INTEGER             | node ID
 key          | TEXT                | tag key
 value        | TEXT                | tag value
-- INDEX node_tags__node_id ON node_tags (node_id)
-- INDEX node_tags__key     ON node_tags (key)
 
 #### Table "way_nodes"
 column       | type                | description
@@ -45,8 +43,6 @@ column       | type                | description
 way_id       | INTEGER             | way ID
 node_id      | INTEGER             | node ID
 node_order   | INTEGER             | node order
-- INDEX way_nodes__way_id  ON way_nodes (way_id, node_order)
-- INDEX way_nodes__node_id ON way_nodes (node_id)
 
 #### Table "way_tags"
 column       | type                | description
@@ -54,8 +50,6 @@ column       | type                | description
 way_id       | INTEGER             | way ID
 key          | TEXT                | tag key
 value        | TEXT                | tag value
-- INDEX way_tags__way_id   ON way_tags (way_id)
-- INDEX way_tags__key      ON way_tags (key)
 
 #### Table "relation_members"
 column       | type                | description
@@ -65,8 +59,6 @@ ref          | TEXT                | reference ('node','way','relation')
 ref_id       | INTEGER             | node, way or relation ID
 role         | TEXT                | describes a particular feature
 member_order | INTEGER             | member order
-- INDEX relation_members__relation_id ON relation_members (relation_id, member_order)
-- INDEX relation_members__ref_id      ON relation_members (ref_id)
 
 #### Table "relation_tags"
 column       | type                | description
@@ -74,13 +66,24 @@ column       | type                | description
 relation_id  | INTEGER             | relation ID
 key          | TEXT                | tag key
 value        | TEXT                | tag value
-- INDEX relation_tags__relation_id    ON relation_tags (relation_id)
-- INDEX relation_tags__key            ON relation_tags (key)
 
 ## 2.2. Option "index"
 
-This option creates basic indexes for the six tables.  
-The created indexes are described in section 2.1.  
+This option creates the following basic indexes:  
+
+table            | index_name                    | columns
+-----------------|-------------------------------|---------------------------
+node_tags        | node_tags__node_id            | node_id
+node_tags        | node_tags__key                | key
+way_tags         | way_tags__way_id              | way_id
+way_tags         | way_tags__key                 | key
+way_nodes        | way_nodes__way_id             | way_id, node_order
+way_nodes        | way_nodes__node_id            | node_id
+relation_members | relation_members__relation_id | relation_id, member_order
+relation_members | relation_members__ref_id      | ref_id
+relation_tags    | relation_tags__relation_id    | relation_id
+relation_tags    | relation_tags__key            | key
+ 
 Finally, the [ANALYZE](https://www.sqlite.org/lang_analyze.html) command is executed.  
 
 ## 2.3. Option "rtree"
@@ -223,7 +226,7 @@ Links:
 <https://www.geofabrik.de/data/routable-shapefile.pdf>  
 
 
-# 3. Show data
+# 3. Additional options
 
 ## 3.1. Option "node", "way" and "relation"
 
@@ -255,18 +258,6 @@ pbf2sqlite DATABASE vaddr LON1 LAT1 LON2 LAT2 HTMLFILE
 ## 3.3. Option "sql" 
 
 The **sql** option executes an SQL command.
-```
-Usage:  
-pbf2sqlite DATABASE sql STATEMENT
-```
-
-A simple [SELECT](https://www.sqlite.org/lang_select.html) statement
-displays the result on the console.
-
-A large SQL command can be written to a file and executed with bash as follows:
-```
-pbf2sqlite test.db sql "`cat query.sql`"
-```
 
 SQLite is extended with the following functions:
 
@@ -288,17 +279,21 @@ lon: -180°                       |                 lon: +180°
                lat: -85.05112878 | y: -20037508.343
 ```
 
-It can also be used to make changes to the data:  
-```
-pbf2sqlite test.db sql "ALTER TABLE nodes ADD COLUMN x"
-pbf2sqlite test.db sql "ALTER TABLE nodes ADD COLUMN y"
-pbf2sqlite test.db sql "UPDATE nodes SET x=mercator_x(lon),y=mercator_y(lat)"
-```
+Examples:  
+`pbf2sqlite test.db sql "ALTER TABLE nodes ADD COLUMN x"`  
+`pbf2sqlite test.db sql "ALTER TABLE nodes ADD COLUMN y"`  
+`pbf2sqlite test.db sql "UPDATE nodes SET x=mercator_x(lon),y=mercator_y(lat)"`  
 
+If the SQL command is a [SELECT](https://www.sqlite.org/lang_select.html)
+statement, then the result will be displayed on the console.
 
-# 4. Find shortest way
+SQL commands can also be entered via stdin:  
+`pbf2sqlite test.db sql < stmt.sql`  
+`cat stmt.sql | pbf2sqlite test.db sql`  
 
-## 4.1. Option "route"
+## 3.4. Option "route"
+
+The **route** option calculates a shortest way.
 
 Table **graph_edges** and **rtree_way** are required.
 
@@ -315,7 +310,7 @@ Therefore, FILE is supplemented with the file extensions **.html**, **.csv** and
 
 # Appendix
 
-## Option duration
+## Time required for the options
 
 | Option    | germany.osm.pbf (4,4G) | andorra.osm.pbf (3,2M) |
 |-----------|-----------------------:|-----------------------:|
