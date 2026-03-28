@@ -138,7 +138,7 @@ void shortest_way(
   html = fopen(filename, "w");
   if( html==NULL ) abort_fopen();
   leaflet_html_header(html, "map route");
-  fprintf(html, "<h3>Routing</h3>\n<pre>\n");
+  fprintf(html, "<h3>Route</h3>\n<pre>\n");
   fprintf(html, "# start: %f %f   dest: %f %f\n", lon_start, lat_start, lon_dest, lat_dest);
   /* 1. Get permit mask */
   int mask_permit;
@@ -256,7 +256,7 @@ void shortest_way(
   leaflet_style(html, "#000000", 0.3, 2, "5 5", "none", 0.3, 5);
   leaflet_rectangle(html, "map", b.min_lon, b.min_lat, b.max_lon, b.max_lat, "");
   /* path */
-  leaflet_style(html, "#ff0000", 0.5, 6, "", "none", 1.0, 5);
+  leaflet_style(html, "#0000ff", 0.5, 6, "", "none", 1.0, 5);
   leaflet_polyline(html, "map", &path, "Shortest way");
   /* start and dest points */
   leaflet_style(html, "none", 0.9, 2, "", "#ff0000", 1.0, 5);
