@@ -220,11 +220,6 @@ node_id    | INTEGER             | node ID
 num_edges  | INTEGER             | number of edges
 - INDEX graph_vertices__node_id ON graph_vertices (node_id)
 
-Links:  
-<https://www.sqlite.org/lang_with.html#queries_against_a_graph>  
-<https://www.geofabrik.de/data/routeable-vector-data.html>  
-<https://www.geofabrik.de/data/routable-shapefile.pdf>  
-
 
 # 3. Additional options
 
@@ -232,27 +227,24 @@ Links:
 
 The **node**, **way** and **relation** options display information about
 the respective objects on the console.
+
+Examples:  
 ```
-Usage:  
-pbf2sqlite DATABASE node ID
-pbf2sqlite DATABASE way ID
-pbf2sqlite DATABASE relation ID
+pbf2sqlite germany.db node 3378340880
+pbf2sqlite germany.db way 424415177
+pbf2sqlite germany.db relation 2201742
 ```
 
-## 3.2. Option "vgraph" and "vaddr"
+## 3.2. Option "vaddr" and "vgraph"
 
-The **vgraph** option allows you to visualize the graph for a given area.  
-This option creates an HTML file containing zoomable maps with the graph data.  
-```
-Usage:  
-pbf2sqlite DATABASE vgraph LON1 LAT1 LON2 LAT2 HTMLFILE
-```
+The **vaddr** option visualizes the addresses for a given area.  
+The **vgraph** option visualizes the graph table for a given area.  
+These options generate an HTML file with zoomable maps.  
 
-The **vaddr** option allows you to visualize the addresses for a given area.  
-This option creates an HTML file containing a zoomable map with the address data.  
+Examples:  
 ```
-Usage:  
-pbf2sqlite DATABASE vaddr LON1 LAT1 LON2 LAT2 HTMLFILE
+pbf2sqlite germany.db vaddr 13.36 52.52 13.38 52.53 addr_bln.html
+pbf2sqlite germany.db vgraph 11.56 48.13 11.58 48.14 graph_mchn.html
 ```
 
 ## 3.3. Option "sql" 
@@ -280,16 +272,20 @@ lon: -180°                       |                 lon: +180°
 ```
 
 Examples:  
-`pbf2sqlite test.db sql "ALTER TABLE nodes ADD COLUMN x"`  
-`pbf2sqlite test.db sql "ALTER TABLE nodes ADD COLUMN y"`  
-`pbf2sqlite test.db sql "UPDATE nodes SET x=mercator_x(lon),y=mercator_y(lat)"`  
+```
+pbf2sqlite test.db sql "ALTER TABLE nodes ADD COLUMN x"
+pbf2sqlite test.db sql "ALTER TABLE nodes ADD COLUMN y"
+pbf2sqlite test.db sql "UPDATE nodes SET x=mercator_x(lon),y=mercator_y(lat)"
+```
 
 If the SQL command is a [SELECT](https://www.sqlite.org/lang_select.html)
 statement, then the result will be displayed on the console.
 
 SQL commands can also be entered via stdin:  
-`pbf2sqlite test.db sql < stmt.sql`  
-`cat stmt.sql | pbf2sqlite test.db sql`  
+```
+pbf2sqlite test.db sql < stmt.sql
+cat stmt.sql | pbf2sqlite test.db sql
+```
 
 ## 3.4. Option "route"
 
@@ -297,20 +293,27 @@ The **route** option calculates a shortest way.
 
 Table **graph_edges** and **rtree_way** are required.
 
+Usage:  
 ```
-Usage:
-pbf2sqlite DATABASE route LON_START LAT_START LON_DEST LAT_DEST PERMIT FILE
+pbf2sqlite <database> route <lon1> <lat1> <lon2> <lat2> <permit> <file>
 ```
 
-PERMIT can be "foot", "bike" or "car".  
+`<permit>` can be "foot", "bike" or "car".  
 
 The result is written to three files (HTML, CSV and GPX).  
-Therefore, FILE is supplemented with the file extensions **.html**, **.csv** and **.gpx**.  
+Therefore, `<file>` is supplemented with the file extensions **.html**, **.csv** and **.gpx**.  
+
+Examples:  
+```
+pbf2sqlite germany.db route 11.5777 48.1427 11.6031 48.1619 foot ~/route_mchn_foot
+pbf2sqlite germany.db route 11.5777 48.1427 11.6031 48.1619 bike ~/route_mchn_bike
+pbf2sqlite germany.db route 11.5777 48.1427 11.6031 48.1619 car ~/route_mchn_car
+```
 
 
 # Appendix
 
-## Time required for the options
+## Time requirements
 
 | Option    | germany.osm.pbf (4,4G) | andorra.osm.pbf (3,2M) |
 |-----------|-----------------------:|-----------------------:|
@@ -351,4 +354,10 @@ SQLITE_STAT1...................................... 1            0.0%
 
 */
 ```
+
+## Links
+
+<https://www.sqlite.org/lang_with.html#queries_against_a_graph>  
+<https://www.geofabrik.de/data/routeable-vector-data.html>  
+<https://www.geofabrik.de/data/routable-shapefile.pdf>  
 
