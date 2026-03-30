@@ -8,26 +8,25 @@ files into a SQLite database.
 
 ```
 Usage:
-pbf2sqlite DATABASE [OPTION ...]
+pbf2sqlite <database> [OPTION ...]
 
 Main options:
-  read FILE     Reads FILE (.osm.pbf or .osm) into the database
-  index         Add basic indexes
-  rtree         Add R*Tree indexes
-  addr          Add address tables
-  graph         Add graph tables
+  read <file>      Reads an .osm.pbf or .osm file into the database
+  index            Add basic indexes
+  rtree            Add R*Tree indexes
+  addr             Add address tables
+  graph            Add graph tables
 
-Show data:
-  node ID                                 Show node data
-  way ID                                  Show way data
-  relation ID                             Show relation data
-  vaddr  LON1 LAT1 LON2 LAT2 HTMLFILE     Visualize address data
-  vgraph LON1 LAT1 LON2 LAT2 HTMLFILE     Visualize graph data
-  sql STATEMENT                           Execute SQL statement
-
-Find shortest way:
-  route LON_START LAT_START LON_DEST LAT_DEST PERMIT FILE
-  (PERMIT: 'foot', 'bike' or 'car')
+Additional options:
+  node <id>                                           Show data of a node
+  way <id>                                            Show data of a way
+  relation <id>                                       Show data of a relation
+  vaddr <lon1> <lat1> <lon2> <lat2> <htmlfile>        Generates a map of the addresses
+  vgraph <lon1> <lat1> <lon2> <lat2> <htmlfile>       Generates a map of the graph
+  sql <stmt>                                          Executes an SQL statement
+  sql                                                 Executes an SQL statement from stdin
+  route <lon1> <lat1> <lon2> <lat2> <permit> <file>   Calculates shortest route
+                                   (<permit> can be 'foot', 'bike' or 'car')
 ```
 
 The command
