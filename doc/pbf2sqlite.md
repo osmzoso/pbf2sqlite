@@ -132,7 +132,7 @@ WHERE way_id=4872512;
 
 ## 2.4. Option "addr"
 
-This option creates two tables with address data.  
+This option creates two tables with address data:  
 
 #### Table "addr_street"
 column       | type                | description
@@ -145,7 +145,7 @@ min_lon      | REAL                | boundingbox min. longitude
 min_lat      | REAL                | boundingbox min. latitude
 max_lon      | REAL                | boundingbox max. longitude
 max_lat      | REAL                | boundingbox max. latitude
-- INDEX addr_street_1 ON addr_street (postcode,city,street)
+Index **addr_street_1** on columns (postcode,city,street)
 
 #### Table "addr_housenumber"
 column       | type                | description
@@ -157,9 +157,9 @@ lon            | REAL                | longitude
 lat            | REAL                | latitude
 way_id         | INTEGER             | way ID
 node_id        | INTEGER             | node ID
-- INDEX addr_housenumber_1 ON addr_housenumber (street_id)
+Index **addr_housenumber_1** on column (street_id)
 
-The view **addr_view** join the two tables.
+The view **addr_view** joins these two tables.
 
 
 ## 2.5. Option "graph"
@@ -178,7 +178,17 @@ dist            | INTEGER             | distance in meters
 way_id          | INTEGER             | way ID
 nodes           | INTEGER             | number of nodes
 permit          | INTEGER             | bit field access
-- INDEX graph_edges__way_id ON graph_edges (way_id)
+Index **graph_edges\_\_way_id** on column (way_id)
+
+#### Table "graph_vertices"
+column     | type                | description
+-----------|---------------------|-------------------------------------
+vertex_id  | INTEGER PRIMARY KEY | vertex ID
+node_id    | INTEGER             | node ID
+num_edges  | INTEGER             | number of edges
+Index **graph_vertices\_\_node_id** on column (node_id)
+
+### Access for foot, bike and car
 
 The bit field **permit** determines who may use this edge:  
 
@@ -193,8 +203,7 @@ Bit 5 | oneway_car  | 2^5  32
 Bit 6 | (not used)  | 2^6  64
 Bit 7 | (not used)  | 2^7 128
 
-To fill the column **permit** a table **graph_permit** is needed.  
-This table specifies which tags set or clear which bits in **permit**.  
+To fill the column **permit** a table **graph_permit** is needed:  
 
 #### Table "graph_permit"
 column     | type     | description
@@ -204,21 +213,14 @@ value      | TEXT     | tag value
 set_bit    | INTEGER  | bitmask set bits
 clear_bit  | INTEGER  | bitmask clear bits
 
-Initially, no bits are set in **permit**.  
-Then, the bits are set according to the tags found (set_bit).  
-Finally, the bits are cleared according to the tags found (clear_bit).  
-
 > If table **graph_permit** doesn't exist, a new table will be created with default values.  
 > But if the table already exists, it will be used.  
 > This allows you to create your own definition for filling the permit field.  
 
-#### Table "graph_vertices"
-column     | type                | description
------------|---------------------|-------------------------------------
-vertex_id  | INTEGER PRIMARY KEY | vertex ID
-node_id    | INTEGER             | node ID
-num_edges  | INTEGER             | number of edges
-- INDEX graph_vertices__node_id ON graph_vertices (node_id)
+This table specifies which tags set or clear which bits in **permit**.  
+Initially, no bits are set in **permit**.  
+Then, the bits are set according to the tags found (set_bit).  
+Finally, the bits are cleared according to the tags found (clear_bit).  
 
 
 # 3. Additional options
