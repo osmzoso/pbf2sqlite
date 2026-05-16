@@ -5,22 +5,33 @@ CC = gcc
 CFLAGS = -Wall -std=c99
 LDFLAGS =
 
-# build directory, binary name, source files
+# build directory, binary name
 BUILD_DIR = ./build/
 TARGET = pbf2sqlite
-SRC = ./src/main.c
 
+# source files, doc
+SRC = ./src/main.c
 DOC_SRC = ./doc/pbf2sqlite.md
 DOC_CSS = ./doc/custom.css
 
-
+#
+# main targets
+#
+.PHONY: all test doc release amalgamation install clean
 all: bldir compile
 test: bldir debug runtest
 doc: bldir renderdoc
-release: bldir compile_static renderdoc
+release: bldir static static_win64 renderdoc
 amalgamation: bldir single_src
+install:
+	install -m755 $(BUILD_DIR)$(TARGET) /usr/bin
+clean:
+	rm -rf $(BUILD_DIR)
 
-
+#
+#
+#
+.PHONY: bldir compile debug static static_win64 runtest renderdoc single_src
 bldir:
 	mkdir -p $(BUILD_DIR)
 
@@ -30,8 +41,24 @@ compile:
 debug:
 	$(CC) $(CFLAGS) -O0 -g $(SRC) -lsqlite3 -lreadosm -lm -o $(BUILD_DIR)$(TARGET) -DDEBUG
 
-compile_static:
-	@echo "TODO: compile static..."
+static:
+	$(CC) -static $(CFLAGS) -O2 -s \
+     -DSQLITE_THREADSAFE=0 \
+     -DSQLITE_OMIT_LOAD_EXTENSION \
+     -DSQLITE_ENABLE_RTREE \
+     -DSQLITE_ENABLE_MATH_FUNCTIONS \
+     $(SRC) \
+     ./src/sqlite3/sqlite3.c \
+     ./src/readosm/osm_objects.c \
+     ./src/readosm/osmxml.c \
+     ./src/readosm/protobuf.c \
+     ./src/readosm/readosm.c \
+     -o $(BUILD_DIR)$(TARGET) \
+     -I. -I./src/sqlite3 -I./src/readosm \
+     -lexpat -lz -lm -lgcc
+
+static_win64:
+	@echo "TODO: compile static win64..."
 
 runtest:
 	@echo "TODO: run tests..."
@@ -61,10 +88,3 @@ renderdoc:
 single_src:
 	$(CC) -E $(SRC) | grep -v '^#' > $(BUILD_DIR)$(TARGET).c
 
-install:
-	install -m755 $(BUILD_DIR)$(TARGET) /usr/bin
-
-clean:
-	rm -rf $(BUILD_DIR)
-
-.PHONY: all test doc release amalgamation bldir compile debug compile_static runtest renderdoc single_src install clean
