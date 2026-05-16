@@ -21,17 +21,17 @@ DOC_CSS = ./doc/custom.css
 all: bldir compile
 test: bldir debug runtest
 doc: bldir renderdoc
-release: bldir static static_win64 renderdoc
-amalgamation: bldir single_src
+release: clean bldir static static_win64 renderdoc
 install:
 	install -m755 $(BUILD_DIR)$(TARGET) /usr/bin
 clean:
 	rm -rf $(BUILD_DIR)
+amalgamation: bldir single_src
 
 #
 #
 #
-.PHONY: bldir compile debug static static_win64 runtest renderdoc single_src
+.PHONY: bldir compile debug debug_asan static static_win64 runtest renderdoc single_src
 bldir:
 	mkdir -p $(BUILD_DIR)
 
@@ -40,6 +40,9 @@ compile:
 
 debug:
 	$(CC) $(CFLAGS) -O0 -g $(SRC) -lsqlite3 -lreadosm -lm -o $(BUILD_DIR)$(TARGET) -DDEBUG
+
+debug_asan:
+	$(CC) $(CFLAGS) -O0 -g $(SRC) -fsanitize=address -lasan -lsqlite3 -lreadosm -lm -o $(BUILD_DIR)$(TARGET) -DDEBUG
 
 static:
 	$(CC) -static $(CFLAGS) -O2 -s \
@@ -58,7 +61,23 @@ static:
      -lexpat -lz -lm -lgcc
 
 static_win64:
-	@echo "TODO: compile static win64..."
+	x86_64-w64-mingw32-gcc -static $(CFLAGS) -O2 -s \
+     -DSQLITE_THREADSAFE=0 \
+     -DSQLITE_OMIT_LOAD_EXTENSION \
+     -DSQLITE_ENABLE_RTREE \
+     -DSQLITE_ENABLE_MATH_FUNCTIONS \
+     -D_FORTIFY_SOURCE=2 \
+     $(SRC) \
+     ./src/sqlite3/sqlite3.c \
+     ./src/readosm/osm_objects.c \
+     ./src/readosm/osmxml.c \
+     ./src/readosm/protobuf.c \
+     ./src/readosm/readosm.c \
+     -o $(BUILD_DIR)$(TARGET).exe \
+     -I. -I./src/sqlite3 -I./src/readosm \
+     -I/usr/x86_64-w64-mingw32/sys-root/mingw/include \
+     -L/usr/x86_64-w64-mingw32/sys-root/mingw/lib \
+     -lexpat -lz -lpthread -lwinpthread -lws2_32 -lssp -lgcc
 
 runtest:
 	@echo "TODO: run tests..."
