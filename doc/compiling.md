@@ -13,18 +13,16 @@ readosm-devel
 
 Compile with
 ```
-cd ./src
 make
 ```
-The binary is in the **/build** directory.  
-(install in **/usr/bin** with `sudo make install`)  
+The binary can be found in the **./build** directory.  
+Install in **/usr/bin** with `sudo make install`.  
 
 Create the documentation files (pandoc is required):
 ```
-cd ./doc
-make
+make doc
 ```
-The doc files are also in the **/build** directory.  
+The doc files are also in the **./build** directory.  
 
 The dynamic libs are in the following directory:
 ```
@@ -77,10 +75,9 @@ zlib-ng-compat-static
 
 Compile with
 ```
-cd ./src
 make static
 ```
-The binary is in the **/build** directory.  
+> The directory **./build** must already exist.  
 
 ### Build a static binary for Windows (64bit)
 
@@ -99,10 +96,9 @@ mingw64-winpthreads-static
 
 Compile with
 ```
-cd ./src
-make win64
+make static_win64
 ```
-The binary is in the **/build** directory.  
+> The directory **./build** must already exist.  
 
 The static libs are in the following directories:
 ```
