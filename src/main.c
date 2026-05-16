@@ -18,7 +18,11 @@
 # define M_PI   3.141592653589793238462643383279502884
 #endif
 
-#define PBF2SQLITE_VERSION  "0.5.1"
+#define PBF2SQLITE_VERSION  "0.5.2"
+
+#define RED     "\033[31m"
+#define GREEN   "\033[32m"
+#define RESET   "\033[0m"
 
 /*
 ** Public variables
@@ -49,7 +53,7 @@ static char *help =
   "  sql <stmt>                                          Executes an SQL statement\n"
   "  sql                                                 Executes an SQL statement from stdin\n"
   "  route <lon1> <lat1> <lon2> <lat2> <permit> <file>   Calculates shortest route\n"
-  "                                   (<permit> can be 'foot', 'bike' or 'car')\n"
+  "        (<permit> can be 'foot', 'bike' or 'car')\n"
   "\n"
   "This is pbf2sqlite version " PBF2SQLITE_VERSION "\n"
   ;
@@ -69,6 +73,9 @@ static char *help =
 ** Program start 
 */
 int main(int argc, char **argv) {
+#ifdef DEBUG
+  printf(RED "\n!!!!! Warning: This is a DEBUG build. !!!!!\n" RESET);
+#endif
   if( argc==1 ){
     printf("%s", help);
     printf("SQLite %s and readosm %s are used.\n\n",
