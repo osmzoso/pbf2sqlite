@@ -145,6 +145,7 @@ min_lon      | REAL                | boundingbox min. longitude
 min_lat      | REAL                | boundingbox min. latitude
 max_lon      | REAL                | boundingbox max. longitude
 max_lat      | REAL                | boundingbox max. latitude
+
 Index **addr_street_1** on columns (postcode,city,street)
 
 #### Table "addr_housenumber"
@@ -157,6 +158,7 @@ lon            | REAL                | longitude
 lat            | REAL                | latitude
 way_id         | INTEGER             | way ID
 node_id        | INTEGER             | node ID
+
 Index **addr_housenumber_1** on column (street_id)
 
 The view **addr_view** joins these two tables.
@@ -178,6 +180,7 @@ dist            | INTEGER             | distance in meters
 way_id          | INTEGER             | way ID
 nodes           | INTEGER             | number of nodes
 permit          | INTEGER             | bit field access
+
 Index **graph_edges\_\_way_id** on column (way_id)
 
 #### Table "graph_vertices"
@@ -186,6 +189,7 @@ column     | type                | description
 vertex_id  | INTEGER PRIMARY KEY | vertex ID
 node_id    | INTEGER             | node ID
 num_edges  | INTEGER             | number of edges
+
 Index **graph_vertices\_\_node_id** on column (node_id)
 
 ### Access for foot, bike and car
