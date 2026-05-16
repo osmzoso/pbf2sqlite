@@ -32,6 +32,9 @@ int rc;              /* SQLite Result code */
 sqlite3_stmt *stmt_insert_nodes, *stmt_insert_node_tags, *stmt_insert_way_nodes,
              *stmt_insert_way_tags, *stmt_insert_relation_members, *stmt_insert_relation_tags;
 static char *help =
+#ifdef DEBUG
+  RED "\n!!!!! Warning: This is a DEBUG build. !!!!!\n" RESET
+#endif
   "\n"
   "Reads OpenStreetMap data into a SQLite database.\n"
   "\n"
@@ -73,9 +76,6 @@ static char *help =
 ** Program start 
 */
 int main(int argc, char **argv) {
-#ifdef DEBUG
-  printf(RED "\n!!!!! Warning: This is a DEBUG build. !!!!!\n" RESET);
-#endif
   if( argc==1 ){
     printf("%s", help);
     printf("SQLite %s and readosm %s are used.\n\n",

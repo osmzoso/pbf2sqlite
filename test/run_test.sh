@@ -39,24 +39,24 @@ rm -f $dir/osm_py.db
 
 
 echo "-----------------------------------------------------------------"
-echo "Test 2: Show data (Andorra)"
+echo "Test 2: Show data (weimar.osm)"
 echo "-----------------------------------------------------------------"
 
 echo "Test option 'node'..."
-../build/pbf2sqlite $dir/osm_c.db node 5447216522
+../build/pbf2sqlite $dir/osm_c.db node 2616037670
 
 echo "Test option 'way'..."
-../build/pbf2sqlite $dir/osm_c.db way 1426053359
+../build/pbf2sqlite $dir/osm_c.db way 15805105
 
 echo "Test option 'relation'..."
-../build/pbf2sqlite $dir/osm_c.db relation 1843715
+../build/pbf2sqlite $dir/osm_c.db relation 2731564
 
 echo "Test option 'vaddr'..."
-../build/pbf2sqlite $dir/osm_c.db vaddr 1.527 42.505 1.536 42.508 $dir/vaddr.html
+../build/pbf2sqlite $dir/osm_c.db vaddr 11.3309 50.9771 11.3326 50.9786 $dir/vaddr.html
 firefox $dir/vaddr.html
 
 echo "Test option 'vgraph'..."
-../build/pbf2sqlite $dir/osm_c.db vgraph 1.520 42.501 1.549 42.517 $dir/vgraph.html
+../build/pbf2sqlite $dir/osm_c.db vgraph 11.3309 50.9771 11.3326 50.9786 $dir/vgraph.html
 firefox $dir/vgraph.html
 
 echo "Test option 'sql'..."
@@ -72,7 +72,7 @@ echo "Test 3: Routing"
 echo "-----------------------------------------------------------------"
 
 echo "Test option 'route'..."
-../build/pbf2sqlite $dir/osm_c.db route 1.522 42.505 1.549 42.517 foot $dir/route1
+../build/pbf2sqlite $dir/osm_c.db route 11.3314 50.9778 11.3320 50.9785 foot $dir/route1
 firefox $dir/route1.html
 
 ../build/pbf2sqlite $dir/osm_c.db route 1.530 42.507 1.549 42.517 car $dir/route2

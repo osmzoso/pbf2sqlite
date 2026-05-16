@@ -81,6 +81,10 @@ static_win64:
 
 runtest:
 	@echo "TODO: run tests..."
+	#@cd ./test/
+	#@pwd
+	./test/run_test.sh ../build/ weimar.osm
+	#@cd ..
 
 renderdoc:
 	pandoc \
