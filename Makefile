@@ -38,6 +38,12 @@ runtest:
 
 renderdoc:
 	pandoc \
+     -V geometry:margin=0.6in \
+     $(DOC_SRC) \
+     --pdf-engine=xelatex \
+     --toc \
+     -o $(BUILD_DIR)$(TARGET).pdf
+	pandoc \
      --standalone \
      --embed-resources \
      --metadata title="$(TARGET)" \
@@ -45,10 +51,15 @@ renderdoc:
      --css=$(DOC_CSS) \
      $(DOC_SRC) \
      -o $(BUILD_DIR)$(TARGET).html
+	rm -f $(BUILD_DIR)$(TARGET).1.gz
+	pandoc \
+     -s -f markdown -t man \
+     $(DOC_SRC) \
+     -o $(BUILD_DIR)$(TARGET).1
+	gzip $(BUILD_DIR)$(TARGET).1
 
 single_src:
-	mkdir -p $(BDIR)
-	$(CC) -E main.c | grep -v '^#' > $(BDIR)$(BNAME).c
+	$(CC) -E $(SRC) | grep -v '^#' > $(BUILD_DIR)$(TARGET).c
 
 install:
 	install -m755 $(BUILD_DIR)$(TARGET) /usr/bin
