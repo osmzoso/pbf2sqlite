@@ -19,7 +19,7 @@ DOC_CSS = ./doc/custom.css
 #
 .PHONY: all test doc release amalgamation install clean
 all: bldir compile
-test: bldir debug runtest
+test: bldir debug quicktest
 doc: bldir renderdoc
 release: clean bldir static static_win64 renderdoc
 install:
@@ -31,7 +31,7 @@ amalgamation: bldir single_src
 #
 #
 #
-.PHONY: bldir compile debug debug_asan static static_win64 runtest renderdoc single_src
+.PHONY: bldir compile debug debug_asan static static_win64 quicktest renderdoc single_src
 bldir:
 	mkdir -p $(BUILD_DIR)
 
@@ -79,12 +79,8 @@ static_win64:
      -L/usr/x86_64-w64-mingw32/sys-root/mingw/lib \
      -lexpat -lz -lpthread -lwinpthread -lws2_32 -lssp -lgcc
 
-runtest:
-	@echo "TODO: run tests..."
-	#@cd ./test/
-	#@pwd
-	./test/run_test.sh ../build/ weimar.osm
-	#@cd ..
+quicktest:
+	bash $(PWD)/test/run_test.sh $(PWD)/build/ $(PWD)/test/weimar.osm
 
 renderdoc:
 	pandoc \
