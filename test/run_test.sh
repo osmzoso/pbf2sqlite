@@ -74,7 +74,6 @@ echo "-----------------------------------------------------------------"
 echo "Test option 'route'..."
 $dir/pbf2sqlite $dir/osm_c.db route 11.3314 50.9778 11.3320 50.9785 foot $dir/route1
 firefox $dir/route1.html
-
-$dir/pbf2sqlite $dir/osm_c.db route 1.530 42.507 1.549 42.517 car $dir/route2
-firefox $dir/route2.html
+# Coordinates outside the range of weimar.osm -> display error message
+#$dir/pbf2sqlite $dir/osm_c.db route 1.530 42.507 1.549 42.517 car $dir/route2
 

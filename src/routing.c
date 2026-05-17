@@ -135,24 +135,16 @@ void shortest_way(
   if (!filename) abort_oom();
   strcpy(filename, name);
   strcat(filename, ext);
-  html = fopen(filename, "w");
-  if( html==NULL ) abort_fopen();
-  leaflet_html_header(html, "map route");
-  fprintf(html, "<h3>Route</h3>\n<pre>\n");
-  fprintf(html, "# start: %f %f   dest: %f %f\n", lon_start, lat_start, lon_dest, lat_dest);
   /* 1. Get permit mask */
   int mask_permit;
   if     ( strcmp("foot", permit)==0 ) mask_permit = 1;
   else if( strcmp("bike", permit)==0 ) mask_permit = 2; 
   else if( strcmp("car",  permit)==0 ) mask_permit = 4; 
   else mask_permit = atoi(permit);
-  fprintf(html, "# permit: %s -> mask_permit: %d\n", permit, mask_permit);
   /* 2. Get boundingbox for the subgraph */
   bbox b = calc_boundingbox(lon_start, lat_start, lon_dest, lat_dest, 2.0);
-  fprintf(html, "# boundingbox: %f %f   %f %f\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
   /* 3. Get subgraph */
   int number_nodes = create_subgraph_tables(db, b.min_lon, b.min_lat, b.max_lon, b.max_lat, mask_permit);
-  fprintf(html, "# graph number nodes : %d\n", number_nodes);
   /* 4. fill adjacency list */
   struct Graph* graph = createGraph(number_nodes);
   rc = sqlite3_prepare_v2(db,
@@ -200,13 +192,31 @@ void shortest_way(
     }
   }
   sqlite3_finalize(stmt);
+  /* 6. Check whether valid start and end nodes were found */
+  if( graph_node_start==-1 ){
+    fprintf(stderr, "route - lon: %f  lat: %f - No start node found in the graph.\n", lon_start, lat_start);
+    exit(EXIT_FAILURE);
+  }
+  if( graph_node_end==-1 ){
+    fprintf(stderr, "route - lon: %f  lat: %f - No end node found in the graph.\n", lon_dest, lat_dest);
+    exit(EXIT_FAILURE);
+  }
+  /* 7. Open HTML file */
+  html = fopen(filename, "w");
+  if( html==NULL ) abort_fopen();
+  leaflet_html_header(html, "map route");
+  fprintf(html, "<h3>Route</h3>\n<pre>\n");
+  fprintf(html, "# start: %f %f   dest: %f %f\n", lon_start, lat_start, lon_dest, lat_dest);
+  fprintf(html, "# permit: %s -> mask_permit: %d\n", permit, mask_permit);
+  fprintf(html, "# boundingbox: %f %f   %f %f\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
+  fprintf(html, "# graph number nodes : %d\n", number_nodes);
   fprintf(html, "# graph node_start   : %d (OSM node_id %" PRId64 ")\n", graph_node_start, node_id_start);
   fprintf(html, "# graph node_end     : %d (OSM node_id %" PRId64 ")\n", graph_node_end, node_id_end);
-  /* 6. Routing */
+  /* 8. Routing */
   Dijkstra(graph, graph_node_start, graph_node_end);
   fprintf(html, "# distance: %d m\n", node[graph_node_end].d);
   fprintf(html, "</pre>\n");
-  /* 7. Output the coordinates of the path */
+  /* 9. Output the coordinates of the path */
   NodeList path;          /* contains all points of the path in reverse order */
   NodeList edge;          /* contains all points of an edge */
   nodelist_init(&path);
@@ -269,7 +279,7 @@ void shortest_way(
   /* Write path coordinates to CSV and GPX files */
   write_file_csv(name, &path);
   write_file_gpx(name, &path);
-  /* 8. Cleanup */
+  /* 10. Cleanup */
   free(filename);
   nodelist_free(&path);
   nodelist_free(&edge);

@@ -19,8 +19,8 @@ DOC_CSS = ./doc/custom.css
 #
 .PHONY: all test doc release amalgamation install clean
 all: bldir compile
-test: bldir debug quicktest
-test2: bldir debug_asan quicktest
+test: clean bldir debug quicktest
+test2: clean bldir debug_asan quicktest
 doc: bldir renderdoc
 release: clean bldir static static_win64 renderdoc
 install:
