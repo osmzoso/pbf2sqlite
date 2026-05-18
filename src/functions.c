@@ -13,11 +13,6 @@ void abort_msg(const char *msg) {
   exit(EXIT_FAILURE);
 }
 
-void abort_fopen() {
-  fprintf(stderr, "pbf2sqlite - error opening file");
-  exit(EXIT_FAILURE);
-}
-
 void abort_fclose() {
   fprintf(stderr, "pbf2sqlite - error closing file");
   exit(EXIT_FAILURE);

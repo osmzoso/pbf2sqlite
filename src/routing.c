@@ -69,7 +69,7 @@ void write_file_csv(
   strcpy(filename, name);
   strcat(filename, ext);
   csv = fopen(filename, "w");
-  if( csv==NULL ) abort_fopen();
+  if( csv==NULL ) abort_msg("Error opening file\n");
   fprintf(csv, "lon,lat,ele,node_id\r\n");
   /* Write the list in reverse order */
   for (int i=list->size-1; i>=0; i--) {
@@ -90,7 +90,7 @@ void write_file_gpx(
   strcpy(filename, name);
   strcat(filename, ext);
   gpx = fopen(filename, "w");
-  if( gpx==NULL ) abort_fopen();
+  if( gpx==NULL ) abort_msg("Error opening file\n");
   fprintf(gpx,
     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n"
     "<gpx version=\"1.1\" xmlns=\"http://www.topografix.com/GPX/1/1\" creator=\"pbf2sqlite\">\n"
@@ -197,7 +197,7 @@ void shortest_way(
   if( graph_node_end==-1 ) abort_msg("route - Destination coordinates out of range\n");
   /* 7. Open HTML file */
   html = fopen(filename, "w");
-  if( html==NULL ) abort_fopen();
+  if( html==NULL ) abort_msg("Error opening file\n");
   leaflet_html_header(html, "map route");
   fprintf(html, "<h3>Route</h3>\n<pre>\n");
   fprintf(html, "# start: %f %f   dest: %f %f\n", lon_start, lat_start, lon_dest, lat_dest);

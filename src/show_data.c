@@ -194,7 +194,7 @@ void html_map_addr(
   char popup_text[1000];
   int64_t way_id, node_id;
   html = fopen(html_file, "w");
-  if( html==NULL ) abort_fopen();
+  if( html==NULL ) abort_msg("Error opening file\n");
   leaflet_html_header(html, "map addr");
   fprintf(html,
     "<h3>Map 1 - Address</h3>\n"
@@ -359,7 +359,7 @@ void html_map_graph(
 ){
   FILE *html;
   html = fopen(html_file, "w");
-  if( html==NULL ) abort_fopen();
+  if( html==NULL ) abort_msg("Error opening file\n");
   leaflet_html_header(html, "map graph");
   fprintf(html,
     "<h3>Map 1 - Graph complete</h3>\n"
