@@ -17,12 +17,12 @@ DOC_CSS = ./doc/custom.css
 #
 # main targets
 #
-.PHONY: all test doc release amalgamation install clean
+.PHONY: all test debug doc release install clean amalgamation
 all: bldir compile
-test: clean bldir debug quicktest
-test2: clean bldir debug_asan quicktest
+test: clean bldir compile_asan quicktest
+debug: clean bldir compile_debug quicktest
 doc: bldir renderdoc
-release: clean bldir static static_win64 renderdoc
+release: clean bldir compile_static compile_static_win64 renderdoc
 install:
 	install -m755 $(BUILD_DIR)$(TARGET) /usr/bin
 clean:
@@ -32,20 +32,24 @@ amalgamation: bldir single_src
 #
 #
 #
-.PHONY: bldir compile debug debug_asan static static_win64 quicktest renderdoc single_src
+.PHONY: bldir
 bldir:
 	mkdir -p $(BUILD_DIR)
 
+.PHONY: compile
 compile:
 	$(CC) $(CFLAGS) -O2 -s $(SRC) -lsqlite3 -lreadosm -lm -o $(BUILD_DIR)$(TARGET)
 
-debug:
+.PHONY: compile_debug
+compile_debug:
 	$(CC) $(CFLAGS) -O0 -g $(SRC) -lsqlite3 -lreadosm -lm -o $(BUILD_DIR)$(TARGET) -DDEBUG
 
-debug_asan:
+.PHONY: compile_asan
+compile_asan:
 	$(CC) $(CFLAGS) -O0 -g $(SRC) -fsanitize=address -lasan -lsqlite3 -lreadosm -lm -o $(BUILD_DIR)$(TARGET) -DDEBUG
 
-static:
+.PHONY: compile_static
+compile_static:
 	$(CC) -static $(CFLAGS) -O2 -s \
      -DSQLITE_THREADSAFE=0 \
      -DSQLITE_OMIT_LOAD_EXTENSION \
@@ -61,7 +65,8 @@ static:
      -I. -I./src/sqlite3 -I./src/readosm \
      -lexpat -lz -lm -lgcc
 
-static_win64:
+.PHONY: compile_static_win64
+compile_static_win64:
 	x86_64-w64-mingw32-gcc -static $(CFLAGS) -O2 -s \
      -DSQLITE_THREADSAFE=0 \
      -DSQLITE_OMIT_LOAD_EXTENSION \
@@ -80,9 +85,11 @@ static_win64:
      -L/usr/x86_64-w64-mingw32/sys-root/mingw/lib \
      -lexpat -lz -lpthread -lwinpthread -lws2_32 -lssp -lgcc
 
+.PHONY: quicktest
 quicktest:
 	bash $(PWD)/test/run_test.sh $(PWD)/build/ $(PWD)/test/weimar.osm
 
+.PHONY: renderdoc
 renderdoc:
 	pandoc \
      -V geometry:margin=0.6in \
@@ -105,6 +112,7 @@ renderdoc:
      -o $(BUILD_DIR)$(TARGET).1
 	gzip $(BUILD_DIR)$(TARGET).1
 
+.PHONY: single_src
 single_src:
 	$(CC) -E $(SRC) | grep -v '^#' > $(BUILD_DIR)$(TARGET).c
 

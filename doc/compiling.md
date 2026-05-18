@@ -75,7 +75,7 @@ zlib-ng-compat-static
 
 Compile with
 ```
-make static
+make compile_static
 ```
 > The directory **./build** must already exist.  
 
@@ -96,7 +96,7 @@ mingw64-winpthreads-static
 
 Compile with
 ```
-make static_win64
+make compile_static_win64
 ```
 > The directory **./build** must already exist.  
 
