@@ -19,7 +19,7 @@ struct Graph {
 
 struct AdjNode* newAdjListNode(int dest, int dist, int edge) {
   struct AdjNode* newNode = (struct AdjNode*)malloc(sizeof(struct AdjNode));
-  if(!newNode) abort_oom();
+  if(!newNode) abort_msg("Out of memory\n");
   newNode->dest = dest;
   newNode->dist = dist;
   newNode->edge = edge;
@@ -29,12 +29,12 @@ struct AdjNode* newAdjListNode(int dest, int dist, int edge) {
 
 struct Graph* createGraph(int V) {
   struct Graph* graph = (struct Graph*)malloc(sizeof(struct Graph));
-  if(!graph) abort_oom();
+  if(!graph) abort_msg("Out of memory\n");
   V = V+1;
   graph->num_nodes = V;
   /* init adjacency list */
   graph->array = (struct AdjList*)malloc(V * sizeof(struct AdjList));
-  if(!graph->array) abort_oom();
+  if(!graph->array) abort_msg("Out of memory\n");
   /* set head of all lists to NULL */
   for (int i = 0; i < V; ++i)
     graph->array[i].head = NULL;
@@ -168,9 +168,9 @@ void Dijkstra(struct Graph* graph, int start_node, int dest_node) {
   int i, minD=0, minB=0;
   /* Allocate memory */
   node = (struct Dijkstra*) malloc(graph->num_nodes * sizeof(struct Dijkstra));
-  if(!node) abort_oom();
+  if(!node) abort_msg("Out of memory\n");
   b = (int *) malloc(graph->num_nodes * sizeof(int));
-  if(!b) abort_oom();
+  if(!b) abort_msg("Out of memory\n");
   /* Initialize distances and heap */
   for (i = 0; i < graph->num_nodes; i++) {
     node[i].d = INT_MAX;

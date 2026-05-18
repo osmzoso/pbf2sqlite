@@ -37,7 +37,7 @@ void sql_read_stdin(sqlite3 *db){
       if (!new_sql) {
         free(sql);
         sqlite3_close(db);
-        abort_oom();
+        abort_msg("Out of memory\n");
       }
       sql = new_sql;
       memcpy(sql + sql_size, buffer, len);

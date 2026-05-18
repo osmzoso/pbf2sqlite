@@ -65,7 +65,7 @@ void write_file_csv(
   FILE *csv;
   char *ext = ".csv";
   char *filename = malloc(strlen(name) + strlen(ext) + 1);
-  if (!filename) abort_oom();
+  if (!filename) abort_msg("Out of memory\n");
   strcpy(filename, name);
   strcat(filename, ext);
   csv = fopen(filename, "w");
@@ -86,7 +86,7 @@ void write_file_gpx(
   FILE *gpx;
   char *ext = ".gpx";
   char *filename = malloc(strlen(name) + strlen(ext) + 1);
-  if (!filename) abort_oom();
+  if (!filename) abort_msg("Out of memory\n");
   strcpy(filename, name);
   strcat(filename, ext);
   gpx = fopen(filename, "w");
@@ -132,7 +132,7 @@ void shortest_way(
   FILE *html;
   char *ext = ".html";
   char *filename = malloc(strlen(name) + strlen(ext) + 1);
-  if (!filename) abort_oom();
+  if (!filename) abort_msg("Out of memory\n");
   strcpy(filename, name);
   strcat(filename, ext);
   /* 1. Get permit mask */
@@ -193,14 +193,8 @@ void shortest_way(
   }
   sqlite3_finalize(stmt);
   /* 6. Check whether valid start and end nodes were found */
-  if( graph_node_start==-1 ){
-    fprintf(stderr, "route - lon: %f  lat: %f - No start node found in the graph.\n", lon_start, lat_start);
-    exit(EXIT_FAILURE);
-  }
-  if( graph_node_end==-1 ){
-    fprintf(stderr, "route - lon: %f  lat: %f - No end node found in the graph.\n", lon_dest, lat_dest);
-    exit(EXIT_FAILURE);
-  }
+  if( graph_node_start==-1 ) abort_msg("route - Start coordinates out of range\n");
+  if( graph_node_end==-1 ) abort_msg("route - Destination coordinates out of range\n");
   /* 7. Open HTML file */
   html = fopen(filename, "w");
   if( html==NULL ) abort_fopen();

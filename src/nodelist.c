@@ -18,7 +18,7 @@ void nodelist_init(NodeList *list) {
   list->size = 0;
   list->capacity = 4;  /* initial capacity */
   list->node = malloc(list->capacity * sizeof(Node));
-  if (!list->node) abort_oom();
+  if (!list->node) abort_msg("Out of memory\n");
 }
 
 /* Add a node */
@@ -26,7 +26,7 @@ void nodelist_add(NodeList *list, double lon, double lat, int64_t node_id) {
   if (list->size == list->capacity) {
     list->capacity *= 2;
     list->node = realloc(list->node, list->capacity * sizeof(Node));
-    if (!list->node) abort_oom();
+    if (!list->node) abort_msg("Out of memory\n");
   }
   list->node[list->size++] = (Node){lon, lat, node_id};
 }

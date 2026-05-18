@@ -8,8 +8,8 @@ void abort_db_error(sqlite3 *db, int rc) {
   exit(EXIT_FAILURE);
 }
 
-void abort_oom() {
-  fprintf(stderr, "pbf2sqlite - out of memory");
+void abort_msg(const char *msg) {
+  fprintf(stderr, msg);
   exit(EXIT_FAILURE);
 }
 
