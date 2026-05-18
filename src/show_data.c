@@ -280,7 +280,7 @@ void html_map_addr(
       "<p>Boundingbox: %f %f - %f %f</p>\n", lon1, lat1, lon2, lat2);
   leaflet_html_footer(html);
   /* Close the file */
-  if( fclose(html)!=0 ) abort_fclose();
+  if( fclose(html)!=0 ) abort_msg("Error closing file\n");
   sqlite3_finalize(stmt_addr);
 }
 
@@ -385,5 +385,5 @@ void html_map_graph(
       "<hr>\n"
       "<p>Boundingbox: %f %f - %f %f</p>\n", lon1, lat1, lon2, lat2);
   leaflet_html_footer(html);
-  if( fclose(html)!=0 ) abort_fclose();
+  if( fclose(html)!=0 ) abort_msg("Error closing file\n");
 }

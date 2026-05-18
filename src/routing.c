@@ -75,7 +75,7 @@ void write_file_csv(
   for (int i=list->size-1; i>=0; i--) {
     fprintf(csv, "%.7f,%.7f,0,%" PRId64 "\r\n", list->node[i].lon, list->node[i].lat, list->node[i].node_id);
   }
-  if( fclose(csv)!=0 ) abort_fclose();
+  if( fclose(csv)!=0 ) abort_msg("Error closing file\n");
   free(filename);
 }
 
@@ -111,7 +111,7 @@ void write_file_gpx(
     "  </trk>\n"
     "</gpx>"
   );
-  if( fclose(gpx)!=0 ) abort_fclose();
+  if( fclose(gpx)!=0 ) abort_msg("Error closing file\n");
   free(filename);
 }
 
@@ -269,7 +269,7 @@ void shortest_way(
   leaflet_circlemarker(html, "map", lon_dest, lat_dest, "Dest");
   fprintf(html, "</script>\n");
   leaflet_html_footer(html);
-  if( fclose(html)!=0 ) abort_fclose();
+  if( fclose(html)!=0 ) abort_msg("Error closing file\n");
   /* Write path coordinates to CSV and GPX files */
   write_file_csv(name, &path);
   write_file_gpx(name, &path);
