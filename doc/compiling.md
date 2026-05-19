@@ -1,4 +1,4 @@
-# Compiling pbf2sqlite on Linux
+# Compiling on Linux
 
 
 ## Dynamic binary for Linux
