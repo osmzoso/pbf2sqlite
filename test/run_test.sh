@@ -53,11 +53,11 @@ $dir/pbf2sqlite $dir/osm_c.db relation 2731564
 
 echo "Test option 'vaddr'..."
 $dir/pbf2sqlite $dir/osm_c.db vaddr 11.3309 50.9771 11.3326 50.9786 $dir/vaddr.html
-firefox $dir/vaddr.html
+xdg-open $dir/vaddr.html
 
 echo "Test option 'vgraph'..."
 $dir/pbf2sqlite $dir/osm_c.db vgraph 11.3309 50.9771 11.3326 50.9786 $dir/vgraph.html
-firefox $dir/vgraph.html
+xdg-open $dir/vgraph.html
 
 echo "Test option 'sql'..."
 $dir/pbf2sqlite $dir/osm_c.db sql "SELECT * FROM nodes LIMIT 5"
@@ -73,7 +73,7 @@ echo "-----------------------------------------------------------------"
 
 echo "Test option 'route'..."
 $dir/pbf2sqlite $dir/osm_c.db route 11.3314 50.9778 11.3320 50.9785 foot $dir/route1
-firefox $dir/route1.html
+xdg-open $dir/route1.html
 # Coordinates outside the range of weimar.osm -> display error message
 #$dir/pbf2sqlite $dir/osm_c.db route 1.530 42.507 1.549 42.517 car $dir/route2
 
