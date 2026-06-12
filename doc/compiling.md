@@ -64,26 +64,16 @@ Therefore, in ./src/readosm/readosm.c in line 50 add the following lines:
 #endif
 ```
 
-### Build a static binary for Linux (64bit)
+### Required packages on Fedora Linux
 
-Additional required packages (Fedora):
+For a static Linux version:
 ```
 expat-static
 glibc-static
 zlib-ng-compat-static
 ```
 
-Compile with
-```
-make compile_static
-```
-> The directory **./build** must already exist.  
-
-### Build a static binary for Windows (64bit)
-
-Compilation for Windows systems with Linux and crosscompiler MinGW.
-
-Additional required packages (Fedora):
+For a static Windows version:
 ```
 mingw64-gcc
 mingw64-expat
@@ -94,12 +84,6 @@ mingw64-winpthreads
 mingw64-winpthreads-static
 ```
 
-Compile with
-```
-make compile_static_win64
-```
-> The directory **./build** must already exist.  
-
 The static libs are in the following directories:
 ```
 /usr/x86_64-w64-mingw32/sys-root/mingw/lib/libexpat.a
@@ -107,5 +91,10 @@ The static libs are in the following directories:
 /usr/x86_64-w64-mingw32/sys-root/mingw/lib/libz.a
 /usr/x86_64-w64-mingw32/sys-root/mingw/lib/libws2_32.a
 /usr/lib/gcc/x86_64-w64-mingw32/12.2.1/libgcc.a
+```
+
+Compile with
+```
+make static
 ```
 

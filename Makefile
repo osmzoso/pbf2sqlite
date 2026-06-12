@@ -17,12 +17,12 @@ DOC_CSS = ./doc/custom.css
 #
 # main targets
 #
-.PHONY: all test debug doc release install clean amalgamation
+.PHONY: all test debug doc static install clean amalgamation
 all: bldir compile
 test: clean bldir compile_asan quicktest
 debug: clean bldir compile_debug quicktest
 doc: bldir renderdoc
-release: clean bldir compile_static compile_static_win64 renderdoc
+static: clean bldir compile_static compile_static_win64 renderdoc
 install:
 	install -m755 $(BUILD_DIR)$(TARGET) /usr/bin
 clean:
