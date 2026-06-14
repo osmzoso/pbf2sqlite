@@ -32,7 +32,7 @@ The dynamic libs are in the following directory:
 ```
 
 
-## Static binaries
+## Static binaries for Linux and Windows
 
 Additional source files in the /src tree are required to create a static binary.
 

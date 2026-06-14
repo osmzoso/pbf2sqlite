@@ -22,7 +22,7 @@ all: bldir compile
 test: clean bldir compile_asan quicktest
 debug: clean bldir compile_debug quicktest
 doc: bldir renderdoc
-static: clean bldir compile_static compile_static_win64 renderdoc
+static: clean bldir compile_static compile_static_win64 check_static_binaries renderdoc
 install:
 	install -m755 $(BUILD_DIR)$(TARGET) /usr/bin
 clean:
@@ -87,7 +87,11 @@ compile_static_win64:
 
 .PHONY: quicktest
 quicktest:
-	bash $(PWD)/test/run_test.sh $(PWD)/build/ $(PWD)/test/weimar.osm
+	bash $(PWD)/test/run_test.sh $(PWD)/build $(PWD)/test/weimar.osm
+
+.PHONY: check_static_binaries
+check_static_binaries:
+	bash $(PWD)/test/check_static_binaries.sh $(PWD)/build $(PWD)/test/weimar.osm
 
 .PHONY: renderdoc
 renderdoc:
