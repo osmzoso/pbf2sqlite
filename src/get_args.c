@@ -102,6 +102,10 @@ void parse_args(sqlite3 *db, int argc, char **argv, int exec) {
       if( exec ) shortest_way(db, lon1, lat1, lon2, lat2, argv[7], argv[8]);
       break;
     } 
+    else if( strcmp("route2", argv[2])==0 ){
+      if( exec ) route(db, argc, argv);
+      break;
+    } 
     else {
       printf("Incorrect option '%s'\n", argv[i]);
       exit(EXIT_FAILURE);

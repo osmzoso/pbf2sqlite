@@ -116,6 +116,18 @@ void write_file_gpx(
 }
 
 /*
+** Transforms a string into a permit mask
+*/
+int permit_mask(const char *permit){
+  int mask_permit;
+  if     ( strcmp("foot", permit)==0 ) mask_permit = 1;
+  else if( strcmp("bike", permit)==0 ) mask_permit = 2;
+  else if( strcmp("car",  permit)==0 ) mask_permit = 4;
+  else mask_permit = atoi(permit);
+  return mask_permit;
+}
+
+/*
 ** Calculate shortest way
 ** Output is a HTML file with a map of the route
 */
@@ -136,11 +148,7 @@ void shortest_way(
   strcpy(filename, name);
   strcat(filename, ext);
   /* 1. Get permit mask */
-  int mask_permit;
-  if     ( strcmp("foot", permit)==0 ) mask_permit = 1;
-  else if( strcmp("bike", permit)==0 ) mask_permit = 2; 
-  else if( strcmp("car",  permit)==0 ) mask_permit = 4; 
-  else mask_permit = atoi(permit);
+  int mask_permit = permit_mask(permit);
   /* 2. Get boundingbox for the subgraph */
   bbox b = calc_boundingbox(lon_start, lat_start, lon_dest, lat_dest, 2.0);
   /* 3. Get subgraph */
@@ -281,3 +289,20 @@ void shortest_way(
   destroyDijkstra();
 }
 
+/*
+**
+*/
+void route(
+  sqlite3 *db,
+  int argc,
+  char *argv[]
+){
+  printf("This option has not yet been implemented.\n");
+  /*  */
+  int mask_permit = permit_mask(argv[3]);
+  printf("%s -> mask_permit: %d\n", argv[3], mask_permit);
+  /* TODO Test */
+  for (int i = 3; i < argc; i++) {
+    printf("Argument %d: %s\n", i, argv[i]);
+  }
+}
