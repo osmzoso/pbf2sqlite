@@ -1,7 +1,21 @@
 # Compiling on Linux
 
+make options:
+```
+make               ;# Build dynamic binary for Linux
+make static        ;# Build static binaries for Linux and Windows
+make install       ;# Copy binary in /usr/bin (sudo is required)
+make doc           ;# Create the documentation files (pandoc is required)
+make test          ;# Build dynamic binary with debug info and libasan, run some tests
+make debug         ;# Build dynamic binary with debug info
+make clean         ;# Remove ./build directory
+make amalgamation  ;# Combine all source code into a single file 
+```
 
-## Dynamic binary for Linux
+All generated files can be found in the automatically created **./build** directory.
+
+
+## Build dynamic binary for Linux
 
 Additional required packages (Fedora):
 ```
@@ -11,28 +25,10 @@ readosm
 readosm-devel
 ```
 
-Compile with
-```
-make
-```
-The binary can be found in the **./build** directory.  
-Install in **/usr/bin** with `sudo make install`.  
-
-Create the documentation files (pandoc is required):
-```
-make doc
-```
-The doc files are also in the **./build** directory.  
-
-The dynamic libs are in the following directory:
-```
-/usr/lib64/libsqlite3.so.0
-/usr/lib64/libreadosm.so.1
-/usr/lib64/libexpat.so.1
-```
+Compile with `make`
 
 
-## Static binaries for Linux and Windows
+## Build static binaries for Linux and Windows
 
 Additional source files in the /src tree are required to create a static binary.
 
@@ -64,16 +60,14 @@ Therefore, in ./src/readosm/readosm.c in line 50 add the following lines:
 #endif
 ```
 
-### Required packages on Fedora Linux
-
-For a static Linux version:
+Additional required packages for the static Linux version (Fedora):
 ```
 expat-static
 glibc-static
 zlib-ng-compat-static
 ```
 
-For a static Windows version:
+Additional required packages for the static Windows version (Fedora):
 ```
 mingw64-gcc
 mingw64-expat
@@ -84,17 +78,24 @@ mingw64-winpthreads
 mingw64-winpthreads-static
 ```
 
-The static libs are in the following directories:
+Compile with `make static`
+
+
+## Library directories in Fedora
+
+The dynamic libraries are located in the following directory:  
+```
+/usr/lib64/libsqlite3.so.0
+/usr/lib64/libreadosm.so.1
+/usr/lib64/libexpat.so.1
+```
+
+The static libraries are located in the following directories:  
 ```
 /usr/x86_64-w64-mingw32/sys-root/mingw/lib/libexpat.a
 /usr/x86_64-w64-mingw32/sys-root/mingw/lib/libwinpthread.a
 /usr/x86_64-w64-mingw32/sys-root/mingw/lib/libz.a
 /usr/x86_64-w64-mingw32/sys-root/mingw/lib/libws2_32.a
 /usr/lib/gcc/x86_64-w64-mingw32/12.2.1/libgcc.a
-```
-
-Compile with
-```
-make static
 ```
 

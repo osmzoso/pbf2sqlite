@@ -33,10 +33,10 @@ sqlite3_stmt *stmt_insert_nodes, *stmt_insert_node_tags, *stmt_insert_way_nodes,
              *stmt_insert_way_tags, *stmt_insert_relation_members, *stmt_insert_relation_tags;
 static char *help =
 #ifdef DEBUG
-  RED "\n!!!!! Warning: This is a DEBUG build. !!!!!\n" RESET
+  RED "\n!!!!! Warning: This is a DEBUG build. "__DATE__" "__TIME__" !!!!!\n" RESET
 #endif
   "\n"
-  "Reads OpenStreetMap data into a SQLite database.\n"
+  "Imports OpenStreetMap data into an SQLite database.\n"
   "\n"
   "Usage:\npbf2sqlite <database> [OPTION ...]\n"
   "\n"
@@ -53,8 +53,7 @@ static char *help =
   "  relation <id>                                       Show data of a relation\n"
   "  vaddr <lon1> <lat1> <lon2> <lat2> <htmlfile>        Generates a map of the addresses\n"
   "  vgraph <lon1> <lat1> <lon2> <lat2> <htmlfile>       Generates a map of the graph\n"
-  "  sql <stmt>                                          Executes an SQL statement\n"
-  "  sql                                                 Executes an SQL statement from stdin\n"
+  "  sql [<stmt>]                                        Executes an SQL statement\n"
   "\n"
   "Option to calculate the shortest path:\n"
   "  route <lon1> <lat1> <lon2> <lat2> <permit> <file>\n"

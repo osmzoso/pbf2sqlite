@@ -1,0 +1,16 @@
+#
+# Doxyfile
+#
+# This file describes the settings for the documentation system doxygen (www.doxygen.org)
+#
+PROJECT_NAME     = pbf2sqlite
+INPUT            = src                       # list of directories
+RECURSIVE        = YES
+EXCLUDE          = readosm sqlite3
+EXCLUDE_PATTERNS = */readosm/* */sqlite3/*
+EXTRACT_ALL      = YES
+GENERATE_HTML    = YES
+GENERATE_LATEX   = NO
+OUTPUT_DIRECTORY = build
+HAVE_DOT         = YES
+

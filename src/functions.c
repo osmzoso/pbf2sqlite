@@ -1,8 +1,44 @@
-/*
-** Program abort
-*/
+/**
+ * \brief Get int64 from ARGV and checks if input is valid int64
+ * \return int64
+ */
+int64_t get_arg_int64(char **argv, int i) {
+  int64_t value;
+  char *endptr;
+  errno = 0; /* Reset errno before conversion */
+  value = strtoll(argv[i], &endptr, 10);
+  /* Check for conversion errors */
+  if( errno==ERANGE ) {
+    printf("Invalid number: Overflow or underflow occurred\n");
+    exit(EXIT_FAILURE);
+  }
+  if( endptr==argv[i] || *endptr!='\0' ) {
+    printf("Invalid number: Not a valid integer string\n");
+    exit(EXIT_FAILURE);
+  }
+  return value;
+}
+
+/**
+ * \brief Get double from ARGV and checks if input is valid double
+ * \return double
+ */
+double get_arg_double(char **argv, int i) {
+  double value;
+  char *endptr;
+  value = strtod(argv[i], &endptr);
+  /* Check if the whole string was converted */
+  if( *endptr!='\0' ) {
+    printf("Invalid number: Non-numeric characters '%s'\n", endptr);
+    exit(EXIT_FAILURE);
+  }
+  return value;
+}
+
+/**
+ * \brief Terminate the program, displays last SQLite error message
+ */
 void abort_db_error(sqlite3 *db, int rc) {
-  /* Database error - display last SQLite error message */
   fprintf(stderr, "pbf2sqlite - (%i) %s - %s\n", rc, sqlite3_errstr(rc), sqlite3_errmsg(db));
   sqlite3_close(db);
   exit(EXIT_FAILURE);

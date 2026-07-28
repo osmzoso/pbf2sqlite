@@ -289,20 +289,27 @@ void shortest_way(
   destroyDijkstra();
 }
 
-/*
-**
-*/
+/**
+ * \brief TODO
+ */
 void route(
   sqlite3 *db,
   int argc,
   char *argv[]
 ){
   printf("This option has not yet been implemented.\n");
-  /*  */
+  /* 1. Get permit mask */
   int mask_permit = permit_mask(argv[3]);
   printf("%s -> mask_permit: %d\n", argv[3], mask_permit);
   /* TODO Test */
-  for (int i = 3; i < argc; i++) {
-    printf("Argument %d: %s\n", i, argv[i]);
+  //for (int i = 3; i < argc; i++) {
+  //  printf("Args %d: %s\n", i, argv[i]);
+  //}
+  /* TEST TODO */
+  printf("argc : %d \n", argc);
+  for (int i = 4; i < argc-1; i=i+2) {
+    double lon = get_arg_double(argv, i);
+    double lat = get_arg_double(argv, i+1);
+    printf("Coordinates %s %s -> %f %f \n", argv[i], argv[i+1], lon, lat);
   }
 }

@@ -1,36 +1,4 @@
 /*
-** Convert and check numeric inputs
-*/
-int64_t get_arg_int64(char **argv, int i) {
-  int64_t value;
-  char *endptr;
-  errno = 0; /* Reset errno before conversion */
-  value = strtoll(argv[i], &endptr, 10);
-  /* Check for conversion errors */
-  if( errno==ERANGE ) {
-    printf("Invalid number: Overflow or underflow occurred\n");
-    exit(EXIT_FAILURE);
-  }
-  if( endptr==argv[i] || *endptr!='\0' ) {
-    printf("Invalid number: Not a valid integer string\n");
-    exit(EXIT_FAILURE);
-  }
-  return value;
-}
-
-double get_arg_double(char **argv, int i) {
-  double value;
-  char *endptr;
-  value = strtod(argv[i], &endptr);
-  /* Check if the whole string was converted */
-  if( *endptr!='\0' ) {
-    printf("Invalid number: Non-numeric characters '%s'\n", endptr);
-    exit(EXIT_FAILURE);
-  }
-  return value;
-}
-
-/*
 ** Parses the arguments and calls the functions if exec is true
 */
 void parse_args(sqlite3 *db, int argc, char **argv, int exec) {
