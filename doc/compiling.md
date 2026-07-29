@@ -6,9 +6,11 @@ make               ;# Build dynamic binary for Linux
 make static        ;# Build static binaries for Linux and Windows
 make install       ;# Copy binary in /usr/bin (sudo is required)
 make doc           ;# Create the documentation files (pandoc is required)
+make clean         ;# Remove ./build directory
+# Options for testing purposes only
 make test          ;# Build dynamic binary with debug info and libasan, run some tests
 make debug         ;# Build dynamic binary with debug info
-make clean         ;# Remove ./build directory
+make doc2          ;# Create source code documentation (doxygen is required)
 make amalgamation  ;# Combine all source code into a single file 
 ```
 

@@ -17,16 +17,17 @@ DOC_CSS = ./doc/custom.css
 #
 # main targets
 #
-.PHONY: all test debug doc static install clean amalgamation
+.PHONY: all static install doc clean test debug doc2 amalgamation
 all: bldir compile
-test: clean bldir compile_asan quicktest
-debug: clean bldir compile_debug quicktest
-doc: bldir renderdoc
 static: clean bldir compile_static compile_static_win64 check_static_binaries renderdoc
 install:
 	install -m755 $(BUILD_DIR)$(TARGET) /usr/bin
+doc: bldir render_doc
 clean:
 	rm -rf $(BUILD_DIR)
+test: clean bldir compile_asan quicktest
+debug: clean bldir compile_debug quicktest
+doc2: bldir render_doc_src
 amalgamation: bldir single_src
 
 #
@@ -93,8 +94,8 @@ quicktest:
 check_static_binaries:
 	bash $(PWD)/test/check_static_binaries.sh $(PWD)/build $(PWD)/test/weimar.osm
 
-.PHONY: renderdoc
-renderdoc:
+.PHONY: render_doc
+render_doc:
 	pandoc \
      -V geometry:margin=0.6in \
      $(DOC_SRC) \
@@ -115,6 +116,11 @@ renderdoc:
      $(DOC_SRC) \
      -o $(BUILD_DIR)$(TARGET).1
 	gzip $(BUILD_DIR)$(TARGET).1
+
+.PHONY: render_doc_src
+render_doc_src:
+	doxygen
+	xdg-open ./build/html/index.html
 
 .PHONY: single_src
 single_src:

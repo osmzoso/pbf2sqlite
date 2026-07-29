@@ -24,33 +24,33 @@ void parse_args(sqlite3 *db, int argc, char **argv, int exec) {
       if( exec ) add_graph(db);
     }
     else if( strcmp("node", argv[2])==0 && argc==4 ){
-      id = get_arg_int64(argv, 3);
+      id = get_argv_int64(argv, 3);
       if( exec ) show_node(db, id);
       break;
     } 
     else if( strcmp("way", argv[2])==0 && argc==4 ){
-      id = get_arg_int64(argv, 3);
+      id = get_argv_int64(argv, 3);
       if( exec ) show_way(db, id);
       break;
     } 
     else if( strcmp("relation", argv[2])==0 && argc==4 ){
-      id = get_arg_int64(argv, 3);
+      id = get_argv_int64(argv, 3);
       if( exec ) show_relation(db, id);
       break;
     } 
     else if( strcmp("vaddr", argv[2])==0 && argc==8 ){
-      lon1 = get_arg_double(argv, 3);
-      lat1 = get_arg_double(argv, 4);
-      lon2 = get_arg_double(argv, 5);
-      lat2 = get_arg_double(argv, 6);
+      lon1 = get_argv_double(argv, 3);
+      lat1 = get_argv_double(argv, 4);
+      lon2 = get_argv_double(argv, 5);
+      lat2 = get_argv_double(argv, 6);
       if( exec ) html_map_addr(db, lon1, lat1, lon2, lat2, argv[7]);
       break;
     } 
     else if( strcmp("vgraph", argv[2])==0 && argc==8 ){
-      lon1 = get_arg_double(argv, 3);
-      lat1 = get_arg_double(argv, 4);
-      lon2 = get_arg_double(argv, 5);
-      lat2 = get_arg_double(argv, 6);
+      lon1 = get_argv_double(argv, 3);
+      lat1 = get_argv_double(argv, 4);
+      lon2 = get_argv_double(argv, 5);
+      lat2 = get_argv_double(argv, 6);
       if( exec ) html_map_graph(db, lon1, lat1, lon2, lat2, argv[7]);
       break;
     } 
@@ -63,10 +63,10 @@ void parse_args(sqlite3 *db, int argc, char **argv, int exec) {
       break;
     } 
     else if( strcmp("route", argv[2])==0 && argc==9 ){
-      lon1 = get_arg_double(argv, 3);
-      lat1 = get_arg_double(argv, 4);
-      lon2 = get_arg_double(argv, 5);
-      lat2 = get_arg_double(argv, 6);
+      lon1 = get_argv_double(argv, 3);
+      lat1 = get_argv_double(argv, 4);
+      lon2 = get_argv_double(argv, 5);
+      lat2 = get_argv_double(argv, 6);
       if( exec ) shortest_way(db, lon1, lat1, lon2, lat2, argv[7], argv[8]);
       break;
     } 

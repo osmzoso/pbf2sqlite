@@ -63,6 +63,7 @@ void leaflet_init(
   const double lat2
 ){
   //const char *tile_server = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+  //const char *tile_server = "https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png";
   const char *tile_server = "https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png";
   fprintf(html, "// %s init\n", mapid);
   fprintf(html, "const %s = L.map('%s').fitBounds([ [%.7f, %.7f], [%.7f, %.7f] ], "

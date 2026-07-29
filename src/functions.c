@@ -2,7 +2,7 @@
  * \brief Get int64 from ARGV and checks if input is valid int64
  * \return int64
  */
-int64_t get_arg_int64(char **argv, int i) {
+int64_t get_argv_int64(char **argv, int i) {
   int64_t value;
   char *endptr;
   errno = 0; /* Reset errno before conversion */
@@ -23,7 +23,7 @@ int64_t get_arg_int64(char **argv, int i) {
  * \brief Get double from ARGV and checks if input is valid double
  * \return double
  */
-double get_arg_double(char **argv, int i) {
+double get_argv_double(char **argv, int i) {
   double value;
   char *endptr;
   value = strtod(argv[i], &endptr);
