@@ -1,14 +1,5 @@
 /*
-** Data type boundingbox
-*/
-typedef struct {
-  double min_lon;
-  double min_lat;
-  double max_lon;
-  double max_lat;
-} bbox;
-
-/*
+** TODO: deprecated function, will be replaced by resize_boundingbox()
 ** Create a boundingbox from two points.
 ** A magnification factor must be specified.
 */
@@ -50,6 +41,29 @@ bbox calc_boundingbox(
   b.max_lat = mp_lat + diff;
   return b;
 }
+
+/**
+ * \brief Resize boundingbox
+ */
+bbox resize_boundingbox(const bbox b, const double enlarge){
+  bbox b_new;
+  double mp_lon = (b.min_lon + b.max_lon) / 2;
+  double mp_lat = (b.min_lat + b.max_lat) / 2;
+  double diff_mp_lon = mp_lon - b.min_lon;
+  double diff_mp_lat = mp_lat - b.min_lat;
+  double diff;
+  if( diff_mp_lat > diff_mp_lon ) {
+    diff = diff_mp_lat * enlarge;
+  } else {
+    diff = diff_mp_lon * enlarge;
+  }
+  b_new.min_lon = mp_lon - diff;
+  b_new.min_lat = mp_lat - diff;
+  b_new.max_lon = mp_lon + diff;
+  b_new.max_lat = mp_lat + diff;
+  return b_new;
+}
+
 
 /*
 ** Write the path coordinates to CSV and GPX files
@@ -152,7 +166,7 @@ void shortest_way(
   /* 2. Get boundingbox for the subgraph */
   bbox b = calc_boundingbox(lon_start, lat_start, lon_dest, lat_dest, 2.0);
   /* 3. Get subgraph */
-  int number_nodes = create_subgraph_tables(db, b.min_lon, b.min_lat, b.max_lon, b.max_lat, mask_permit);
+  int number_nodes = create_subgraph_tables_v1(db, b.min_lon, b.min_lat, b.max_lon, b.max_lat, mask_permit);
   /* 4. fill adjacency list */
   struct Graph* graph = createGraph(number_nodes);
   rc = sqlite3_prepare_v2(db,
@@ -297,15 +311,39 @@ void route(
   int argc,
   char *argv[]
 ){
-  printf("This option has not yet been implemented.\n");
-  /* 1. Get permit mask */
-  int mask_permit = permit_mask(argv[3]);
-  printf("%s -> mask_permit: %d\n", argv[3], mask_permit);
-  /* TEST TODO */
-  printf("argc : %d \n", argc);
+  bbox b;
+  NodeList route_points;
+  /* Number of parameters must be even */
+  if( argc % 2 == 0 ) abort_msg("Option route: Incorrect number of parameters\n");
+  /* 1. Read coordinates TODO */
+  nodelist_init(&route_points);
+  b.min_lon =  180;
+  b.min_lat =   90;
+  b.max_lon = -180;
+  b.max_lat =  -90;
   for (int i = 4; i < argc-1; i=i+2) {
     double lon = get_argv_double(argv, i);
     double lat = get_argv_double(argv, i+1);
     printf("Coordinates %s %s -> %f %f \n", argv[i], argv[i+1], lon, lat);
+    nodelist_add(&route_points, lon, lat, 0);
+    /* adjust boundingbox */
+    if( b.min_lon > lon ) b.min_lon = lon;
+    if( b.min_lat > lat ) b.min_lat = lat;
+    if( b.max_lon < lon ) b.max_lon = lon;
+    if( b.max_lat < lat ) b.max_lat = lat;
   }
+  nodelist_show(&route_points);
+  printf("Boundingbox:  %f %f -  %f %f\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
+  /* 2. Get permit mask */
+  int mask_permit = permit_mask(argv[3]);
+  printf("%s -> mask_permit: %d\n", argv[3], mask_permit);
+  /* 3. Get boundingbox for the subgraph */
+  bbox bs = resize_boundingbox(b, 2.0);
+  printf("Boundingbox Subgraph:  %f %f -  %f %f\n", bs.min_lon, bs.min_lat, bs.max_lon, bs.max_lat);
+  /* 4. Create subgraph table */
+  int number_nodes = create_subgraph_tables(db, bs, mask_permit);
+  /* TODO */
+
+  /* 10. Cleanup */
+  nodelist_free(&route_points);
 }

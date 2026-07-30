@@ -1,6 +1,11 @@
-/*
-** Functions for creating an HTML file with Leaflet.js for visualizing data
-*/
+/**
+ * \file leaflet.c
+ * \brief Functions for creating an HTML file with Leaflet.js for visualizing map data
+ */
+
+/**
+ * \brief Leaflet HTML: Write HTML header
+ */
 void leaflet_html_header(FILE *html, const char *title) {
   fprintf(html,
     "<!DOCTYPE html>\n"
@@ -41,10 +46,18 @@ void leaflet_html_header(FILE *html, const char *title) {
     "  }\n"
     "  </style>\n"
     "</head>\n"
-    "<body>\n", title
+    "<body>\n"
+    "<script>\n"
+    "//const tile_server = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';\n"
+    "//const tile_server = 'https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png';\n"
+    "const tile_server = 'https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png';\n"
+    "</script>\n", title
   );
 }
 
+/**
+ * \brief Leaflet HTML: Write HTML footer
+ */
 void leaflet_html_footer(FILE *html) {
   fprintf(html,
     "<hr>\n"
@@ -54,6 +67,9 @@ void leaflet_html_footer(FILE *html) {
   );
 }
 
+/**
+ * \brief Leaflet HTML: Write Javascript code to initialize a map
+ */
 void leaflet_init(
   FILE *html,
   const char *mapid,
@@ -62,14 +78,11 @@ void leaflet_init(
   const double lon2,
   const double lat2
 ){
-  //const char *tile_server = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
-  //const char *tile_server = "https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png";
-  const char *tile_server = "https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png";
-  fprintf(html, "// %s init\n", mapid);
+  fprintf(html, "// init %s\n", mapid);
   fprintf(html, "const %s = L.map('%s').fitBounds([ [%.7f, %.7f], [%.7f, %.7f] ], "
                 "{padding: [0,0], maxZoom: 19});\n",
                  mapid, mapid, lat1, lon1, lat2, lon2);
-  fprintf(html, "L.tileLayer('%s', {maxZoom:19}).addTo(%s);\n", tile_server, mapid);
+  fprintf(html, "L.tileLayer(tile_server, {maxZoom:19}).addTo(%s);\n", mapid);
   fprintf(html, "L.control.scale({ position: 'bottomleft', maxWidth: 200, "
                 "metric:true, imperial:false }).addTo(%s);\n", mapid);
   fprintf(html, "var %s_popup = L.popup();\n", mapid);
@@ -87,6 +100,9 @@ void leaflet_init(
                 "dashArray:'none', fillColor:'#ff7800', fillOpacity:0.5 };\n");
 }
 
+/**
+ * \brief Leaflet HTML: Write Javascript code to set a marker
+ */
 void leaflet_marker(
   FILE *html,
   const char *mapid,

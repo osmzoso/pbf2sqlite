@@ -285,6 +285,7 @@ void html_map_addr(
 }
 
 /*
+** TODO: replace lon1,lat1,lon2,lat with bbox
 ** Creates visualization of the table graph
 */
 void write_graph(
@@ -303,7 +304,7 @@ void write_graph(
   int64_t node_id, way_id, start_node_id, end_node_id;
   double lon, lat;
   /*  */
-  create_subgraph_tables(db, lon1, lat1, lon2, lat2, mask_permit);
+  create_subgraph_tables_v1(db, lon1, lat1, lon2, lat2, mask_permit);
   /* show graph nodes */
   leaflet_style(html, "none", 0.9, 2, "", "#ff5348", 0.5, 5);
   rc = sqlite3_prepare_v2(db,

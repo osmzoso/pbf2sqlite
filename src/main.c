@@ -24,6 +24,16 @@
 #define GREEN   "\033[32m"
 #define RESET   "\033[0m"
 
+/**
+ * Data type boundingbox
+ */
+typedef struct {
+  double min_lon;
+  double min_lat;
+  double max_lon;
+  double max_lat;
+} bbox;
+
 /*
 ** Public variables
 */
