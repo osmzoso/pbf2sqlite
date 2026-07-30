@@ -313,6 +313,7 @@ void route(
 ){
   bbox b;
   NodeList route_points;
+  sqlite3_stmt *stmt;
   /* Number of parameters must be even */
   if( argc % 2 == 0 ) abort_msg("Option route: Incorrect number of parameters\n");
   /* 1. Read coordinates TODO */
@@ -337,13 +338,36 @@ void route(
   /* 2. Get permit mask */
   int mask_permit = permit_mask(argv[3]);
   printf("%s -> mask_permit: %d\n", argv[3], mask_permit);
-  /* 3. Get boundingbox for the subgraph */
+  /* 3. Resize boundingbox for the subgraph */
   bbox bs = resize_boundingbox(b, 2.0);
   printf("Boundingbox Subgraph:  %f %f -  %f %f\n", bs.min_lon, bs.min_lat, bs.max_lon, bs.max_lat);
-  /* 4. Create subgraph table */
+  /* 4. Create subgraph tables */
   int number_nodes = create_subgraph_tables(db, bs, mask_permit);
+  /* 5. Get nearest node in the subgraph */
+  for (size_t i = 0; i < route_points.size; i++) {
+    int64_t no = subgraph_nearest_node(db, route_points.node[i].lon, route_points.node[i].lat);
+    route_points.node[i].node_id = no;
+    printf("%f %f -> nearest subgraph node: %" PRId64 "\n", route_points.node[i].lon, route_points.node[i].lat, route_points.node[i].node_id);
+  }
+  /* 6. Fill adjacency list */
+  struct Graph* graph = createGraph(number_nodes);
+  rc = sqlite3_prepare_v2(db,
+    " SELECT sns.no,sne.no,s.dist,s.edge_id,s.directed"
+    " FROM subgraph AS s"
+    " LEFT JOIN subgraph_nodes AS sns ON s.start_node_id=sns.node_id"
+    " LEFT JOIN subgraph_nodes AS sne ON s.end_node_id=sne.node_id", -1, &stmt, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  while( sqlite3_step(stmt)==SQLITE_ROW ){
+    addEdge(graph, sqlite3_column_int64(stmt, 0),
+                   sqlite3_column_int64(stmt, 1),
+                   sqlite3_column_int64(stmt, 2),
+                   sqlite3_column_int64(stmt, 3),
+                   sqlite3_column_int64(stmt, 4));
+  }
+  sqlite3_finalize(stmt);
   /* TODO */
 
   /* 10. Cleanup */
   nodelist_free(&route_points);
+  destroyGraph(graph);
 }

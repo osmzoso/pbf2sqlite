@@ -147,9 +147,12 @@ int create_subgraph_tables_v1(
 }
 
 /**
- * \brief Creates a temp. table 'subgraph' in the database for a given boundingbox
+ * \brief Creates from the table 'graph_edges' the temp. tables 'subgraph' and 'subgraph_nodes' in the database
+ *
+ * \param boundingbox
+ * \param mask_permit
  */
-int create_subgraph_tables( sqlite3 *db, const bbox b, const int mask_permit){
+int create_subgraph_tables(sqlite3 *db, const bbox b, const int mask_permit){
   sqlite3_stmt *stmt_subgraph, *stmt_count;
   int number_of_nodes;
   rc = sqlite3_exec(db, "DROP TABLE IF EXISTS subgraph", NULL, NULL, NULL);
@@ -213,5 +216,34 @@ int create_subgraph_tables( sqlite3 *db, const bbox b, const int mask_permit){
   if( rc==SQLITE_ROW ) number_of_nodes = sqlite3_column_int(stmt_count, 0);
   sqlite3_finalize(stmt_count);
   return number_of_nodes;
+}
+
+/**
+ * \brief Find the nearest node in the subgraph
+ */
+int64_t subgraph_nearest_node(
+  sqlite3 *db,
+  const double lon,
+  const double lat
+){
+  sqlite3_stmt *stmt;
+  double min_dist_node = DBL_MAX;
+  int64_t graph_node_no, no;
+  double graph_node_lon, graph_node_lat, dist;
+  no = 0;
+  rc = sqlite3_prepare_v2(db, "SELECT no,lon,lat FROM subgraph_nodes", -1, &stmt, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  while( sqlite3_step(stmt)==SQLITE_ROW ){
+    graph_node_no = sqlite3_column_int64(stmt, 0);
+    graph_node_lon = sqlite3_column_double(stmt, 1);
+    graph_node_lat = sqlite3_column_double(stmt, 2);
+    dist = sqrt(pow(lon-graph_node_lon, 2) + pow(lat-graph_node_lat, 2));
+    if( dist < min_dist_node ){
+      no = graph_node_no;
+      min_dist_node = dist;
+    }
+  }
+  sqlite3_finalize(stmt);
+  return no;
 }
 
