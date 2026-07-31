@@ -313,40 +313,42 @@ void route(
   int argc,
   char *argv[]
 ){
-  bbox b;
+  bbox bp, b;
   NodeList route_points;
-  size_t i;
+  int i;
   sqlite3_stmt *stmt;
   FILE *html;
   char *ext = ".html";
+  char buffer[30];
+  char *filename;
   /* generate HTML filename */
-  char *filename = malloc(strlen(argv[argc-1]) + strlen(ext) + 1);
+  filename = malloc(strlen(argv[argc-1]) + strlen(ext) + 1);
   if (!filename) abort_msg("Out of memory\n");
   strcpy(filename, argv[argc-1]);
   strcat(filename, ext);
   /* Number of parameters must be even */
   if( argc % 2 == 0 ) abort_msg("Option route2: Incorrect number of parameters\n");
-  /* 1. Read coordinates, adjust boundingbox */
+  /* 1. Read coordinates of the start, intermediate, and end points. Adjust boundingbox */
   nodelist_init(&route_points);
-  b.min_lon =  180;
-  b.min_lat =   90;
-  b.max_lon = -180;
-  b.max_lat =  -90;
+  bp.min_lon =  180;
+  bp.min_lat =   90;
+  bp.max_lon = -180;
+  bp.max_lat =  -90;
   for (int i = 4; i < argc-1; i=i+2) {
     double lon = get_argv_double(argv, i);
     double lat = get_argv_double(argv, i+1);
     nodelist_add(&route_points, lon, lat, 0);
-    if( b.min_lon > lon ) b.min_lon = lon;
-    if( b.min_lat > lat ) b.min_lat = lat;
-    if( b.max_lon < lon ) b.max_lon = lon;
-    if( b.max_lat < lat ) b.max_lat = lat;
+    if( bp.min_lon > lon ) bp.min_lon = lon;
+    if( bp.min_lat > lat ) bp.min_lat = lat;
+    if( bp.max_lon < lon ) bp.max_lon = lon;
+    if( bp.max_lat < lat ) bp.max_lat = lat;
   }
   /* 2. Get permit mask */
   int mask_permit = permit_mask(argv[3]);
-  /* 3. Resize boundingbox for the subgraph */
-  bbox bs = resize_boundingbox(b, 2.0);
+  /* 3. Resized boundingbox for the subgraph */
+  b = resize_boundingbox(bp, 2.0);
   /* 4. Create subgraph tables */
-  int number_nodes = create_subgraph_tables(db, bs, mask_permit);
+  int number_nodes = create_subgraph_tables(db, b, mask_permit);
   /* 5. Get nearest node in the subgraph */
   for (i = 0; i < route_points.size; i++) {
     int64_t no = subgraph_nearest_node(db, route_points.node[i].lon, route_points.node[i].lat);
@@ -369,8 +371,13 @@ void route(
                    sqlite3_column_int64(stmt, 4));
   }
   sqlite3_finalize(stmt);
-
-  /* TODO */
+  /* 8. Routing */
+  for (i = 0; i < route_points.size-1; i++) {
+    printf("dijkstra  %" PRId64 " %" PRId64 "\n", route_points.node[i].node_id, route_points.node[i+1].node_id);
+    Dijkstra(graph, route_points.node[i].node_id, route_points.node[i+1].node_id);
+    /* TODO */
+    destroyDijkstra();
+  }
 
   /* 8. Open HTML file */
   html = fopen(filename, "w");
@@ -378,7 +385,7 @@ void route(
   leaflet_html_header(html, "map route2");
   fprintf(html, "<h3>Route</h3>\n<pre>\n");
   fprintf(html, "# permit: %s -> mask_permit: %d\n", argv[3], mask_permit);
-  fprintf(html, "# boundingbox: %f %f   %f %f\n", bs.min_lon, bs.min_lat, bs.max_lon, bs.max_lat);
+  fprintf(html, "# boundingbox: %f %f   %f %f\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
   fprintf(html, "# graph number nodes : %d\n", number_nodes);
   for (i = 0; i < route_points.size; i++) {
     fprintf(html, "#  %f %f -> graph node %" PRId64 "\n", route_points.node[i].lon, route_points.node[i].lat, route_points.node[i].node_id);
@@ -389,6 +396,10 @@ void route(
   leaflet_init(html, "map", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
   leaflet_style(html, "#000000", 0.3, 2, "5 5", "none", 0.3, 5);                         /* boundingbox */
   leaflet_rectangle(html, "map", b.min_lon, b.min_lat, b.max_lon, b.max_lat, "");
+  for (i = 0; i < route_points.size; i++) {                                              /* marker route points */
+    snprintf(buffer, sizeof(buffer), "Point %d", i+1);
+    leaflet_marker(html, "map", route_points.node[i].lon, route_points.node[i].lat, buffer);
+  }
   fprintf(html, "</script>\n");
   leaflet_html_footer(html);
   if( fclose(html)!=0 ) abort_msg("Error closing file\n");
