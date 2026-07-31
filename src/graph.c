@@ -230,7 +230,7 @@ int64_t subgraph_nearest_node(
   double min_dist_node = DBL_MAX;
   int64_t graph_node_no, no;
   double graph_node_lon, graph_node_lat, dist;
-  no = 0;
+  no = -1;
   rc = sqlite3_prepare_v2(db, "SELECT no,lon,lat FROM subgraph_nodes", -1, &stmt, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   while( sqlite3_step(stmt)==SQLITE_ROW ){

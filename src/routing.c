@@ -142,6 +142,7 @@ int permit_mask(const char *permit){
 }
 
 /*
+** TODO: deprecated function, will be replaced by route()
 ** Calculate shortest way
 ** Output is a HTML file with a map of the route
 */
@@ -304,7 +305,8 @@ void shortest_way(
 }
 
 /**
- * \brief TODO
+ * \brief Calculate shortest way
+ * Output is a HTML file with a map of the route
  */
 void route(
   sqlite3 *db,
@@ -313,10 +315,18 @@ void route(
 ){
   bbox b;
   NodeList route_points;
+  size_t i;
   sqlite3_stmt *stmt;
+  FILE *html;
+  char *ext = ".html";
+  /* generate HTML filename */
+  char *filename = malloc(strlen(argv[argc-1]) + strlen(ext) + 1);
+  if (!filename) abort_msg("Out of memory\n");
+  strcpy(filename, argv[argc-1]);
+  strcat(filename, ext);
   /* Number of parameters must be even */
-  if( argc % 2 == 0 ) abort_msg("Option route: Incorrect number of parameters\n");
-  /* 1. Read coordinates TODO */
+  if( argc % 2 == 0 ) abort_msg("Option route2: Incorrect number of parameters\n");
+  /* 1. Read coordinates, adjust boundingbox */
   nodelist_init(&route_points);
   b.min_lon =  180;
   b.min_lat =   90;
@@ -325,29 +335,23 @@ void route(
   for (int i = 4; i < argc-1; i=i+2) {
     double lon = get_argv_double(argv, i);
     double lat = get_argv_double(argv, i+1);
-    printf("Coordinates %s %s -> %f %f \n", argv[i], argv[i+1], lon, lat);
     nodelist_add(&route_points, lon, lat, 0);
-    /* adjust boundingbox */
     if( b.min_lon > lon ) b.min_lon = lon;
     if( b.min_lat > lat ) b.min_lat = lat;
     if( b.max_lon < lon ) b.max_lon = lon;
     if( b.max_lat < lat ) b.max_lat = lat;
   }
-  nodelist_show(&route_points);
-  printf("Boundingbox:  %f %f -  %f %f\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
   /* 2. Get permit mask */
   int mask_permit = permit_mask(argv[3]);
-  printf("%s -> mask_permit: %d\n", argv[3], mask_permit);
   /* 3. Resize boundingbox for the subgraph */
   bbox bs = resize_boundingbox(b, 2.0);
-  printf("Boundingbox Subgraph:  %f %f -  %f %f\n", bs.min_lon, bs.min_lat, bs.max_lon, bs.max_lat);
   /* 4. Create subgraph tables */
   int number_nodes = create_subgraph_tables(db, bs, mask_permit);
   /* 5. Get nearest node in the subgraph */
-  for (size_t i = 0; i < route_points.size; i++) {
+  for (i = 0; i < route_points.size; i++) {
     int64_t no = subgraph_nearest_node(db, route_points.node[i].lon, route_points.node[i].lat);
+    if( no == -1 ) abort_msg("Option route2: Coordinates out of range\n");
     route_points.node[i].node_id = no;
-    printf("%f %f -> nearest subgraph node: %" PRId64 "\n", route_points.node[i].lon, route_points.node[i].lat, route_points.node[i].node_id);
   }
   /* 6. Fill adjacency list */
   struct Graph* graph = createGraph(number_nodes);
@@ -365,9 +369,34 @@ void route(
                    sqlite3_column_int64(stmt, 4));
   }
   sqlite3_finalize(stmt);
+
+  /* TODO */
+
+  /* 8. Open HTML file */
+  html = fopen(filename, "w");
+  if( html==NULL ) abort_msg("Error opening file\n");
+  leaflet_html_header(html, "map route2");
+  fprintf(html, "<h3>Route</h3>\n<pre>\n");
+  fprintf(html, "# permit: %s -> mask_permit: %d\n", argv[3], mask_permit);
+  fprintf(html, "# boundingbox: %f %f   %f %f\n", bs.min_lon, bs.min_lat, bs.max_lon, bs.max_lat);
+  fprintf(html, "# graph number nodes : %d\n", number_nodes);
+  for (i = 0; i < route_points.size; i++) {
+    fprintf(html, "#  %f %f -> graph node %" PRId64 "\n", route_points.node[i].lon, route_points.node[i].lat, route_points.node[i].node_id);
+  }
+  fprintf(html, "</pre>\n");
+  fprintf(html, "<div id='map' style='width:100%%; height:500px;'></div>\n");            /* Show map */
+  fprintf(html, "<script>\n");
+  leaflet_init(html, "map", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
+  leaflet_style(html, "#000000", 0.3, 2, "5 5", "none", 0.3, 5);                         /* boundingbox */
+  leaflet_rectangle(html, "map", b.min_lon, b.min_lat, b.max_lon, b.max_lat, "");
+  fprintf(html, "</script>\n");
+  leaflet_html_footer(html);
+  if( fclose(html)!=0 ) abort_msg("Error closing file\n");
+
   /* TODO */
 
   /* 10. Cleanup */
+  free(filename);
   nodelist_free(&route_points);
   destroyGraph(graph);
 }
