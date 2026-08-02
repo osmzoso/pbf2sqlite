@@ -77,3 +77,11 @@ xdg-open $dir/route1.html
 # Coordinates outside the range of weimar.osm -> display error message
 #$dir/pbf2sqlite $dir/osm_c.db route 1.530 42.507 1.549 42.517 car $dir/route2
 
+echo "Test option 'route2'..."
+$dir/pbf2sqlite $dir/osm_c.db route2 foot \
+  11.3317806 50.9777393 \
+  11.3314828 50.9778879 \
+  11.3310429 50.9785668 \
+  $dir/route2
+xdg-open $dir/route2.html
+

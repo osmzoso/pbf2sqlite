@@ -340,7 +340,17 @@ void route_path_coordinates(
     printf("edge_id: %" PRId64 , edge_id);
     printf(" -> way_id: %" PRId64 " start_node_id: %" PRId64 " end_node_id: %" PRId64 " \n", way_id, start_node_id, end_node_id);
     /* TEST */
-    nodelist_add(path, 1.23, 0.0, 9991);
+    double lon, lat;
+    rc = sqlite3_prepare_v2(db,
+      "SELECT lon,lat FROM nodes WHERE node_id=?", -1, &stmt, NULL);
+    if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+    sqlite3_bind_int64(stmt, 1, start_node_id);
+    while( sqlite3_step(stmt)==SQLITE_ROW ){
+      lon = (double)sqlite3_column_double(stmt, 0);
+      lat = (double)sqlite3_column_double(stmt, 1);
+    }
+    sqlite3_finalize(stmt);
+    nodelist_add(path, lon, lat, start_node_id);
     /* get previous node of the shortest way */
     v = node[v].v_node;
   }
@@ -423,7 +433,6 @@ void route(
     destroyDijkstra();
   }
   nodelist_show(&xpath);
-  nodelist_free(&xpath);
 
   /* 8. Open HTML file */
   html = fopen(filename, "w");
@@ -446,6 +455,8 @@ void route(
     snprintf(buffer, sizeof(buffer), "Point %d", i+1);
     leaflet_marker(html, "map", route_points.node[i].lon, route_points.node[i].lat, buffer);
   }
+  leaflet_style(html, "#0000ff", 0.5, 6, "", "none", 1.0, 5);                            /* path */
+  leaflet_polyline(html, "map", &xpath, "Shortest way");
   fprintf(html, "</script>\n");
   leaflet_html_footer(html);
   if( fclose(html)!=0 ) abort_msg("Error closing file\n");
@@ -454,6 +465,7 @@ void route(
 
   /* 10. Cleanup */
   free(filename);
+  nodelist_free(&xpath);
   nodelist_free(&route_points);
   destroyGraph(graph);
 }
