@@ -304,6 +304,48 @@ void shortest_way(
   destroyDijkstra();
 }
 
+
+
+/**
+ * \brief TODO
+ *
+ */
+void route_path_coordinates(
+  sqlite3 *db,
+  NodeList *path,
+  const int graph_node_end
+){
+  printf("Test path coordinates:\n");
+  sqlite3_stmt *stmt;
+  int64_t v;
+  int64_t edge_id, way_id, start_node_id, end_node_id;
+  v = graph_node_end;
+  while ( node[v].v_edge != 0 ) {
+    edge_id = node[v].v_edge;
+    /* get all infos of the edge */
+    way_id = 0;
+    start_node_id = 0;
+    end_node_id = 0;
+    rc = sqlite3_prepare_v2(db,
+      "SELECT way_id,start_node_id,end_node_id FROM graph_edges WHERE edge_id=?", -1, &stmt, NULL);
+    if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+    sqlite3_bind_int64(stmt, 1, edge_id);
+    while( sqlite3_step(stmt)==SQLITE_ROW ){
+      way_id = (int64_t)sqlite3_column_int64(stmt, 0);
+      start_node_id = (int64_t)sqlite3_column_int64(stmt, 1);
+      end_node_id = (int64_t)sqlite3_column_int64(stmt, 2);
+    }
+    sqlite3_finalize(stmt);
+    /* TEST */
+    printf("edge_id: %" PRId64 , edge_id);
+    printf(" -> way_id: %" PRId64 " start_node_id: %" PRId64 " end_node_id: %" PRId64 " \n", way_id, start_node_id, end_node_id);
+    /* TEST */
+    nodelist_add(path, 1.23, 0.0, 9991);
+    /* get previous node of the shortest way */
+    v = node[v].v_node;
+  }
+}
+
 /**
  * \brief Calculate shortest way
  * Output is a HTML file with a map of the route
@@ -371,13 +413,17 @@ void route(
                    sqlite3_column_int64(stmt, 4));
   }
   sqlite3_finalize(stmt);
-  /* 8. Routing */
+  /* 7. Routing */
+  NodeList xpath;
+  nodelist_init(&xpath);
   for (i = 0; i < route_points.size-1; i++) {
     printf("dijkstra  %" PRId64 " %" PRId64 "\n", route_points.node[i].node_id, route_points.node[i+1].node_id);
     Dijkstra(graph, route_points.node[i].node_id, route_points.node[i+1].node_id);
-    /* TODO */
+    route_path_coordinates(db, &xpath, route_points.node[i+1].node_id);
     destroyDijkstra();
   }
+  nodelist_show(&xpath);
+  nodelist_free(&xpath);
 
   /* 8. Open HTML file */
   html = fopen(filename, "w");
