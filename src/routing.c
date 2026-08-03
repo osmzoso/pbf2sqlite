@@ -304,58 +304,6 @@ void shortest_way(
   destroyDijkstra();
 }
 
-
-
-/**
- * \brief TODO
- *
- */
-void route_path_coordinates(
-  sqlite3 *db,
-  NodeList *path,
-  const int graph_node_end
-){
-  printf("Test path coordinates:\n");
-  sqlite3_stmt *stmt;
-  int64_t v;
-  int64_t edge_id, way_id, start_node_id, end_node_id;
-  v = graph_node_end;
-  while ( node[v].v_edge != 0 ) {
-    edge_id = node[v].v_edge;
-    /* get all infos of the edge */
-    way_id = 0;
-    start_node_id = 0;
-    end_node_id = 0;
-    rc = sqlite3_prepare_v2(db,
-      "SELECT way_id,start_node_id,end_node_id FROM graph_edges WHERE edge_id=?", -1, &stmt, NULL);
-    if( rc!=SQLITE_OK ) abort_db_error(db, rc);
-    sqlite3_bind_int64(stmt, 1, edge_id);
-    while( sqlite3_step(stmt)==SQLITE_ROW ){
-      way_id = (int64_t)sqlite3_column_int64(stmt, 0);
-      start_node_id = (int64_t)sqlite3_column_int64(stmt, 1);
-      end_node_id = (int64_t)sqlite3_column_int64(stmt, 2);
-    }
-    sqlite3_finalize(stmt);
-    /* TEST */
-    printf("edge_id: %" PRId64 , edge_id);
-    printf(" -> way_id: %" PRId64 " start_node_id: %" PRId64 " end_node_id: %" PRId64 " \n", way_id, start_node_id, end_node_id);
-    /* TEST */
-    double lon, lat;
-    rc = sqlite3_prepare_v2(db,
-      "SELECT lon,lat FROM nodes WHERE node_id=?", -1, &stmt, NULL);
-    if( rc!=SQLITE_OK ) abort_db_error(db, rc);
-    sqlite3_bind_int64(stmt, 1, start_node_id);
-    while( sqlite3_step(stmt)==SQLITE_ROW ){
-      lon = (double)sqlite3_column_double(stmt, 0);
-      lat = (double)sqlite3_column_double(stmt, 1);
-    }
-    sqlite3_finalize(stmt);
-    nodelist_add(path, lon, lat, start_node_id);
-    /* get previous node of the shortest way */
-    v = node[v].v_node;
-  }
-}
-
 /**
  * \brief Calculate shortest way
  * Output is a HTML file with a map of the route
@@ -424,15 +372,74 @@ void route(
   }
   sqlite3_finalize(stmt);
   /* 7. Routing */
-  NodeList xpath;
-  nodelist_init(&xpath);
+  sqlite3_stmt *stmt_insert_path_edges;   /* TODO */
+  rc = sqlite3_exec(db,
+    " DROP TABLE IF EXISTS path_edges;"
+    " CREATE TEMP TABLE path_edges ("
+    "  section  INTEGER,"
+    "  sequence INTEGER,"
+    "  edge_id  INTEGER"
+    " );",
+     NULL, NULL, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  rc = sqlite3_prepare_v2(db,
+         "INSERT INTO path_edges (section, sequence, edge_id) VALUES (?1,?2,?3)",
+         -1, &stmt_insert_path_edges, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  NodeList xpath;                   /* contain all points of the result TODO */
+  nodelist_init(&xpath);            /* TODO */
   for (i = 0; i < route_points.size-1; i++) {
-    printf("dijkstra  %" PRId64 " %" PRId64 "\n", route_points.node[i].node_id, route_points.node[i+1].node_id);
+    printf("dijkstra subgraph_no: %" PRId64 " (node_id: %" PRId64 ") -> subgraph_no: %" PRId64 " (node_id: %" PRId64 ")\n",
+        route_points.node[i].node_id, subgraph_node_id(db, route_points.node[i].node_id ),
+        route_points.node[i+1].node_id, subgraph_node_id(db, route_points.node[i+1].node_id) );
     Dijkstra(graph, route_points.node[i].node_id, route_points.node[i+1].node_id);
-    route_path_coordinates(db, &xpath, route_points.node[i+1].node_id);
+    /* Get the edges from the shortest path */
+    int64_t v = route_points.node[i+1].node_id;
+    int64_t edge_id;
+    int sequence = 0;
+    while ( node[v].v_edge != 0 ) {
+      edge_id = node[v].v_edge;
+      sqlite3_bind_int64(stmt_insert_path_edges, 1, i);
+      sqlite3_bind_int64(stmt_insert_path_edges, 2, sequence);
+      sqlite3_bind_int64(stmt_insert_path_edges, 3, edge_id);
+      rc = sqlite3_step(stmt_insert_path_edges);
+      if( rc==SQLITE_DONE ) {
+        sqlite3_reset(stmt_insert_path_edges);
+      } else {
+        abort_db_error(db, rc);
+      }
+      sequence++;
+      /* get previous node of the shortest way */
+      v = node[v].v_node;
+    }
     destroyDijkstra();
   }
+  sqlite3_finalize(stmt_insert_path_edges);
+  /* TEST */
+  printf("+---------+----------+-----------------+-----------------+-----------------+-----------------+\n");
+  printf("| section | sequence |     edge_id     |      way_id     |  start_node_id  |   end_node_id   |\n");
+  printf("+---------+----------+-----------------+-----------------+-----------------+-----------------+\n");
+  rc = sqlite3_prepare_v2(db,
+    " SELECT pe.section,pe.sequence,pe.edge_id,ge.way_id,ge.start_node_id,ge.end_node_id"
+    " FROM path_edges AS pe"
+    " LEFT JOIN graph_edges AS ge ON pe.edge_id=ge.edge_id"
+    " ORDER BY pe.section,pe.sequence DESC", -1, &stmt, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  while( sqlite3_step(stmt)==SQLITE_ROW ) {
+    printf("| %7" PRId64 " | %8" PRId64 " | %15" PRId64 " | %15" PRId64 " | %15" PRId64 " | %15" PRId64 " |\n",
+             (int64_t)sqlite3_column_int64(stmt, 0),
+             (int64_t)sqlite3_column_int64(stmt, 1),
+             (int64_t)sqlite3_column_int64(stmt, 2),
+             (int64_t)sqlite3_column_int64(stmt, 3),
+             (int64_t)sqlite3_column_int64(stmt, 4),
+             (int64_t)sqlite3_column_int64(stmt, 5)
+          );
+  }
+  printf("+---------+----------+-----------------+-----------------+-----------------+-----------------+\n");
+  sqlite3_finalize(stmt);
+
   nodelist_show(&xpath);
+
 
   /* 8. Open HTML file */
   html = fopen(filename, "w");

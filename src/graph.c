@@ -247,3 +247,22 @@ int64_t subgraph_nearest_node(
   return no;
 }
 
+/**
+ * \brief Get node_id for a subgraph node no
+ */
+int64_t subgraph_node_id(
+  sqlite3 *db,
+  const int64_t no
+){
+  sqlite3_stmt *stmt;
+  int64_t node_id = -1;
+  rc = sqlite3_prepare_v2(db, "SELECT node_id FROM subgraph_nodes WHERE no=?", -1, &stmt, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  sqlite3_bind_int64(stmt, 1, no);
+  while( sqlite3_step(stmt)==SQLITE_ROW ){
+    node_id = sqlite3_column_int64(stmt, 0);
+  }
+  sqlite3_finalize(stmt);
+  return node_id;
+}
+
