@@ -388,11 +388,13 @@ void route(
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   NodeList xpath;                   /* contain all points of the result TODO */
   nodelist_init(&xpath);            /* TODO */
+  int distance = 0;             /* TODO */
   for (i = 0; i < route_points.size-1; i++) {
-    printf("dijkstra subgraph_no: %" PRId64 " (node_id: %" PRId64 ") -> subgraph_no: %" PRId64 " (node_id: %" PRId64 ")\n",
-        route_points.node[i].node_id, subgraph_node_id(db, route_points.node[i].node_id ),
+    printf("dijkstra: subgraph_node %8" PRId64 " (node_id: %15" PRId64 ") -> subgraph_node %8" PRId64 " (node_id: %15" PRId64 ")\n",
+        route_points.node[i].node_id, subgraph_node_id(db, route_points.node[i].node_id),
         route_points.node[i+1].node_id, subgraph_node_id(db, route_points.node[i+1].node_id) );
     Dijkstra(graph, route_points.node[i].node_id, route_points.node[i+1].node_id);
+    distance = distance + node[route_points.node[i+1].node_id].d;
     /* Get the edges from the shortest path */
     int64_t v = route_points.node[i+1].node_id;
     int64_t edge_id;
@@ -416,42 +418,57 @@ void route(
   }
   sqlite3_finalize(stmt_insert_path_edges);
   /* TEST */
-  printf("+---------+----------+-----------------+-----------------+-----------------+-----------------+\n");
-  printf("| section | sequence |     edge_id     |      way_id     |  start_node_id  |   end_node_id   |\n");
-  printf("+---------+----------+-----------------+-----------------+-----------------+-----------------+\n");
+  int64_t first_node_id;            /* TODO */
+  first_node_id = subgraph_node_id(db, route_points.node[0].node_id);
+  printf("first_node_id: %" PRId64 "\n", first_node_id);
+  /* TEST */
+  int64_t way_id, start_node_id, end_node_id;
   rc = sqlite3_prepare_v2(db,
-    " SELECT pe.section,pe.sequence,pe.edge_id,ge.way_id,ge.start_node_id,ge.end_node_id"
+    " SELECT pe.section,pe.sequence,pe.edge_id,ge.way_id,ge.start_node_id,ge.end_node_id,ge.dist"
     " FROM path_edges AS pe"
     " LEFT JOIN graph_edges AS ge ON pe.edge_id=ge.edge_id"
     " ORDER BY pe.section,pe.sequence DESC", -1, &stmt, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  printf("+---------+----------+-----------------+-----------------+-----------------+-----------------+---------+\n"
+         "| section | sequence |     edge_id     |      way_id     |  start_node_id  |   end_node_id   |   dist  |\n"
+         "+---------+----------+-----------------+-----------------+-----------------+-----------------+---------+\n");
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
-    printf("| %7" PRId64 " | %8" PRId64 " | %15" PRId64 " | %15" PRId64 " | %15" PRId64 " | %15" PRId64 " |\n",
+    printf("| %7" PRId64 " | %8" PRId64 " | %15" PRId64 " | %15" PRId64 " | %15" PRId64 " | %15" PRId64 " | %7" PRId64 " |\n",
              (int64_t)sqlite3_column_int64(stmt, 0),
              (int64_t)sqlite3_column_int64(stmt, 1),
              (int64_t)sqlite3_column_int64(stmt, 2),
              (int64_t)sqlite3_column_int64(stmt, 3),
              (int64_t)sqlite3_column_int64(stmt, 4),
-             (int64_t)sqlite3_column_int64(stmt, 5)
+             (int64_t)sqlite3_column_int64(stmt, 5),
+             (int64_t)sqlite3_column_int64(stmt, 6)
           );
+    way_id = (int64_t)sqlite3_column_int64(stmt, 3);
+    start_node_id = (int64_t)sqlite3_column_int64(stmt, 4);
+    end_node_id = (int64_t)sqlite3_column_int64(stmt, 5);
+    /* Determination of the points on an edge, observing the direction */
+    if( first_node_id==start_node_id ) {
+      edge_points_v2(db, way_id, start_node_id, end_node_id, &xpath);
+      first_node_id = end_node_id;
+    }else{
+      edge_points_v2(db, way_id, end_node_id, start_node_id, &xpath);
+      first_node_id = start_node_id;
+    }
   }
-  printf("+---------+----------+-----------------+-----------------+-----------------+-----------------+\n");
-  sqlite3_finalize(stmt);
-
+  printf("+---------+----------+-----------------+-----------------+-----------------+-----------------+---------+\n");
   nodelist_show(&xpath);
-
-
+  sqlite3_finalize(stmt);
   /* 8. Open HTML file */
   html = fopen(filename, "w");
   if( html==NULL ) abort_msg("Error opening file\n");
   leaflet_html_header(html, "map route2");
   fprintf(html, "<h3>Route</h3>\n<pre>\n");
   fprintf(html, "# permit: %s -> mask_permit: %d\n", argv[3], mask_permit);
-  fprintf(html, "# boundingbox: %f %f   %f %f\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
-  fprintf(html, "# graph number nodes : %d\n", number_nodes);
+  fprintf(html, "# boundingbox: %f %f - %f %f\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
+  fprintf(html, "# graph number nodes: %d\n", number_nodes);
   for (i = 0; i < route_points.size; i++) {
     fprintf(html, "#  %f %f -> graph node %" PRId64 "\n", route_points.node[i].lon, route_points.node[i].lat, route_points.node[i].node_id);
   }
+  fprintf(html, "# distance: %d m\n", distance);
   fprintf(html, "</pre>\n");
   fprintf(html, "<div id='map' style='width:100%%; height:500px;'></div>\n");            /* Show map */
   fprintf(html, "<script>\n");
