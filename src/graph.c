@@ -1,5 +1,5 @@
 /*
-** TODO: deprecated function, will be replaced by edge_points_v2()
+** TODO: deprecated function, will be replaced by slice_way_nodes()
 ** Determines all waypoints along an edge
 */
 void edge_points(
@@ -70,10 +70,10 @@ void edge_points(
 }
 
 /**
- * \brief Determines all waypoints along an edge
- * TODO check double points, function doc
+ * \brief Determine intermediate nodes of a way
+ * TODO check double points
  */
-void edge_points_v2(
+void slice_way_nodes(
   sqlite3 *db,
   uint64_t way_id,
   uint64_t start_node_id,

@@ -313,42 +313,50 @@ void route(
   int argc,
   char *argv[]
 ){
-  bbox bp, b;
-  NodeList route_points;
   int i;
-  sqlite3_stmt *stmt;
   FILE *html;
   char *ext = ".html";
   char buffer[30];
   char *filename;
-  /* generate HTML filename */
+  char *name;
+  int mask_permit;                /* Permit mask */
+  NodeList route_points;          /* List of all route points */
+  double lon, lat;                /* Coordinates of a route point */
+  bbox bp;                        /* Bounding box of the route points */
+  bbox b;                         /* Enlarged bounding box */
+  int number_nodes;               /* Number of nodes in the subgraph */
+  struct Graph* graph;
+  sqlite3_stmt *stmt;
+  /* generate HTML filename TODO */
   filename = malloc(strlen(argv[argc-1]) + strlen(ext) + 1);
   if (!filename) abort_msg("Out of memory\n");
   strcpy(filename, argv[argc-1]);
   strcat(filename, ext);
+  /* Get name */
+  name = argv[argc-1];
   /* Number of parameters must be even */
   if( argc % 2 == 0 ) abort_msg("Option route2: Incorrect number of parameters\n");
-  /* 1. Read coordinates of the start, intermediate, and end points. Adjust boundingbox */
+  /* Get permit mask */
+  mask_permit = permit_mask(argv[3]);
+  /* Read coordinates of the start, intermediate, and end points. Adjust boundingbox */
   nodelist_init(&route_points);
   bp.min_lon =  180;
   bp.min_lat =   90;
   bp.max_lon = -180;
   bp.max_lat =  -90;
-  for (int i = 4; i < argc-1; i=i+2) {
-    double lon = get_argv_double(argv, i);
-    double lat = get_argv_double(argv, i+1);
+  for (i = 4; i < argc-1; i=i+2) {
+    lon = get_argv_double(argv, i);
+    lat = get_argv_double(argv, i+1);
     nodelist_add(&route_points, lon, lat, 0);
     if( bp.min_lon > lon ) bp.min_lon = lon;
     if( bp.min_lat > lat ) bp.min_lat = lat;
     if( bp.max_lon < lon ) bp.max_lon = lon;
     if( bp.max_lat < lat ) bp.max_lat = lat;
   }
-  /* 2. Get permit mask */
-  int mask_permit = permit_mask(argv[3]);
-  /* 3. Resized boundingbox for the subgraph */
+  /* Resized boundingbox for the subgraph */
   b = resize_boundingbox(bp, 2.0);
-  /* 4. Create subgraph tables */
-  int number_nodes = create_subgraph_tables(db, b, mask_permit);
+  /* Create subgraph tables */
+  number_nodes = create_subgraph_tables(db, b, mask_permit);
   /* 5. Get nearest node in the subgraph */
   for (i = 0; i < route_points.size; i++) {
     int64_t no = subgraph_nearest_node(db, route_points.node[i].lon, route_points.node[i].lat);
@@ -356,7 +364,8 @@ void route(
     route_points.node[i].node_id = no;
   }
   /* 6. Fill adjacency list */
-  struct Graph* graph = createGraph(number_nodes);
+  //struct Graph* graph = createGraph(number_nodes);
+  graph = createGraph(number_nodes);
   rc = sqlite3_prepare_v2(db,
     " SELECT sns.no,sne.no,s.dist,s.edge_id,s.directed"
     " FROM subgraph AS s"
@@ -420,19 +429,33 @@ void route(
   /* TEST */
   int64_t first_node_id;            /* TODO */
   first_node_id = subgraph_node_id(db, route_points.node[0].node_id);
-  printf("first_node_id: %" PRId64 "\n", first_node_id);
-  /* TEST */
-  int64_t way_id, start_node_id, end_node_id;
+  /* Get all edges in the right order */
+  int64_t way_id, start_node_id, end_node_id;  /* TODO */
   rc = sqlite3_prepare_v2(db,
     " SELECT pe.section,pe.sequence,pe.edge_id,ge.way_id,ge.start_node_id,ge.end_node_id,ge.dist"
     " FROM path_edges AS pe"
     " LEFT JOIN graph_edges AS ge ON pe.edge_id=ge.edge_id"
     " ORDER BY pe.section,pe.sequence DESC", -1, &stmt, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+#ifdef DEBUG
+  printf("first_node_id: %" PRId64 "\n", first_node_id);
   printf("+---------+----------+-----------------+-----------------+-----------------+-----------------+---------+\n"
          "| section | sequence |     edge_id     |      way_id     |  start_node_id  |   end_node_id   |   dist  |\n"
          "+---------+----------+-----------------+-----------------+-----------------+-----------------+---------+\n");
+#endif
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
+    way_id = (int64_t)sqlite3_column_int64(stmt, 3);
+    start_node_id = (int64_t)sqlite3_column_int64(stmt, 4);
+    end_node_id = (int64_t)sqlite3_column_int64(stmt, 5);
+    /* Determination of the points on an edge, observing the direction */
+    if( first_node_id==start_node_id ) {
+      slice_way_nodes(db, way_id, start_node_id, end_node_id, &xpath);
+      first_node_id = end_node_id;
+    }else{
+      slice_way_nodes(db, way_id, end_node_id, start_node_id, &xpath);
+      first_node_id = start_node_id;
+    }
+#ifdef DEBUG
     printf("| %7" PRId64 " | %8" PRId64 " | %15" PRId64 " | %15" PRId64 " | %15" PRId64 " | %15" PRId64 " | %7" PRId64 " |\n",
              (int64_t)sqlite3_column_int64(stmt, 0),
              (int64_t)sqlite3_column_int64(stmt, 1),
@@ -442,20 +465,12 @@ void route(
              (int64_t)sqlite3_column_int64(stmt, 5),
              (int64_t)sqlite3_column_int64(stmt, 6)
           );
-    way_id = (int64_t)sqlite3_column_int64(stmt, 3);
-    start_node_id = (int64_t)sqlite3_column_int64(stmt, 4);
-    end_node_id = (int64_t)sqlite3_column_int64(stmt, 5);
-    /* Determination of the points on an edge, observing the direction */
-    if( first_node_id==start_node_id ) {
-      edge_points_v2(db, way_id, start_node_id, end_node_id, &xpath);
-      first_node_id = end_node_id;
-    }else{
-      edge_points_v2(db, way_id, end_node_id, start_node_id, &xpath);
-      first_node_id = start_node_id;
-    }
+#endif
   }
+#ifdef DEBUG
   printf("+---------+----------+-----------------+-----------------+-----------------+-----------------+---------+\n");
   nodelist_show(&xpath);
+#endif
   sqlite3_finalize(stmt);
   /* 8. Open HTML file */
   html = fopen(filename, "w");
@@ -485,7 +500,10 @@ void route(
   leaflet_html_footer(html);
   if( fclose(html)!=0 ) abort_msg("Error closing file\n");
 
-  /* TODO */
+  /* TODO CSV GPX*/
+  /* 9. Write path coordinates to CSV and GPX files */
+  write_file_csv(name, &xpath);
+  write_file_gpx(name, &xpath);
 
   /* 10. Cleanup */
   free(filename);
