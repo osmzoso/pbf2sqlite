@@ -307,8 +307,11 @@ void shortest_way(
 /**
  * \brief Calculate shortest way
  *
- * Output is a HTML file with a map of the route
+ * Creates three files
+ *  - HTML file with a map of the route
+ *  - CSV and GPX files
  *
+ * \param ARGV
  */
 void route(
   sqlite3 *db,
@@ -333,10 +336,10 @@ void route(
   int64_t edge_id, way_id, start_node_id, end_node_id;  /* Cache ID */
   sqlite3_stmt *stmt;                          /* SQLite statement handler */
   int64_t first_node_id;                       /* Node ID of the first node in the path */
-  FILE *html;
-  char *ext = ".html";
-  char buffer[30];
-  char *filename;
+  FILE *html;                                  /* File pointer HTML file */
+  char *ext = ".html";                         /* File extension */
+  char buffer[30];                             /* Buffer */
+  char *filename;                              /* File name HTML file */
   /* Number of parameters must be even */
   if( argc % 2 == 0 ) abort_msg("Option route2: Incorrect number of parameters\n");
   /* Get permit mask, coordinates of all route points and filename without extension */
@@ -398,9 +401,9 @@ void route(
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   for (i = 0; i < route_points.size-1; i++) {
 #ifdef DEBUG
-    printf("dijkstra: subgraph_node %8" PRId64 " (node_id: %15" PRId64 ") -> subgraph_node %8" PRId64 " (node_id: %15" PRId64 ")\n",
-        route_points.node[i].node_id, subgraph_node_id(db, route_points.node[i].node_id),
-        route_points.node[i+1].node_id, subgraph_node_id(db, route_points.node[i+1].node_id) );
+    printf("dijkstra: %8" PRId64 " -> %8" PRId64 "         (node_id: %15" PRId64 " -> %15" PRId64 ")\n",
+        route_points.node[i].node_id, route_points.node[i+1].node_id,
+        subgraph_node_id(db, route_points.node[i].node_id), subgraph_node_id(db, route_points.node[i+1].node_id) );
 #endif
     Dijkstra(graph, route_points.node[i].node_id, route_points.node[i+1].node_id);
     distance = distance + node[route_points.node[i+1].node_id].d;
@@ -468,7 +471,7 @@ void route(
   nodelist_show(&xpath);
 #endif
   sqlite3_finalize(stmt);
-  /* 8. Open HTML file */
+  /* Create HTML file */
   filename = malloc(strlen(argv[argc-1]) + strlen(ext) + 1);
   if (!filename) abort_msg("Out of memory\n");
   strcpy(filename, argv[argc-1]);
@@ -499,12 +502,10 @@ void route(
   fprintf(html, "</script>\n");
   leaflet_html_footer(html);
   if( fclose(html)!=0 ) abort_msg("Error closing file\n");
-
-  /* 9. Write path coordinates to CSV and GPX files */
+  /* Create CSV and GPX files with the path coordinates */
   write_file_csv(name, &xpath);
   write_file_gpx(name, &xpath);
-
-  /* 10. Cleanup */
+  /* Cleanup */
   free(filename);
   nodelist_free(&xpath);
   nodelist_free(&route_points);
