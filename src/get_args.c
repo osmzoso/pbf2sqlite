@@ -62,7 +62,7 @@ void parse_args(sqlite3 *db, int argc, char **argv, int exec) {
       if( exec ) sql_read_stdin(db);
       break;
     } 
-    else if( strcmp("route2", argv[2])==0 ){
+    else if( strcmp("route", argv[2])==0 ){
       if( exec ) route(db, argc, argv);
       break;
     } 

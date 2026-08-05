@@ -134,7 +134,7 @@ void route(
   char buffer[30];                             /* Buffer */
   char *filename;                              /* File name HTML file */
   /* Number of parameters must be even */
-  if( argc % 2 == 0 ) abort_msg("Option route2: Incorrect number of parameters\n");
+  if( argc % 2 == 0 ) abort_msg("Option route: Incorrect number of parameters\n");
   /* Get permit mask, coordinates of all route points and filename without extension */
   mask_permit = permit_mask(argv[3]);
   nodelist_init(&route_points);
@@ -158,7 +158,7 @@ void route(
   /* For all route points get nearest node in the subgraph */
   for (i = 0; i < route_points.size; i++) {
     no = subgraph_nearest_node(db, route_points.node[i].lon, route_points.node[i].lat);
-    if( no == -1 ) abort_msg("Option route2: Coordinates out of range\n");
+    if( no == -1 ) abort_msg("Option route: Coordinates out of range\n");
     route_points.node[i].node_id = no;  /* Attention: Inserts Node ID subgraph, not OSM Node ID */
   }
   /* Fill adjacency list */
@@ -272,7 +272,7 @@ void route(
   strcat(filename, ext);
   html = fopen(filename, "w");
   if( html==NULL ) abort_msg("Error opening file\n");
-  leaflet_html_header(html, "map route2");
+  leaflet_html_header(html, "map route");
   fprintf(html, "<h3>Route</h3>\n<pre>\n");
   fprintf(html, "# permit: %s -> mask_permit: %d\n", argv[3], mask_permit);
   fprintf(html, "# boundingbox: %f %f - %f %f\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
