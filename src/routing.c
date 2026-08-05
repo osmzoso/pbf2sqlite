@@ -20,18 +20,16 @@ bbox resize_boundingbox(const bbox b, const double enlarge){
   return b_new;
 }
 
-
-/*
-** Write the path coordinates to CSV and GPX files
-**
-** https://en.wikipedia.org/wiki/Comma-separated_values
-** https://en.wikipedia.org/wiki/GPS_Exchange_Format
-**
-*/
+/**
+ * \brief Writes a node list to a CSV file
+ *
+ * https://en.wikipedia.org/wiki/Comma-separated_values
+ */
 void write_file_csv(
   const char *name,
   const NodeList *list
 ){
+  int i;
   FILE *csv;
   char *ext = ".csv";
   char *filename = malloc(strlen(name) + strlen(ext) + 1);
@@ -41,18 +39,23 @@ void write_file_csv(
   csv = fopen(filename, "w");
   if( csv==NULL ) abort_msg("Error opening file\n");
   fprintf(csv, "lon,lat,ele,node_id\r\n");
-  /* Write the list in reverse order */
-  for (int i=list->size-1; i>=0; i--) {
+  for(i=0; i<list->size; i++){
     fprintf(csv, "%.7f,%.7f,0,%" PRId64 "\r\n", list->node[i].lon, list->node[i].lat, list->node[i].node_id);
   }
   if( fclose(csv)!=0 ) abort_msg("Error closing file\n");
   free(filename);
 }
 
+/**
+ * \brief Writes a node list to a GPX file
+ *
+ * https://en.wikipedia.org/wiki/GPS_Exchange_Format
+ */
 void write_file_gpx(
   const char *name,
   const NodeList *list
 ){
+  int i;
   FILE *gpx;
   char *ext = ".gpx";
   char *filename = malloc(strlen(name) + strlen(ext) + 1);
@@ -71,8 +74,7 @@ void write_file_gpx(
     "    </extensions>\n"
     "    <trkseg>\n"
   );
-  /* Write the list in reverse order */
-  for (int i=list->size-1; i>=0; i--) {
+  for(i=0; i<list->size; i++){
     fprintf(gpx, "      <trkpt lat=\"%.7f\" lon=\"%.7f\">\n", list->node[i].lat, list->node[i].lon);
     fprintf(gpx, "        <ele>0.0</ele>\n      </trkpt>\n");
   }
