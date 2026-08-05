@@ -331,7 +331,8 @@ void write_graph(
     end_node_id = (int64_t)sqlite3_column_int64(stmt_edges, 1);
     way_id = (int64_t)sqlite3_column_int64(stmt_edges, 2);
     directed = (int)sqlite3_column_int(stmt_edges, 3);
-    edge_points(db, way_id, start_node_id, end_node_id, &nodelist);
+    nodelist_clear(&nodelist);
+    slice_way_nodes(db, way_id, start_node_id, end_node_id, &nodelist);
     snprintf(popuptext, sizeof(popuptext), "way_id %" PRId64, way_id);
     if( directed ){
       leaflet_style(html, "#0000ff", 0.5, 3, "5 5", "none", 1.0, 5);
