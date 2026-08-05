@@ -79,6 +79,6 @@ $dir/pbf2sqlite $dir/osm_c.db route foot \
   $dir/route
 xdg-open $dir/route.html
 
-# TODO Coordinates outside the range of weimar.osm -> display error message
-#$dir/pbf2sqlite $dir/osm_c.db route 1.530 42.507 1.549 42.517 car $dir/route
+# Both coordinates outside the range of weimar.osm -> display error message
+#$dir/pbf2sqlite $dir/osm_c.db route foot 11.574 48.137 11.578 48.137 $dir/route2
 
