@@ -71,7 +71,6 @@ void edge_points(
 
 /**
  * \brief Determine intermediate nodes of a way
- * TODO check double points
  */
 void slice_way_nodes(
   sqlite3 *db,

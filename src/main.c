@@ -66,9 +66,8 @@ static char *help =
   "  sql [<stmt>]                                        Executes an SQL statement\n"
   "\n"
   "Option to calculate the shortest path:\n"
-  "  route <lon1> <lat1> <lon2> <lat2> <permit> <file>\n"
   "  route2 <permit> <lon1> <lat1> <lon2> <lat2> [<lon3> <lat3> ...] <file>\n"
-  "        (<permit> can be 'foot', 'bike' or 'car')\n"
+  "        (<permit>: 'foot', 'bike' or 'car')\n"
   "\n"
   "This is pbf2sqlite version " PBF2SQLITE_VERSION "\n"
   ;

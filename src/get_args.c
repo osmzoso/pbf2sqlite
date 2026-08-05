@@ -62,14 +62,6 @@ void parse_args(sqlite3 *db, int argc, char **argv, int exec) {
       if( exec ) sql_read_stdin(db);
       break;
     } 
-    else if( strcmp("route", argv[2])==0 && argc==9 ){
-      lon1 = get_argv_double(argv, 3);
-      lat1 = get_argv_double(argv, 4);
-      lon2 = get_argv_double(argv, 5);
-      lat2 = get_argv_double(argv, 6);
-      if( exec ) shortest_way(db, lon1, lat1, lon2, lat2, argv[7], argv[8]);
-      break;
-    } 
     else if( strcmp("route2", argv[2])==0 ){
       if( exec ) route(db, argc, argv);
       break;
