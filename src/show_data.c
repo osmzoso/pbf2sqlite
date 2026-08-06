@@ -281,18 +281,14 @@ void html_map_addr(
   sqlite3_finalize(stmt_addr);
 }
 
-/*
-** TODO: replace lon1,lat1,lon2,lat with bbox
-** Creates visualization of the table graph
-*/
+/**
+ * \brief Creates the Leaflet commands to visualize the graph
+ */
 void write_graph(
   sqlite3 *db,
   FILE *html,
   const char *mapid,
-  const double lon1,
-  const double lat1,
-  const double lon2,
-  const double lat2,
+  const bbox b,
   const int mask_permit
 ){
   sqlite3_stmt *stmt_nodes, *stmt_edges;
@@ -301,7 +297,7 @@ void write_graph(
   int64_t node_id, way_id, start_node_id, end_node_id;
   double lon, lat;
   /*  */
-  create_subgraph_tables_v1(db, lon1, lat1, lon2, lat2, mask_permit);
+  create_subgraph_tables(db, b, mask_permit);
   /* show graph nodes */
   leaflet_style(html, "none", 0.9, 2, "", "#ff5348", 0.5, 5);
   rc = sqlite3_prepare_v2(db,
@@ -341,7 +337,7 @@ void write_graph(
   }
   /* show boundingbox */
   leaflet_style(html, "#000000", 0.3, 2, "5 5", "none", 0.3, 5);
-  leaflet_rectangle(html, mapid, lon1, lat1, lon2, lat2, "");
+  leaflet_rectangle(html, mapid, b.min_lon, b.min_lat, b.max_lon, b.max_lat, "");
   /*  */
   nodelist_free(&nodelist);
   sqlite3_finalize(stmt_nodes);
@@ -374,10 +370,10 @@ void html_map_graph(
   leaflet_init(html, "map2", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
   leaflet_init(html, "map3", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
   leaflet_init(html, "map4", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
-  write_graph(db, html, "map1", b.min_lon, b.min_lat, b.max_lon, b.max_lat, 0);  /* graph complete */
-  write_graph(db, html, "map2", b.min_lon, b.min_lat, b.max_lon, b.max_lat, 1);  /* graph foot */
-  write_graph(db, html, "map3", b.min_lon, b.min_lat, b.max_lon, b.max_lat, 2);  /* graph bike */
-  write_graph(db, html, "map4", b.min_lon, b.min_lat, b.max_lon, b.max_lat, 4);  /* graph car */
+  write_graph(db, html, "map1", b, 0);  /* graph complete */
+  write_graph(db, html, "map2", b, 1);  /* graph foot */
+  write_graph(db, html, "map3", b, 2);  /* graph bike */
+  write_graph(db, html, "map4", b, 4);  /* graph car */
   fprintf(html,
       "</script>\n"
       "<p>dashed line -> one way</p>\n"

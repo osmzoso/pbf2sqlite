@@ -4,7 +4,7 @@
  */
 
 /**
- * \brief Leaflet HTML: Write HTML header
+ * \brief Write HTML header with Leaflet.js library
  */
 void leaflet_html_header(FILE *html, const char *title) {
   fprintf(html,
@@ -68,7 +68,8 @@ void leaflet_html_footer(FILE *html) {
 }
 
 /**
- * \brief Leaflet HTML: Write Javascript code to initialize a map
+ * TODO use bbox
+ * \brief Write Leaflet.js code to initialize a map
  */
 void leaflet_init(
   FILE *html,
@@ -101,7 +102,7 @@ void leaflet_init(
 }
 
 /**
- * \brief Leaflet HTML: Write Javascript code to set a marker
+ * \brief Write Leaflet.js code to set a marker 
  */
 void leaflet_marker(
   FILE *html,
