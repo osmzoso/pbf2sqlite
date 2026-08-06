@@ -178,15 +178,12 @@ void show_relation(sqlite3 *db, const int64_t relation_id) {
   sqlite3_finalize(stmt);
 }
 
-/*
-** Creates visualization of the table addr
-*/
+/**
+ * \brief Creates visualization of the table addr
+ */
 void html_map_addr(
   sqlite3 *db,
-  const double lon1,
-  const double lat1,
-  const double lon2,
-  const double lat2,
+  const bbox b,
   const char *html_file
 ){
   FILE *html;
@@ -200,7 +197,7 @@ void html_map_addr(
     "<h3>Map 1 - Address</h3>\n"
     "<div id='map' style='width:100%%; height:500px;'></div>\n");
   fprintf(html, "<script>\n");
-  leaflet_init(html, "map", lon1, lat1, lon2, lat2);
+  leaflet_init(html, "map", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
   const char *query = 
     " SELECT way_id,node_id,postcode,city,street,housenumber,lon,lat"
     " FROM addr_view"
@@ -209,10 +206,10 @@ void html_map_addr(
   /* 1. Map Marker */
   rc = sqlite3_prepare_v2(db, query, -1, &stmt_addr, NULL);
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
-  sqlite3_bind_double(stmt_addr, 1, lon1);
-  sqlite3_bind_double(stmt_addr, 2, lat1);
-  sqlite3_bind_double(stmt_addr, 3, lon2);
-  sqlite3_bind_double(stmt_addr, 4, lat2);
+  sqlite3_bind_double(stmt_addr, 1, b.min_lon);
+  sqlite3_bind_double(stmt_addr, 2, b.min_lat);
+  sqlite3_bind_double(stmt_addr, 3, b.max_lon);
+  sqlite3_bind_double(stmt_addr, 4, b.max_lat);
   while( sqlite3_step(stmt_addr)==SQLITE_ROW ){
     snprintf(popup_text, sizeof(popup_text),
         "<pre>"
@@ -233,7 +230,7 @@ void html_map_addr(
   }
   /* show boundingbox */
   leaflet_style(html, "#000000", 0.3, 2, "5 5", "none", 0.3, 5);
-  leaflet_rectangle(html, "map", lon1, lat1, lon2, lat2, "");
+  leaflet_rectangle(html, "map", b.min_lon, b.min_lat, b.max_lon, b.max_lat, "");
   fprintf(html, "</script>\n");
   /* 2. Table of addresses */
   fprintf(html,
@@ -243,10 +240,10 @@ void html_map_addr(
   );
   sqlite3_reset(stmt_addr);
   sqlite3_clear_bindings(stmt_addr);
-  sqlite3_bind_double(stmt_addr, 1, lon1);
-  sqlite3_bind_double(stmt_addr, 2, lat1);
-  sqlite3_bind_double(stmt_addr, 3, lon2);
-  sqlite3_bind_double(stmt_addr, 4, lat2);
+  sqlite3_bind_double(stmt_addr, 1, b.min_lon);
+  sqlite3_bind_double(stmt_addr, 2, b.min_lat);
+  sqlite3_bind_double(stmt_addr, 3, b.max_lon);
+  sqlite3_bind_double(stmt_addr, 4, b.max_lat);
   while( sqlite3_step(stmt_addr)==SQLITE_ROW ){
     fprintf(html, "<tr>");
     way_id = (int64_t)sqlite3_column_int64(stmt_addr, 0);
@@ -277,7 +274,7 @@ void html_map_addr(
   fprintf(html,
       "</table>\n"
       "<hr>\n"
-      "<p>Boundingbox: %f %f - %f %f</p>\n", lon1, lat1, lon2, lat2);
+      "<p>Boundingbox: %f %f - %f %f</p>\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
   leaflet_html_footer(html);
   /* Close the file */
   if( fclose(html)!=0 ) abort_msg("Error closing file\n");
@@ -351,12 +348,12 @@ void write_graph(
   sqlite3_finalize(stmt_edges);
 }
 
+/**
+ * \brief Creates visualization of the table graph
+ */
 void html_map_graph(
   sqlite3 *db,
-  const double lon1,
-  const double lat1,
-  const double lon2,
-  const double lat2,
+  const bbox b,
   const char *html_file
 ){
   FILE *html;
@@ -373,19 +370,19 @@ void html_map_graph(
     "<h3>Map 4 - Graph car</h3>\n"
     "<div id='map4' style='width:100%%; height:500px;'></div>\n");
   fprintf(html, "<script>\n");
-  leaflet_init(html, "map1", lon1, lat1, lon2, lat2);
-  leaflet_init(html, "map2", lon1, lat1, lon2, lat2);
-  leaflet_init(html, "map3", lon1, lat1, lon2, lat2);
-  leaflet_init(html, "map4", lon1, lat1, lon2, lat2);
-  write_graph(db, html, "map1", lon1, lat1, lon2, lat2, 0);  /* graph complete */
-  write_graph(db, html, "map2", lon1, lat1, lon2, lat2, 1);  /* graph foot */
-  write_graph(db, html, "map3", lon1, lat1, lon2, lat2, 2);  /* graph bike */
-  write_graph(db, html, "map4", lon1, lat1, lon2, lat2, 4);  /* graph car */
+  leaflet_init(html, "map1", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
+  leaflet_init(html, "map2", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
+  leaflet_init(html, "map3", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
+  leaflet_init(html, "map4", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
+  write_graph(db, html, "map1", b.min_lon, b.min_lat, b.max_lon, b.max_lat, 0);  /* graph complete */
+  write_graph(db, html, "map2", b.min_lon, b.min_lat, b.max_lon, b.max_lat, 1);  /* graph foot */
+  write_graph(db, html, "map3", b.min_lon, b.min_lat, b.max_lon, b.max_lat, 2);  /* graph bike */
+  write_graph(db, html, "map4", b.min_lon, b.min_lat, b.max_lon, b.max_lat, 4);  /* graph car */
   fprintf(html,
       "</script>\n"
       "<p>dashed line -> one way</p>\n"
       "<hr>\n"
-      "<p>Boundingbox: %f %f - %f %f</p>\n", lon1, lat1, lon2, lat2);
+      "<p>Boundingbox: %f %f - %f %f</p>\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
   leaflet_html_footer(html);
   if( fclose(html)!=0 ) abort_msg("Error closing file\n");
 }

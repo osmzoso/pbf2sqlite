@@ -4,7 +4,7 @@
 void parse_args(sqlite3 *db, int argc, char **argv, int exec) {
   int i;
   int64_t id;
-  double lon1, lat1, lon2, lat2;
+  bbox b;
   i = 2;
   while( i<argc ){
     if( strcmp("read", argv[i])==0 && argc>=i+2 ){
@@ -39,19 +39,19 @@ void parse_args(sqlite3 *db, int argc, char **argv, int exec) {
       break;
     } 
     else if( strcmp("vaddr", argv[2])==0 && argc==8 ){
-      lon1 = get_argv_double(argv, 3);
-      lat1 = get_argv_double(argv, 4);
-      lon2 = get_argv_double(argv, 5);
-      lat2 = get_argv_double(argv, 6);
-      if( exec ) html_map_addr(db, lon1, lat1, lon2, lat2, argv[7]);
+      b.min_lon = get_argv_double(argv, 3);
+      b.min_lat = get_argv_double(argv, 4);
+      b.max_lon = get_argv_double(argv, 5);
+      b.max_lat = get_argv_double(argv, 6);
+      if( exec ) html_map_addr(db, b, argv[7]);
       break;
     } 
     else if( strcmp("vgraph", argv[2])==0 && argc==8 ){
-      lon1 = get_argv_double(argv, 3);
-      lat1 = get_argv_double(argv, 4);
-      lon2 = get_argv_double(argv, 5);
-      lat2 = get_argv_double(argv, 6);
-      if( exec ) html_map_graph(db, lon1, lat1, lon2, lat2, argv[7]);
+      b.min_lon = get_argv_double(argv, 3);
+      b.min_lat = get_argv_double(argv, 4);
+      b.max_lon = get_argv_double(argv, 5);
+      b.max_lat = get_argv_double(argv, 6);
+      if( exec ) html_map_graph(db, b, argv[7]);
       break;
     } 
     else if( strcmp("sql", argv[2])==0 && argc==4 ){
