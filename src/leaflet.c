@@ -68,7 +68,6 @@ void leaflet_html_footer(FILE *html) {
 }
 
 /**
- * TODO use bbox
  * \brief Write Leaflet.js code to initialize a map
  */
 void leaflet_init(
@@ -102,7 +101,7 @@ void leaflet_init(
 }
 
 /**
- * \brief Write Leaflet.js code to set a marker 
+ * \brief Write Leaflet.js code to set a marker
  */
 void leaflet_marker(
   FILE *html,
@@ -116,6 +115,9 @@ void leaflet_marker(
   fprintf(html, ";\n");
 }
 
+/**
+ * \brief Write Leaflet.js code to draw a polyline
+ */
 void leaflet_polyline(
   FILE *html,
   const char *mapid,
@@ -132,6 +134,9 @@ void leaflet_polyline(
   fprintf(html, ";\n");
 }
 
+/**
+ * \brief Write Leaflet.js code to draw a line
+ */
 void leaflet_line(
   FILE *html,
   const char *mapid,
@@ -147,6 +152,9 @@ void leaflet_line(
   fprintf(html, ";\n");
 }
 
+/**
+ * \brief Write Leaflet.js code to draw a polygon
+ */
 void leaflet_polygon(
   FILE *html,
   const char *mapid,
@@ -163,6 +171,9 @@ void leaflet_polygon(
   fprintf(html, ";\n");
 }
 
+/**
+ * \brief Write Leaflet.js code to draw a circle
+ */
 void leaflet_circle(
   FILE *html,
   const char *mapid,
@@ -176,6 +187,9 @@ void leaflet_circle(
   fprintf(html, ";\n");
 }
 
+/**
+ * \brief Write Leaflet.js code to draw a circlemarker
+ */
 void leaflet_circlemarker(
   FILE *html,
   const char *mapid,
@@ -188,6 +202,9 @@ void leaflet_circlemarker(
   fprintf(html, ";\n");
 }
 
+/**
+ * \brief Write Leaflet.js code to draw a rectangle
+ */
 void leaflet_rectangle(
   FILE *html,
   const char *mapid,
@@ -202,6 +219,9 @@ void leaflet_rectangle(
   fprintf(html, ";\n");
 }
 
+/**
+ * \brief Write Leaflet.js code to set style options
+ */
 void leaflet_style(
   FILE *html,
   const char *color,
