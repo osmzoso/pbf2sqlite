@@ -124,7 +124,7 @@ void route(
   int64_t no;                                  /* Node ID subgraph */
   struct Graph* graph;                         /* Adjacency list */
   sqlite3_stmt *stmt_insert_path_edges;        /* SQLite statement handler */
-  NodeList xpath;                              /* Contains all points of the shortest path */
+  NodeList xpath, path2;                       /* Contains all points of the shortest path */
   int distance;                                /* Distance of the shortest path in meters */
   int64_t v;                                   /* Previous node of the shortest way */
   int sequence;                                /* Contain the sequence of edges */
@@ -233,9 +233,8 @@ void route(
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
 #ifdef DEBUG
   printf("first_node_id: %" PRId64 "\n", first_node_id);
-  printf("+---------+----------+-----------------+-----------------+-----------------+-----------------+---------+\n"
-         "| section | sequence |     edge_id     |      way_id     |  start_node_id  |   end_node_id   |   dist  |\n"
-         "+---------+----------+-----------------+-----------------+-----------------+-----------------+---------+\n");
+  printf(" section | sequence |     edge_id     |      way_id     |  start_node_id  |   end_node_id   |   dist  \n"
+         "---------+----------+-----------------+-----------------+-----------------+-----------------+---------\n");
 #endif
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
     way_id = (int64_t)sqlite3_column_int64(stmt, 3);
@@ -250,7 +249,7 @@ void route(
       first_node_id = start_node_id;
     }
 #ifdef DEBUG
-    printf("| %7" PRId64 " | %8" PRId64 " | %15" PRId64 " | %15" PRId64 " | %15" PRId64 " | %15" PRId64 " | %7" PRId64 " |\n",
+    printf(" %7" PRId64 " | %8" PRId64 " | %15" PRId64 " | %15" PRId64 " | %15" PRId64 " | %15" PRId64 " | %7" PRId64 " \n",
              (int64_t)sqlite3_column_int64(stmt, 0),
              (int64_t)sqlite3_column_int64(stmt, 1),
              (int64_t)sqlite3_column_int64(stmt, 2),
@@ -261,12 +260,26 @@ void route(
           );
 #endif
   }
-#ifdef DEBUG
-  printf("+---------+----------+-----------------+-----------------+-----------------+-----------------+---------+\n");
-  nodelist_show(&xpath);
-  /* TODO remove double points in the nodelist */
-#endif
   sqlite3_finalize(stmt);
+  /*
+   * Dirty Hack
+   * remove double points in the nodelist
+   */
+  nodelist_init(&path2);
+  v = -1;
+  for (i = 0; i < xpath.size; i++) {
+    if( v!=xpath.node[i].node_id ){
+      nodelist_add(&path2, xpath.node[i].lon, xpath.node[i].lat, xpath.node[i].node_id);
+    }
+    v = xpath.node[i].node_id;
+  }
+#ifdef DEBUG
+  nodelist_show(&xpath);
+  nodelist_show(&path2);
+#endif
+  /* Create CSV and GPX files with the path coordinates */
+  write_file_csv(name, &path2);
+  write_file_gpx(name, &path2);
   /* Create HTML file */
   filename = malloc(strlen(argv[argc-1]) + strlen(ext) + 1);
   if (!filename) abort_msg("Out of memory\n");
@@ -294,16 +307,14 @@ void route(
     leaflet_marker(html, "map", route_points.node[i].lon, route_points.node[i].lat, buffer);
   }
   leaflet_style(html, "#0000ff", 0.5, 6, "", "none", 1.0, 5);                            /* path */
-  leaflet_polyline(html, "map", &xpath, "Shortest way");
+  leaflet_polyline(html, "map", &path2, "Shortest way");
   fprintf(html, "</script>\n");
   leaflet_html_footer(html);
   if( fclose(html)!=0 ) abort_msg("Error closing file\n");
-  /* Create CSV and GPX files with the path coordinates */
-  write_file_csv(name, &xpath);
-  write_file_gpx(name, &xpath);
   /* Cleanup */
   free(filename);
   nodelist_free(&xpath);
+  nodelist_free(&path2);
   nodelist_free(&route_points);
   destroyGraph(graph);
 }

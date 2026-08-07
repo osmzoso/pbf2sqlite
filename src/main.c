@@ -18,7 +18,7 @@
 # define M_PI   3.141592653589793238462643383279502884
 #endif
 
-#define PBF2SQLITE_VERSION  "0.5.3 ALPHA"
+#define PBF2SQLITE_VERSION  "0.5.3"
 
 #define RED     "\033[31m"
 #define GREEN   "\033[32m"
