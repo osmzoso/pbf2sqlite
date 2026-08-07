@@ -227,7 +227,7 @@ Then, the bits are set according to the tags found (set_bit).
 Finally, the bits are cleared according to the tags found (clear_bit).  
 
 
-# 3. Additional options
+# 3. Options for displaying data
 
 ## 3.1. Option "node", "way" and "relation"
 
@@ -257,6 +257,17 @@ pbf2sqlite germany.db vgraph 11.56 48.13 11.58 48.14 graph_mchn.html
 
 The **sql** option executes an SQL command.
 
+If the SQL command is a [SELECT](https://www.sqlite.org/lang_select.html)
+statement, then the result will be displayed on the console.
+
+SQL commands can also be entered via stdin:  
+```
+pbf2sqlite test.db sql < stmt.sql
+cat stmt.sql | pbf2sqlite test.db sql
+```
+
+### Additional functions
+
 SQLite is extended with the following functions:
 
 function                         | description
@@ -279,29 +290,26 @@ lon: -180°                       |                 lon: +180°
 
 Examples:  
 ```
+pbf2sqlite test.db sql "SELECT * FROM nodes LIMIT 10"
 pbf2sqlite test.db sql "ALTER TABLE nodes ADD COLUMN x"
 pbf2sqlite test.db sql "ALTER TABLE nodes ADD COLUMN y"
 pbf2sqlite test.db sql "UPDATE nodes SET x=mercator_x(lon),y=mercator_y(lat)"
 ```
 
-If the SQL command is a [SELECT](https://www.sqlite.org/lang_select.html)
-statement, then the result will be displayed on the console.
 
-SQL commands can also be entered via stdin:  
-```
-pbf2sqlite test.db sql < stmt.sql
-cat stmt.sql | pbf2sqlite test.db sql
-```
+# 4. Option to calculate the shortest path
 
-## 3.4. Option "route"
+## 4.1. Option "route"
 
 The **route** option calculates a shortest way.
 
 Table **graph_edges** and **rtree_way** are required.
 
+Any number of intermediate destinations can also be specified.
+
 Usage:  
 ```
-pbf2sqlite <database> route <lon1> <lat1> <lon2> <lat2> <permit> <file>
+pbf2sqlite <database> route <permit> <lon1> <lat1> <lon2> <lat2> [<lon3> <lat3> ...] <file>
 ```
 
 `<permit>` can be "foot", "bike" or "car".  
@@ -311,9 +319,9 @@ Therefore, `<file>` is supplemented with the file extensions **.html**, **.csv**
 
 Examples:  
 ```
-pbf2sqlite germany.db route 11.5777 48.1427 11.6031 48.1619 foot ~/route_mchn_foot
-pbf2sqlite germany.db route 11.5777 48.1427 11.6031 48.1619 bike ~/route_mchn_bike
-pbf2sqlite germany.db route 11.5777 48.1427 11.6031 48.1619 car ~/route_mchn_car
+pbf2sqlite germany.db route foot 11.5777 48.1427 11.5922 48.1524 11.5870 48.1623 ~/route_mchn_foot
+pbf2sqlite germany.db route bike 11.5777 48.1427 11.6031 48.1619 ~/route_mchn_bike
+pbf2sqlite germany.db route car 11.5777 48.1427 11.6031 48.1619 ~/route_mchn_car
 ```
 
 
