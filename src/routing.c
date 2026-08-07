@@ -291,10 +291,12 @@ void route(
   fprintf(html, "<h3>Route</h3>\n<pre>\n");
   fprintf(html, "# permit: %s -> mask_permit: %d\n", argv[3], mask_permit);
   for (i = 0; i < route_points.size; i++) {
-    fprintf(html, "#  %f %f -> graph node %" PRId64 "\n", route_points.node[i].lon, route_points.node[i].lat, route_points.node[i].node_id);
+    fprintf(html, "# %d.  %f %f -> OSM Node %" PRId64 "\n",
+       i+1, route_points.node[i].lon, route_points.node[i].lat,
+       subgraph_node_id(db, route_points.node[i].node_id) );
   }
   fprintf(html, "# route distance: %d m\n", distance);
-  fprintf(html, "# boundingbox: %f %f - %f %f\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
+  fprintf(html, "#\n# boundingbox: %f %f - %f %f\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
   fprintf(html, "# graph number nodes: %d\n", number_nodes);
   fprintf(html, "</pre>\n");
   fprintf(html, "<div id='map' style='width:100%%; height:500px;'></div>\n");            /* Show map */
