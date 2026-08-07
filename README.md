@@ -17,16 +17,17 @@ Main options:
   addr             Add address tables
   graph            Add graph tables
 
-Additional options:
+Options for displaying data:
   node <id>                                           Show data of a node
   way <id>                                            Show data of a way
   relation <id>                                       Show data of a relation
   vaddr <lon1> <lat1> <lon2> <lat2> <htmlfile>        Generates a map of the addresses
   vgraph <lon1> <lat1> <lon2> <lat2> <htmlfile>       Generates a map of the graph
-  sql <stmt>                                          Executes an SQL statement
-  sql                                                 Executes an SQL statement from stdin
-  route <lon1> <lat1> <lon2> <lat2> <permit> <file>   Calculates shortest route
-                                   (<permit> can be 'foot', 'bike' or 'car')
+  sql [<stmt>]                                        Executes an SQL statement
+
+Option to calculate the shortest path:
+  route <permit> <lon1> <lat1> <lon2> <lat2> [<lon3> <lat3> ...] <file>
+        (<permit>: 'foot', 'bike' or 'car')
 ```
 
 The command

@@ -124,7 +124,7 @@ void route(
   int64_t no;                                  /* Node ID subgraph */
   struct Graph* graph;                         /* Adjacency list */
   sqlite3_stmt *stmt_insert_path_edges;        /* SQLite statement handler */
-  NodeList xpath, path2;                       /* Contains all points of the shortest path */
+  NodeList path, path2;                        /* Contains all points of the shortest path */
   int distance;                                /* Distance of the shortest path in meters */
   int64_t v;                                   /* Previous node of the shortest way */
   int sequence;                                /* Contain the sequence of edges */
@@ -180,7 +180,7 @@ void route(
   }
   sqlite3_finalize(stmt);
   /* Routing */
-  nodelist_init(&xpath);
+  nodelist_init(&path);
   distance = 0;
   rc = sqlite3_exec(db,
     " DROP TABLE IF EXISTS path_edges;"
@@ -242,10 +242,10 @@ void route(
     end_node_id = (int64_t)sqlite3_column_int64(stmt, 5);
     /* Determination of the points on an edge, observing the direction */
     if( first_node_id==start_node_id ) {
-      slice_way_nodes(db, way_id, start_node_id, end_node_id, &xpath);
+      slice_way_nodes(db, way_id, start_node_id, end_node_id, &path);
       first_node_id = end_node_id;
     }else{
-      slice_way_nodes(db, way_id, end_node_id, start_node_id, &xpath);
+      slice_way_nodes(db, way_id, end_node_id, start_node_id, &path);
       first_node_id = start_node_id;
     }
 #ifdef DEBUG
@@ -267,14 +267,14 @@ void route(
    */
   nodelist_init(&path2);
   v = -1;
-  for (i = 0; i < xpath.size; i++) {
-    if( v!=xpath.node[i].node_id ){
-      nodelist_add(&path2, xpath.node[i].lon, xpath.node[i].lat, xpath.node[i].node_id);
+  for (i = 0; i < path.size; i++) {
+    if( v!=path.node[i].node_id ){
+      nodelist_add(&path2, path.node[i].lon, path.node[i].lat, path.node[i].node_id);
     }
-    v = xpath.node[i].node_id;
+    v = path.node[i].node_id;
   }
 #ifdef DEBUG
-  nodelist_show(&xpath);
+  nodelist_show(&path);
   nodelist_show(&path2);
 #endif
   /* Create CSV and GPX files with the path coordinates */
@@ -290,12 +290,12 @@ void route(
   leaflet_html_header(html, "map route");
   fprintf(html, "<h3>Route</h3>\n<pre>\n");
   fprintf(html, "# permit: %s -> mask_permit: %d\n", argv[3], mask_permit);
-  fprintf(html, "# boundingbox: %f %f - %f %f\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
-  fprintf(html, "# graph number nodes: %d\n", number_nodes);
   for (i = 0; i < route_points.size; i++) {
     fprintf(html, "#  %f %f -> graph node %" PRId64 "\n", route_points.node[i].lon, route_points.node[i].lat, route_points.node[i].node_id);
   }
-  fprintf(html, "# distance: %d m\n", distance);
+  fprintf(html, "# route distance: %d m\n", distance);
+  fprintf(html, "# boundingbox: %f %f - %f %f\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
+  fprintf(html, "# graph number nodes: %d\n", number_nodes);
   fprintf(html, "</pre>\n");
   fprintf(html, "<div id='map' style='width:100%%; height:500px;'></div>\n");            /* Show map */
   fprintf(html, "<script>\n");
@@ -313,7 +313,7 @@ void route(
   if( fclose(html)!=0 ) abort_msg("Error closing file\n");
   /* Cleanup */
   free(filename);
-  nodelist_free(&xpath);
+  nodelist_free(&path);
   nodelist_free(&path2);
   nodelist_free(&route_points);
   destroyGraph(graph);
