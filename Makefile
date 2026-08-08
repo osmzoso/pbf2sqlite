@@ -19,7 +19,7 @@ DOC_CSS = ./doc/custom.css
 #
 .PHONY: all static install doc clean test debug doc2 amalgamation
 all: bldir compile
-static: clean bldir compile_static compile_static_win64 check_static_binaries renderdoc
+static: clean bldir compile_static compile_static_win64 check_static_binaries render_doc
 install:
 	install -m755 $(BUILD_DIR)$(TARGET) /usr/bin
 doc: bldir render_doc
