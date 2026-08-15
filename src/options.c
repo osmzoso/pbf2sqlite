@@ -15,9 +15,9 @@ void add_index(sqlite3 *db) {
     " CREATE INDEX relation_tags__relation_id    ON relation_tags (relation_id);"
     " CREATE INDEX relation_tags__key            ON relation_tags (key);",
     NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
   rc = sqlite3_exec(db, "ANALYZE", NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
 }
 
 void add_rtree(sqlite3 *db) {
@@ -25,7 +25,7 @@ void add_rtree(sqlite3 *db) {
   #include "opt_rtree.sql"
   ;
   rc = sqlite3_exec(db, sql, NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
 }
 
 void add_addr(sqlite3 *db) {
@@ -33,7 +33,7 @@ void add_addr(sqlite3 *db) {
   #include "opt_addr.sql"
   ;
   rc = sqlite3_exec(db, sql, NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
 }
 
 void fill_graph_permit(sqlite3 *db) {
@@ -43,16 +43,16 @@ void fill_graph_permit(sqlite3 *db) {
   rc = sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, NULL);
   /* prepare statements */
   rc = sqlite3_prepare_v2(db, "SELECT DISTINCT way_id FROM graph_edges", -1, &stmt, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
   rc = sqlite3_prepare_v2(db,
     " SELECT gp.set_bit,gp.clear_bit"
     " FROM way_tags AS wt"
     " JOIN graph_permit AS gp ON wt.key=gp.key AND wt.value=gp.value"
     " WHERE wt.way_id=?",
      -1, &stmt_mask, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
   rc = sqlite3_prepare_v2(db, "UPDATE graph_edges SET permit=? WHERE way_id=?", -1, &stmt_update, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
   /* get the ways */
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
     way_id = (int64_t)sqlite3_column_int64(stmt, 0);
@@ -74,7 +74,7 @@ void fill_graph_permit(sqlite3 *db) {
     sqlite3_bind_int(stmt_update, 1, permit);
     sqlite3_bind_int64(stmt_update, 2, way_id);
     rc = sqlite3_step(stmt_update);
-    if( rc!=SQLITE_DONE ) abort_db_error(db, rc);
+    if( rc!=SQLITE_DONE ) handle_db_error(db, rc);
     sqlite3_reset(stmt_update);
     sqlite3_clear_bindings(stmt_update);
   }
@@ -91,7 +91,7 @@ void create_table_graph_permit(sqlite3 *db) {
     " SELECT name FROM sqlite_master"
     " WHERE type='table' AND name='graph_permit'",
     -1, &stmt_check, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
   if( sqlite3_step(stmt_check)==SQLITE_ROW ) {
         sqlite3_finalize(stmt_check);
         return;
@@ -102,7 +102,7 @@ void create_table_graph_permit(sqlite3 *db) {
   #include "opt_graph_permit.sql"
   ;
   rc = sqlite3_exec(db, sql, NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
 }
 
 void add_graph(sqlite3 *db) {
@@ -119,7 +119,7 @@ void add_graph(sqlite3 *db) {
     "  permit        INTEGER DEFAULT 15    -- bit field access\n"
     " )\n",
     NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
   /* Create a table with all nodes that are crossing points */
   rc = sqlite3_exec(
     db,
@@ -136,7 +136,7 @@ void add_graph(sqlite3 *db) {
     " )"
     " GROUP BY node_id HAVING count(*)>1;",
     NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
   /* */
   double prev_lon = 0;
   double prev_lat = 0;
@@ -152,7 +152,7 @@ void add_graph(sqlite3 *db) {
     db,
     "INSERT INTO graph_edges (start_node_id,end_node_id,dist,way_id,nodes) VALUES (?1,?2,?3,?4,?5)",
     -1, &stmt_insert_graph, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
 
   sqlite3_stmt *stmt = NULL;
   rc = sqlite3_prepare_v2(
@@ -168,7 +168,7 @@ void add_graph(sqlite3 *db) {
     " WHERE wt.key='highway'"
     " ORDER BY wn.way_id,wn.node_order",
     -1, &stmt, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
 
   int64_t way_id;
   int64_t node_id;
@@ -192,7 +192,7 @@ void add_graph(sqlite3 *db) {
       if( rc==SQLITE_DONE ) {
         sqlite3_reset(stmt_insert_graph);
       } else {
-        abort_db_error(db, rc);
+        handle_db_error(db, rc);
       }
       edge_active = 0;
     }
@@ -216,7 +216,7 @@ void add_graph(sqlite3 *db) {
         if( rc==SQLITE_DONE ) {
           sqlite3_reset(stmt_insert_graph);
         } else {
-          abort_db_error(db, rc);
+          handle_db_error(db, rc);
         }
         edge_active = 0;
       }
@@ -240,12 +240,12 @@ void add_graph(sqlite3 *db) {
     if( rc==SQLITE_DONE ) {
       sqlite3_reset(stmt_insert_graph);
     } else {
-      abort_db_error(db, rc);
+      handle_db_error(db, rc);
     }
   }
   sqlite3_finalize(stmt_insert_graph);
   rc = sqlite3_exec(db, "CREATE INDEX graph_edges__way_id ON graph_edges (way_id)", NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
   rc = sqlite3_exec(db,
     " CREATE TABLE graph_vertices (\n"
     "  vertex_id INTEGER PRIMARY KEY,  -- vertex ID\n"
@@ -261,11 +261,11 @@ void add_graph(sqlite3 *db) {
     " )"
     " GROUP BY node_id;",
      NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
   rc = sqlite3_exec(db, "CREATE INDEX graph_vertices__node_id ON graph_vertices (node_id)", NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
   rc = sqlite3_exec(db, "COMMIT TRANSACTION", NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
   create_table_graph_permit(db);
   fill_graph_permit(db);
 }

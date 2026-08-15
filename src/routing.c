@@ -170,7 +170,7 @@ void route(
     " FROM subgraph AS s"
     " LEFT JOIN subgraph_nodes AS sns ON s.start_node_id=sns.node_id"
     " LEFT JOIN subgraph_nodes AS sne ON s.end_node_id=sne.node_id", -1, &stmt, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
   while( sqlite3_step(stmt)==SQLITE_ROW ){
     addEdge(graph, sqlite3_column_int64(stmt, 0),
                    sqlite3_column_int64(stmt, 1),
@@ -190,10 +190,10 @@ void route(
     "  edge_id  INTEGER"
     " );",
      NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
   rc = sqlite3_prepare_v2(db, "INSERT INTO path_edges (section, sequence, edge_id) VALUES (?1,?2,?3)",
          -1, &stmt_insert_path_edges, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
   for (i = 0; i < route_points.size-1; i++) {
 #ifdef DEBUG
     printf("dijkstra: %8" PRId64 " -> %8" PRId64 "         (node_id: %15" PRId64 " -> %15" PRId64 ")\n",
@@ -214,7 +214,7 @@ void route(
       if( rc==SQLITE_DONE ) {
         sqlite3_reset(stmt_insert_path_edges);
       } else {
-        abort_db_error(db, rc);
+        handle_db_error(db, rc);
       }
       sequence++;
       /* get previous node of the shortest way */
@@ -230,7 +230,7 @@ void route(
     " FROM path_edges AS pe"
     " LEFT JOIN graph_edges AS ge ON pe.edge_id=ge.edge_id"
     " ORDER BY pe.section,pe.sequence DESC", -1, &stmt, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
 #ifdef DEBUG
   printf("first_node_id: %" PRId64 "\n", first_node_id);
   printf(" section | sequence |     edge_id     |      way_id     |  start_node_id  |   end_node_id   |   dist  \n"

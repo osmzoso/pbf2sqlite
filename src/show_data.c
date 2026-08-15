@@ -57,7 +57,7 @@ void show_node(sqlite3 *db, const int64_t node_id) {
   /* Location */
   rc = sqlite3_prepare_v2(db,
     "SELECT lon,lat FROM nodes WHERE node_id=?", -1, &stmt, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
   sqlite3_bind_int64(stmt, 1, node_id);
   while( sqlite3_step(stmt)==SQLITE_ROW ){
     printf("node %" PRId64 " location %.7f %.7f\n", node_id,
@@ -68,7 +68,7 @@ void show_node(sqlite3 *db, const int64_t node_id) {
   /* Tags */
   rc = sqlite3_prepare_v2(db,
     "SELECT key,value FROM node_tags WHERE node_id=?", -1, &stmt, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
   sqlite3_bind_int64(stmt, 1, node_id);
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
     printf("node %" PRId64 " tag \"%s\":\"%s\"\n", node_id,
@@ -81,7 +81,7 @@ void show_node(sqlite3 *db, const int64_t node_id) {
     " SELECT relation_id,role"
     " FROM relation_members"
     " WHERE ref_id=? AND ref='node'", -1, &stmt, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
   sqlite3_bind_int64(stmt, 1, node_id);
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
     printf("node %" PRId64 " part_of_relation %15" PRId64 " %s\n", node_id,
@@ -96,7 +96,7 @@ void show_way(sqlite3 *db, const int64_t way_id) {
   /* Tags */
   rc = sqlite3_prepare_v2(db,
     "SELECT key,value FROM way_tags WHERE way_id=?", -1, &stmt, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
   sqlite3_bind_int64(stmt, 1, way_id);
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
     printf("way %" PRId64 " tag \"%s\":\"%s\"\n", way_id,
@@ -109,7 +109,7 @@ void show_way(sqlite3 *db, const int64_t way_id) {
     " SELECT relation_id,role"
     " FROM relation_members"
     " WHERE ref_id=? AND ref='way'", -1, &stmt, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
   sqlite3_bind_int64(stmt, 1, way_id);
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
     printf("way %" PRId64 " part_of_relation %15" PRId64 " %s\n", way_id,
@@ -124,7 +124,7 @@ void show_way(sqlite3 *db, const int64_t way_id) {
     " LEFT JOIN nodes AS n ON wn.node_id=n.node_id"
     " WHERE wn.way_id=?"
     " ORDER BY wn.node_order", -1, &stmt, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
   sqlite3_bind_int64(stmt, 1, way_id);
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
     printf("way %" PRId64 " node %15" PRId64 " %.7f %.7f\n", way_id,
@@ -140,7 +140,7 @@ void show_relation(sqlite3 *db, const int64_t relation_id) {
   /* Tags */
   rc = sqlite3_prepare_v2(db,
     "SELECT key,value FROM relation_tags WHERE relation_id=?", -1, &stmt, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
   sqlite3_bind_int64(stmt, 1, relation_id);
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
     printf("relation %" PRId64 " tag \"%s\":\"%s\"\n", relation_id,
@@ -153,7 +153,7 @@ void show_relation(sqlite3 *db, const int64_t relation_id) {
     " SELECT relation_id,role"
     " FROM relation_members"
     " WHERE ref_id=? AND ref='relation'", -1, &stmt, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
   sqlite3_bind_int64(stmt, 1, relation_id);
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
     printf("relation %" PRId64 " part_of_relation %15" PRId64 " %s\n", relation_id,
@@ -167,7 +167,7 @@ void show_relation(sqlite3 *db, const int64_t relation_id) {
     " FROM relation_members"
     " WHERE relation_id=?"
     " ORDER BY member_order", -1, &stmt, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
   sqlite3_bind_int64(stmt, 1, relation_id);
   while( sqlite3_step(stmt)==SQLITE_ROW ) {
     printf("relation %" PRId64 " member %s %15" PRId64 " %s\n", relation_id,
@@ -205,7 +205,7 @@ void html_map_addr(
     " ORDER BY postcode,street,abs(housenumber)";
   /* 1. Map Marker */
   rc = sqlite3_prepare_v2(db, query, -1, &stmt_addr, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
   sqlite3_bind_double(stmt_addr, 1, b.min_lon);
   sqlite3_bind_double(stmt_addr, 2, b.min_lat);
   sqlite3_bind_double(stmt_addr, 3, b.max_lon);
@@ -303,7 +303,7 @@ void write_graph(
   rc = sqlite3_prepare_v2(db,
     "SELECT node_id,lon,lat FROM subgraph_nodes",
      -1, &stmt_nodes, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
   while( sqlite3_step(stmt_nodes)==SQLITE_ROW ){
     node_id = (int64_t)sqlite3_column_int64(stmt_nodes, 0);
     lon = (double)sqlite3_column_double(stmt_nodes, 1);
@@ -318,7 +318,7 @@ void write_graph(
   rc = sqlite3_prepare_v2(db,
     "SELECT start_node_id,end_node_id,way_id,directed FROM subgraph",
      -1, &stmt_edges, NULL);
-  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
   while( sqlite3_step(stmt_edges)==SQLITE_ROW ){
     start_node_id = (int64_t)sqlite3_column_int64(stmt_edges, 0);
     end_node_id = (int64_t)sqlite3_column_int64(stmt_edges, 1);

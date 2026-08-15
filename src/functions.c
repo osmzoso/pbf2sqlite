@@ -36,9 +36,12 @@ double get_argv_double(char **argv, int i) {
 }
 
 /**
- * \brief Terminate the program, displays last SQLite error message
+ * \brief Handels DB errors
+ * Normally displays the last SQLite error message and than terminates the program immediately
+ * but SQLITE_CONSTRAINT error is silently ignored
  */
-void abort_db_error(sqlite3 *db, int rc) {
+void handle_db_error(sqlite3 *db, int rc) {
+  if( rc==SQLITE_CONSTRAINT ) return;
   fprintf(stderr, "pbf2sqlite - (%i) %s - %s\n", rc, sqlite3_errstr(rc), sqlite3_errmsg(db));
   sqlite3_close(db);
   exit(EXIT_FAILURE);
