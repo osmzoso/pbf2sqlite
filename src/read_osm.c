@@ -22,7 +22,10 @@ static int callback_node (const void *user_data, const readosm_node * node) {
   rc = sqlite3_step(stmt_insert_nodes);
   if( rc==SQLITE_DONE ) {
     sqlite3_reset(stmt_insert_nodes);
-  } else {
+  }else if( rc==SQLITE_CONSTRAINT ){
+    sqlite_error_constraint++;
+    sqlite3_reset(stmt_insert_nodes);
+  }else{
     handle_db_error(db, rc);
   }
 
@@ -149,34 +152,34 @@ int read_osm_file(sqlite3 *db, char *filename) {
   if( rc!=SQLITE_OK ) handle_db_error(db, rc);
   /* 2. Add tables */
   rc = sqlite3_exec(db,
-         " CREATE TABLE nodes (\n"
+         " CREATE TABLE IF NOT EXISTS nodes (\n"
          "  node_id      INTEGER PRIMARY KEY,  -- node ID\n"
          "  lon          REAL,                 -- longitude\n"
          "  lat          REAL                  -- latitude\n"
          " );\n"
-         " CREATE TABLE node_tags (\n"
+         " CREATE TABLE IF NOT EXISTS node_tags (\n"
          "  node_id      INTEGER,              -- node ID\n"
          "  key          TEXT,                 -- tag key\n"
          "  value        TEXT                  -- tag value\n"
          " );\n"
-         " CREATE TABLE way_nodes (\n"
+         " CREATE TABLE IF NOT EXISTS way_nodes (\n"
          "  way_id       INTEGER,              -- way ID\n"
          "  node_id      INTEGER,              -- node ID\n"
          "  node_order   INTEGER               -- node order\n"
          " );\n"
-         " CREATE TABLE way_tags (\n"
+         " CREATE TABLE IF NOT EXISTS way_tags (\n"
          "  way_id       INTEGER,              -- way ID\n"
          "  key          TEXT,                 -- tag key\n"
          "  value        TEXT                  -- tag value\n"
          " );\n"
-         " CREATE TABLE relation_members (\n"
+         " CREATE TABLE IF NOT EXISTS relation_members (\n"
          "  relation_id  INTEGER,              -- relation ID\n"
          "  ref          TEXT,                 -- reference ('node','way','relation')\n"
          "  ref_id       INTEGER,              -- node, way or relation ID\n"
          "  role         TEXT,                 -- describes a particular feature\n"
          "  member_order INTEGER               -- member order\n"
          " );\n"
-         " CREATE TABLE relation_tags (\n"
+         " CREATE TABLE IF NOT EXISTS relation_tags (\n"
          "  relation_id  INTEGER,              -- relation ID\n"
          "  key          TEXT,                 -- tag key\n"
          "  value        TEXT                  -- tag value\n"
@@ -216,6 +219,7 @@ int read_osm_file(sqlite3 *db, char *filename) {
     return EXIT_FAILURE;
   }
   /* 5. Parsing the OSM file */
+  sqlite_error_constraint = 0;
   ret = readosm_parse(osm_handle, (const void *) 0,
           callback_node, callback_way, callback_relation);
   if( ret!=READOSM_OK ) {
@@ -235,5 +239,7 @@ int read_osm_file(sqlite3 *db, char *filename) {
   sqlite3_finalize(stmt_insert_way_tags);
   sqlite3_finalize(stmt_insert_relation_members);
   sqlite3_finalize(stmt_insert_relation_tags);
+  /*  */
+  printf("%d SQLite constraint violations occurred\n", sqlite_error_constraint);
   return EXIT_SUCCESS;
 }

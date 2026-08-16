@@ -71,6 +71,7 @@ static char *help =
   "\n"
   "This is pbf2sqlite version " PBF2SQLITE_VERSION "\n"
   ;
+int sqlite_error_constraint;       /* Number of SQLite constraint errors */
 
 #include "functions.c"
 #include "nodelist.c"
