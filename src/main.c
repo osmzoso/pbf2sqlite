@@ -1,6 +1,6 @@
-/*
-** pbf2sqlite
-*/
+/**
+ * pbf2sqlite
+ */
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -34,11 +34,11 @@ typedef struct {
   double max_lat;
 } bbox;
 
-/*
-** Public variables
-*/
-sqlite3 *db;         /* SQLite Database connection */
-int rc;              /* SQLite Result code */
+/**
+ * Public variables
+ */
+sqlite3 *db;                       /* SQLite Database connection */
+int rc;                            /* SQLite Result code */
 sqlite3_stmt *stmt_insert_nodes, *stmt_insert_node_tags, *stmt_insert_way_nodes,
              *stmt_insert_way_tags, *stmt_insert_relation_members, *stmt_insert_relation_tags;
 static char *help =
@@ -83,9 +83,9 @@ static char *help =
 #include "show_data.c"
 #include "get_args.c"
 
-/*
-** Program start 
-*/
+/**
+ * Program start 
+ */
 int main(int argc, char **argv) {
   if( argc==1 ){
     printf("%s", help);

@@ -1,10 +1,10 @@
 # pbf2sqlite
 
-A simple command line tool for importing OpenStreetMap
+A simple command-line tool that imports
 [PBF](https://wiki.openstreetmap.org/wiki/PBF_Format)
 or
 [XML](https://wiki.openstreetmap.org/wiki/OSM_XML)
-files into a SQLite database.
+OpenStreetMap data into an SQLite database.
 
 ```
 Usage:

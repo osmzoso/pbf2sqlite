@@ -36,37 +36,41 @@ double get_argv_double(char **argv, int i) {
 }
 
 /**
- * \brief Handels DB errors
- * Normally displays the last SQLite error message and than terminates the program immediately
- * but SQLITE_CONSTRAINT error is silently ignored
+ * \brief Handels database errors
+ * Displays the last SQLite error message and then terminates the program
  */
 void handle_db_error(sqlite3 *db, int rc) {
-  if( rc==SQLITE_CONSTRAINT ) return;
   fprintf(stderr, "pbf2sqlite - (%i) %s - %s\n", rc, sqlite3_errstr(rc), sqlite3_errmsg(db));
   sqlite3_close(db);
   exit(EXIT_FAILURE);
 }
 
+/**
+ * \brief Terminates the program with a message
+ */
 void abort_msg(const char *msg) {
   fprintf(stderr, msg);
   exit(EXIT_FAILURE);
 }
 
-/*
-** Conversion degree to radians and vice versa
-*/
+/**
+ * \brief Conversion degree to radians
+ */
 double radians(double deg) {
   return deg * (M_PI / 180.0);
 }
 
+/**
+ * \brief Conversion radians to degrees
+ */
 double degrees(double rad) {
   return rad * (180.0 / M_PI);
 }
 
-/*
-** Calculates great circle distance between two coordinates in degrees
-** The result is in meters
-*/
+/**
+ * \brief Calculates great circle distance between two coordinates in degrees
+ * \return Distance in meters
+ */
 double distance(double lon1, double lat1, double lon2, double lat2) {
   /* Avoid a acos error if the two points are identical */
   if( lon1 == lon2 && lat1 == lat2 ) return 0;
@@ -79,22 +83,25 @@ double distance(double lon1, double lat1, double lon2, double lat2) {
   return dist;
 }
 
-/*
-** Converting WGS84 to Web Mercator
-*/
+/**
+ * \brief Converting WGS84 longitude to Web Mercator x
+ */
 double mercator_x(double lon) {
   const double r = 6378137.0;
   return r * radians(lon);
 }
 
+/**
+ * \brief Converting WGS84 latitude to Web Mercator y
+ */
 double mercator_y(double lat) {
   const double r = 6378137.0;
   return r * log(tan(M_PI / 4 + radians(lat) / 2));
 }
 
-/*
-** Register the functions in SQLite
-*/
+/**
+ * Register the functions in SQLite
+ */
 static void distance_func(sqlite3_context *context, int argc, sqlite3_value **argv) {
   if (argc == 4 && sqlite3_value_type(argv[0]) == SQLITE_FLOAT
                 && sqlite3_value_type(argv[1]) == SQLITE_FLOAT
