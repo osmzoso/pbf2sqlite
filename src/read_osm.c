@@ -23,10 +23,10 @@ static int callback_node (const void *user_data, const readosm_node * node) {
   if( rc==SQLITE_DONE ) {
     sqlite3_reset(stmt_insert_nodes);
   }else if( rc==SQLITE_CONSTRAINT ){
-    sqlite_error_constraint++;
+    nodes_constraint++;
     sqlite3_reset(stmt_insert_nodes);
   }else{
-    handle_db_error(db, rc);
+    abort_db_error(db, rc);
   }
 
   if( node->tag_count!=0 ) {
@@ -39,7 +39,7 @@ static int callback_node (const void *user_data, const readosm_node * node) {
       if( rc==SQLITE_DONE ) {
         sqlite3_reset(stmt_insert_node_tags);
       } else {
-        handle_db_error(db, rc);
+        abort_db_error(db, rc);
       }
     }
   }
@@ -62,7 +62,7 @@ static int callback_way (const void *user_data, const readosm_way * way) {
       if( rc==SQLITE_DONE ) {
         sqlite3_reset(stmt_insert_way_nodes);
       } else {
-        handle_db_error(db, rc);
+        abort_db_error(db, rc);
       }
     }
   }
@@ -77,7 +77,7 @@ static int callback_way (const void *user_data, const readosm_way * way) {
       if( rc==SQLITE_DONE ) {
         sqlite3_reset(stmt_insert_way_tags);
       } else {
-        handle_db_error(db, rc);
+        abort_db_error(db, rc);
       }
     }
   }
@@ -123,7 +123,7 @@ static int callback_relation (const void *user_data, const readosm_relation * re
       if( rc==SQLITE_DONE ) {
         sqlite3_reset(stmt_insert_relation_members);
       } else {
-        handle_db_error(db, rc);
+        abort_db_error(db, rc);
       }
     }
   }
@@ -137,7 +137,7 @@ static int callback_relation (const void *user_data, const readosm_relation * re
       if( rc==SQLITE_DONE ) {
         sqlite3_reset(stmt_insert_relation_tags);
       } else {
-        handle_db_error(db, rc);
+        abort_db_error(db, rc);
       }
     }
   }
@@ -149,7 +149,7 @@ int read_osm_file(sqlite3 *db, char *filename) {
   int ret;
   /* 1. Start transaction */
   rc = sqlite3_exec(db, "BEGIN TRANSACTION;", NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   /* 2. Add tables */
   rc = sqlite3_exec(db,
          " CREATE TABLE IF NOT EXISTS nodes (\n"
@@ -185,32 +185,32 @@ int read_osm_file(sqlite3 *db, char *filename) {
          "  value        TEXT                  -- tag value\n"
          " );\n",
          NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   /* 3. Create prepared statements */
   rc = sqlite3_prepare_v2(db,
          "INSERT INTO nodes (node_id,lat,lon) VALUES (?1,?2,?3)",
          -1, &stmt_insert_nodes, NULL);
-  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   rc = sqlite3_prepare_v2(db,
          "INSERT INTO node_tags (node_id,key,value) VALUES (?1,?2,?3)",
          -1, &stmt_insert_node_tags, NULL);
-  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   rc = sqlite3_prepare_v2(db,
          "INSERT INTO way_nodes (way_id,node_id,node_order) VALUES (?1,?2,?3)",
          -1, &stmt_insert_way_nodes, NULL);
-  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   rc = sqlite3_prepare_v2(db,
          "INSERT INTO way_tags (way_id,key,value) VALUES (?1,?2,?3)",
          -1, &stmt_insert_way_tags, NULL);
-  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   rc = sqlite3_prepare_v2(db,
          "INSERT INTO relation_members (relation_id,ref,ref_id,role,member_order) VALUES (?1,?2,?3,?4,?5)",
          -1, &stmt_insert_relation_members, NULL);
-  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   rc = sqlite3_prepare_v2(db,
          "INSERT INTO relation_tags (relation_id,key,value) VALUES (?1,?2,?3)",
          -1, &stmt_insert_relation_tags, NULL);
-  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   /* 4. Opening the OSM file */
   ret = readosm_open(filename, &osm_handle);
   if( ret!=READOSM_OK ) {
@@ -219,7 +219,7 @@ int read_osm_file(sqlite3 *db, char *filename) {
     return EXIT_FAILURE;
   }
   /* 5. Parsing the OSM file */
-  sqlite_error_constraint = 0;
+  nodes_constraint = 0;
   ret = readosm_parse(osm_handle, (const void *) 0,
           callback_node, callback_way, callback_relation);
   if( ret!=READOSM_OK ) {
@@ -231,7 +231,7 @@ int read_osm_file(sqlite3 *db, char *filename) {
   readosm_close(osm_handle);
   /* 7. End transaction */
   rc = sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   /* 8. Destroy prepared statements */
   sqlite3_finalize(stmt_insert_nodes);
   sqlite3_finalize(stmt_insert_node_tags);
@@ -240,6 +240,8 @@ int read_osm_file(sqlite3 *db, char *filename) {
   sqlite3_finalize(stmt_insert_relation_members);
   sqlite3_finalize(stmt_insert_relation_tags);
   /*  */
-  printf("%d SQLite constraint violations occurred\n", sqlite_error_constraint);
+  if( nodes_constraint>0 ){
+    fprintf(stderr, "%d duplicate nodes that could not be inserted\n", nodes_constraint);
+  }
   return EXIT_SUCCESS;
 }

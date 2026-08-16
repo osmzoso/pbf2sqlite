@@ -22,7 +22,7 @@ void slice_way_nodes(
     "                       WHERE way_id=?4 AND node_id=?5)"
     " ORDER BY wn.node_order",
      -1, &stmt_points, NULL);
-  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   sqlite3_bind_int64(stmt_points, 1, way_id);
   sqlite3_bind_int64(stmt_points, 2, way_id);
   sqlite3_bind_int64(stmt_points, 3, start_node_id);
@@ -50,7 +50,7 @@ void slice_way_nodes(
       "                       WHERE way_id=?4 AND node_id=?5)"
       " ORDER BY wn.node_order DESC  -- nodes in reverse order",
      -1, &stmt_points, NULL);
-    if( rc!=SQLITE_OK ) handle_db_error(db, rc);
+    if( rc!=SQLITE_OK ) abort_db_error(db, rc);
     sqlite3_bind_int64(stmt_points, 1, way_id);
     sqlite3_bind_int64(stmt_points, 2, way_id);
     sqlite3_bind_int64(stmt_points, 3, end_node_id);
@@ -82,7 +82,7 @@ int create_subgraph_tables(
   sqlite3_stmt *stmt_subgraph, *stmt_count;
   int number_of_nodes;
   rc = sqlite3_exec(db, "DROP TABLE IF EXISTS subgraph", NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   rc = sqlite3_prepare_v2(db,
     " CREATE TEMP TABLE subgraph AS"
     " SELECT edge_id,start_node_id,end_node_id,dist,way_id,"
@@ -99,7 +99,7 @@ int create_subgraph_tables(
     "                    AND max_lat>=?7 AND min_lat<=?8"
     "                 )",
      -1, &stmt_subgraph, NULL);
-  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   sqlite3_bind_int(stmt_subgraph, 1, mask_permit);
   sqlite3_bind_int(stmt_subgraph, 2, mask_permit);
   sqlite3_bind_int(stmt_subgraph, 3, mask_permit);
@@ -112,7 +112,7 @@ int create_subgraph_tables(
   if( rc==SQLITE_DONE ){
     sqlite3_reset(stmt_subgraph);
   }else{
-    handle_db_error(db, rc);
+    abort_db_error(db, rc);
   }
   sqlite3_finalize(stmt_subgraph);
   rc = sqlite3_exec(db,
@@ -132,12 +132,12 @@ int create_subgraph_tables(
     " ) AS s"
     " LEFT JOIN nodes AS n ON s.node_id=n.node_id;",
      NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   /* count nodes */
   number_of_nodes = 0;
   rc = sqlite3_prepare_v2(db,
     "SELECT max(no) FROM subgraph_nodes", -1, &stmt_count, NULL);
-  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   rc = sqlite3_step(stmt_count);
   if( rc==SQLITE_ROW ) number_of_nodes = sqlite3_column_int(stmt_count, 0);
   sqlite3_finalize(stmt_count);
@@ -158,7 +158,7 @@ int64_t subgraph_nearest_node(
   double graph_node_lon, graph_node_lat, dist;
   no = -1;
   rc = sqlite3_prepare_v2(db, "SELECT no,lon,lat FROM subgraph_nodes", -1, &stmt, NULL);
-  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   while( sqlite3_step(stmt)==SQLITE_ROW ){
     graph_node_no = sqlite3_column_int64(stmt, 0);
     graph_node_lon = sqlite3_column_double(stmt, 1);
@@ -183,7 +183,7 @@ int64_t subgraph_node_id(
   sqlite3_stmt *stmt;
   int64_t node_id = -1;
   rc = sqlite3_prepare_v2(db, "SELECT node_id FROM subgraph_nodes WHERE no=?", -1, &stmt, NULL);
-  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   sqlite3_bind_int64(stmt, 1, no);
   while( sqlite3_step(stmt)==SQLITE_ROW ){
     node_id = sqlite3_column_int64(stmt, 0);

@@ -36,10 +36,10 @@ double get_argv_double(char **argv, int i) {
 }
 
 /**
- * \brief Handels database errors
+ * \brief Terminates the program when a database error occurred
  * Displays the last SQLite error message and then terminates the program
  */
-void handle_db_error(sqlite3 *db, int rc) {
+void abort_db_error(sqlite3 *db, int rc) {
   fprintf(stderr, "pbf2sqlite - (%i) %s - %s\n", rc, sqlite3_errstr(rc), sqlite3_errmsg(db));
   sqlite3_close(db);
   exit(EXIT_FAILURE);

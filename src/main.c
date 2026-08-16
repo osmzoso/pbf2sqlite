@@ -18,7 +18,7 @@
 # define M_PI   3.141592653589793238462643383279502884
 #endif
 
-#define PBF2SQLITE_VERSION  "0.5.4 ALPHA"
+#define PBF2SQLITE_VERSION  "0.5.4 BETA"
 
 #define RED     "\033[31m"
 #define GREEN   "\033[32m"
@@ -71,7 +71,7 @@ static char *help =
   "\n"
   "This is pbf2sqlite version " PBF2SQLITE_VERSION "\n"
   ;
-int sqlite_error_constraint;       /* Number of SQLite constraint errors */
+int nodes_constraint;       /* Number of nodes that could not be inserted */
 
 #include "functions.c"
 #include "nodelist.c"
@@ -96,14 +96,14 @@ int main(int argc, char **argv) {
   }
   parse_args(db, argc, argv, 0);       /* Check args, no execution */
   rc = sqlite3_open(argv[1], &db);     /* Open database connection */
-  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   rc = sqlite3_exec(db,                /* Set PRAGMAs */
           " PRAGMA journal_mode = OFF;"
           " PRAGMA page_size = 65536;", NULL, NULL, NULL);
-  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   register_functions(db);              /* Register custom functions */
   parse_args(db, argc, argv, 1);       /* Execute args */
   rc = sqlite3_close(db);              /* Close database connection */
-  if( rc!=SQLITE_OK ) handle_db_error(db, rc);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   return EXIT_SUCCESS;
 }
