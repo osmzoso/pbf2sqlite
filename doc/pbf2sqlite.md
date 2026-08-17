@@ -319,9 +319,9 @@ Therefore, `<file>` is supplemented with the file extensions **.html**, **.csv**
 
 Examples:  
 ```
-pbf2sqlite germany.db route foot 11.5777 48.1427 11.5922 48.1524 11.5870 48.1623 ~/route_mchn_foot
-pbf2sqlite germany.db route bike 11.5777 48.1427 11.6031 48.1619 ~/route_mchn_bike
-pbf2sqlite germany.db route car 11.5777 48.1427 11.6031 48.1619 ~/route_mchn_car
+pbf2sqlite germany.db route foot 11.5777 48.1427 11.5922 48.1524 11.5870 48.1623 route_mchn_foot
+pbf2sqlite germany.db route bike 11.5777 48.1427 11.6031 48.1619 route_mchn_bike
+pbf2sqlite germany.db route car 11.5777 48.1427 11.6031 48.1619 route_mchn_car
 ```
 
 

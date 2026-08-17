@@ -41,6 +41,7 @@ sqlite3 *db;                       /* SQLite Database connection */
 int rc;                            /* SQLite Result code */
 sqlite3_stmt *stmt_insert_nodes, *stmt_insert_node_tags, *stmt_insert_way_nodes,
              *stmt_insert_way_tags, *stmt_insert_relation_members, *stmt_insert_relation_tags;
+int duplicate_nodes;               /* Number of nodes that could not be inserted */
 static char *help =
 #ifdef DEBUG
   RED "\n!!!!! Warning: This is a DEBUG build. "__DATE__" "__TIME__" !!!!!\n" RESET
@@ -71,7 +72,6 @@ static char *help =
   "\n"
   "This is pbf2sqlite version " PBF2SQLITE_VERSION "\n"
   ;
-int nodes_constraint;       /* Number of nodes that could not be inserted */
 
 #include "functions.c"
 #include "nodelist.c"
