@@ -199,7 +199,7 @@ void html_map_addr(
   fprintf(html, "<script>\n");
   leaflet_init(html, "map", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
   const char *query = 
-    " SELECT way_id,node_id,postcode,city,street,housenumber,lon,lat"
+    " SELECT way_id,node_id,country,postcode,city,street,housenumber,lon,lat"
     " FROM addr_view"
     " WHERE lon>=?1 AND lat>=?2 AND lon<=?3 AND lat<=?4"
     " ORDER BY postcode,street,abs(housenumber)";
@@ -213,6 +213,7 @@ void html_map_addr(
   while( sqlite3_step(stmt_addr)==SQLITE_ROW ){
     snprintf(popup_text, sizeof(popup_text),
         "<pre>"
+        "addr:country     : %s<br>"
         "addr:postcode    : %s<br>"
         "addr:city        : %s<br>"
         "addr:street      : %s<br>"
@@ -221,11 +222,12 @@ void html_map_addr(
         (char *)sqlite3_column_text(stmt_addr, 2),
         (char *)sqlite3_column_text(stmt_addr, 3),
         (char *)sqlite3_column_text(stmt_addr, 4),
-        (char *)sqlite3_column_text(stmt_addr, 5)
+        (char *)sqlite3_column_text(stmt_addr, 5),
+        (char *)sqlite3_column_text(stmt_addr, 6)
     );
     leaflet_marker(html, "map",
-        (double)sqlite3_column_double(stmt_addr, 6),
         (double)sqlite3_column_double(stmt_addr, 7),
+        (double)sqlite3_column_double(stmt_addr, 8),
         popup_text);
   }
   /* show boundingbox */
@@ -235,7 +237,7 @@ void html_map_addr(
   /* 2. Table of addresses */
   fprintf(html,
       "<table border=1>\n"
-      "<tr><th>way_id</th><th>node_id</th><th>addr:postcode</th><th>addr:city</th>"
+      "<tr><th>way_id</th><th>node_id</th><th>addr:country</th><th>addr:postcode</th><th>addr:city</th>"
       "<th>addr:street</th><th>addr:housenumber</th><th>lon</th><th>lat</th></tr>\n"
   );
   sqlite3_reset(stmt_addr);
@@ -261,14 +263,15 @@ void html_map_addr(
       fprintf(html, "<td>%" PRId64 "</td>", node_id);
     }
     fprintf(html,
-        "<td>%s</td><td>%s</td><td>%s</td><td>%s</td>"
+        "<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>"
         "<td>%.7f</td><td>%.7f</td></tr>\n",
         (char *)sqlite3_column_text(stmt_addr, 2),
         (char *)sqlite3_column_text(stmt_addr, 3),
         (char *)sqlite3_column_text(stmt_addr, 4),
         (char *)sqlite3_column_text(stmt_addr, 5),
-        (double)sqlite3_column_double(stmt_addr, 6),
-        (double)sqlite3_column_double(stmt_addr, 7)
+        (char *)sqlite3_column_text(stmt_addr, 6),
+        (double)sqlite3_column_double(stmt_addr, 7),
+        (double)sqlite3_column_double(stmt_addr, 8)
     );
   }
   fprintf(html,

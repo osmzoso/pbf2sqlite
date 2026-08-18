@@ -138,6 +138,7 @@ This option creates two tables with address data:
 column       | type                | description
 -------------|---------------------|-------------------------------------
 street_id    | INTEGER PRIMARY KEY | street ID
+country      | TEXT                | country
 postcode     | TEXT                | postcode
 city         | TEXT                | city
 street       | TEXT                | street
@@ -146,11 +147,11 @@ min_lat      | REAL                | boundingbox min. latitude
 max_lon      | REAL                | boundingbox max. longitude
 max_lat      | REAL                | boundingbox max. latitude
 
-Index **addr_street_1** on columns (postcode,city,street)
+Index **addr_street__country_postcode_city_street** on columns (country,postcode,city,street)
 
 #### Table "addr_housenumber"
-column       | type                | description
--------------|---------------------|-------------------------------------
+column         | type                | description
+---------------|---------------------|-------------------------------------
 housenumber_id | INTEGER PRIMARY KEY | housenumber ID
 street_id      | INTEGER             | street ID
 housenumber    | TEXT                | housenumber
@@ -159,7 +160,7 @@ lat            | REAL                | latitude
 way_id         | INTEGER             | way ID
 node_id        | INTEGER             | node ID
 
-Index **addr_housenumber_1** on column (street_id)
+Index **addr_housenumber__street_id** on column (street_id)
 
 The view **addr_view** joins these two tables.
 
