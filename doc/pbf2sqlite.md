@@ -147,7 +147,7 @@ min_lat      | REAL                | boundingbox min. latitude
 max_lon      | REAL                | boundingbox max. longitude
 max_lat      | REAL                | boundingbox max. latitude
 
-Index **addr_street__country_postcode_city_street** on columns (country,postcode,city,street)
+Index **addr_street\_\_country_postcode_city_street** on columns (country,postcode,city,street)
 
 #### Table "addr_housenumber"
 column         | type                | description
@@ -160,7 +160,7 @@ lat            | REAL                | latitude
 way_id         | INTEGER             | way ID
 node_id        | INTEGER             | node ID
 
-Index **addr_housenumber__street_id** on column (street_id)
+Index **addr_housenumber\_\_street_id** on column (street_id)
 
 The view **addr_view** joins these two tables.
 
