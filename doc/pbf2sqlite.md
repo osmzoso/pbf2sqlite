@@ -1,6 +1,11 @@
 # 1. pbf2sqlite
 
-A simple command line tool for reading OpenStreetMap data into a SQLite database.  
+A simple command-line tool that imports
+[PBF](https://wiki.openstreetmap.org/wiki/PBF_Format)
+or
+[XML](https://wiki.openstreetmap.org/wiki/OSM_XML)
+OpenStreetMap data into an SQLite database.
+
 OSM data can be obtained from a provider such as [Geofabrik](https://download.geofabrik.de).  
 
 Simple example:  
@@ -14,7 +19,7 @@ The created database can be easily queried using the [SQLite CLI tool](https://w
 
 # 2. Main options
 
-The order of the options is important. All options are executed in the order given.
+The **order of the options** is important. All options are executed in the order given.
 
 ## 2.1. Option "read"
 
