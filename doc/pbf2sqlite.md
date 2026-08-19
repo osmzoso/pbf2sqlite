@@ -18,10 +18,9 @@ The order of the options is important. All options are executed in the order giv
 
 ## 2.1. Option "read"
 
-This option first creates six tables, then reads OpenStreetMap data
-([PBF](https://wiki.openstreetmap.org/wiki/PBF_Format)
-or
-[XML](https://wiki.openstreetmap.org/wiki/OSM_XML)) and fills these tables.
+This option first creates six tables, provided they do not already exist.  
+Then, the OSM data ([PBF](https://wiki.openstreetmap.org/wiki/PBF_Format) or
+[XML](https://wiki.openstreetmap.org/wiki/OSM_XML)) is imported.
 
 #### Table "nodes"
 column       | type                | description
@@ -132,7 +131,7 @@ WHERE way_id=4872512;
 
 ## 2.4. Option "addr"
 
-This option creates two tables with address data:  
+This option creates two tables with the address data:  
 
 #### Table "addr_street"
 column       | type                | description
@@ -147,12 +146,9 @@ min_lat      | REAL                | boundingbox min. latitude
 max_lon      | REAL                | boundingbox max. longitude
 max_lat      | REAL                | boundingbox max. latitude
 
-Index **addr_street\_\_country_postcode_city_street** on columns (country,postcode,city,street)
-
 #### Table "addr_housenumber"
 column         | type                | description
 ---------------|---------------------|-------------------------------------
-housenumber_id | INTEGER PRIMARY KEY | housenumber ID
 street_id      | INTEGER             | street ID
 housenumber    | TEXT                | housenumber
 lon            | REAL                | longitude
