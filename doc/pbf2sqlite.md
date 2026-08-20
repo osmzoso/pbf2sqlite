@@ -136,7 +136,10 @@ WHERE way_id=4872512;
 
 ## 2.4. Option "addr"
 
-This option creates two tables with the address data:  
+This option creates two tables with the address data.  
+
+Only addr tags from the **node_tags** and **way_tags** tables are taken into account.  
+There are also a few addr tags in the **relation_tags** table; these are not considered.  
 
 #### Table "addr_street"
 column       | type                | description
