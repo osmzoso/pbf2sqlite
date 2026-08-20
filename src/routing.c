@@ -288,7 +288,7 @@ void route(
   html = fopen(filename, "w");
   if( html==NULL ) abort_msg("Error opening file");
   leaflet_html_header(html, "map route");
-  fprintf(html, "<h3>Route</h3>\n<pre>\n");
+  fprintf(html, "<h1>Route</h1>\n<pre>\n");
   fprintf(html, "# permit: %s -> mask_permit: %d\n", argv[3], mask_permit);
   for (i = 0; i < route_points.size; i++) {
     fprintf(html, "# %d.  %f %f -> OSM Node %" PRId64 "\n",

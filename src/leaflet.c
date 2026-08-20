@@ -9,7 +9,7 @@
 void leaflet_html_header(FILE *html, const char *title) {
   fprintf(html,
     "<!DOCTYPE html>\n"
-    "<html>\n"
+    "<html lang=\"en\">\n"
     "<head>\n"
     "  <title>%s</title>\n"
     "  <meta charset=\"utf-8\" />\n"

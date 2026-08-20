@@ -194,7 +194,7 @@ void html_map_addr(
   if( html==NULL ) abort_msg("Error opening file");
   leaflet_html_header(html, "map addr");
   fprintf(html,
-    "<h3>Map 1 - Address</h3>\n"
+    "<h1>Map 1 - Address</h1>\n"
     "<div id='map' style='width:100%%; height:500px;'></div>\n");
   fprintf(html, "<script>\n");
   leaflet_init(html, "map", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
@@ -360,13 +360,13 @@ void html_map_graph(
   if( html==NULL ) abort_msg("Error opening file");
   leaflet_html_header(html, "map graph");
   fprintf(html,
-    "<h3>Map 1 - Graph complete</h3>\n"
+    "<h1>Map 1 - Graph complete</h1>\n"
     "<div id='map1' style='width:100%%; height:500px;'></div>\n"
-    "<h3>Map 2 - Graph foot</h3>\n"
+    "<h1>Map 2 - Graph foot</h1>\n"
     "<div id='map2' style='width:100%%; height:500px;'></div>\n"
-    "<h3>Map 3 - Graph bike</h3>\n"
+    "<h1>Map 3 - Graph bike</h1>\n"
     "<div id='map3' style='width:100%%; height:500px;'></div>\n"
-    "<h3>Map 4 - Graph car</h3>\n"
+    "<h1>Map 4 - Graph car</h1>\n"
     "<div id='map4' style='width:100%%; height:500px;'></div>\n");
   fprintf(html, "<script>\n");
   leaflet_init(html, "map1", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
