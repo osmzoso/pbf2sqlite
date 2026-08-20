@@ -47,7 +47,7 @@ static char *help =
   RED "\n!!!!! Warning: This is a DEBUG build. "__DATE__" "__TIME__" !!!!!\n" RESET
 #endif
   "\n"
-  "Imports OpenStreetMap data into an SQLite database.\n"
+  "Imports PBF or XML OpenStreetMap data into an SQLite database.\n"
   "\n"
   "Usage:\npbf2sqlite <database> [OPTION ...]\n"
   "\n"

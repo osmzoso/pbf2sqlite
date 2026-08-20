@@ -1,13 +1,14 @@
 #
+# Makefile pbf2sqlite
 #
-#
+# C compiler, compiler flags, linker flags
 CC = gcc
-CFLAGS = -Wall -std=c99
-LDFLAGS =
+CFLAGS += -Wall -std=c99
+LDFLAGS +=
 
 # build directory, binary name
 BUILD_DIR = ./build/
-TARGET = pbf2sqlite
+BIN = pbf2sqlite
 
 # source files, doc
 SRC = ./src/main.c
@@ -21,7 +22,7 @@ DOC_CSS = ./doc/custom.css
 all: bldir compile
 static: clean bldir compile_static compile_static_win64 check_static_binaries render_doc
 install:
-	install -m755 $(BUILD_DIR)$(TARGET) /usr/bin
+	install -m755 $(BUILD_DIR)$(BIN) /usr/bin
 doc: bldir render_doc
 clean:
 	rm -rf $(BUILD_DIR)
@@ -39,15 +40,15 @@ bldir:
 
 .PHONY: compile
 compile:
-	$(CC) $(CFLAGS) -O2 -s $(SRC) -lsqlite3 -lreadosm -lm -o $(BUILD_DIR)$(TARGET)
+	$(CC) $(CFLAGS) -O2 -s $(SRC) $(LDFLAGS) -lsqlite3 -lreadosm -lm -o $(BUILD_DIR)$(BIN)
 
 .PHONY: compile_debug
 compile_debug:
-	$(CC) $(CFLAGS) -O0 -g $(SRC) -lsqlite3 -lreadosm -lm -o $(BUILD_DIR)$(TARGET) -DDEBUG
+	$(CC) $(CFLAGS) -O0 -g $(SRC) $(LDFLAGS) -lsqlite3 -lreadosm -lm -o $(BUILD_DIR)$(BIN) -DDEBUG
 
 .PHONY: compile_asan
 compile_asan:
-	$(CC) $(CFLAGS) -O0 -g $(SRC) -fsanitize=address -lasan -lsqlite3 -lreadosm -lm -o $(BUILD_DIR)$(TARGET) -DDEBUG
+	$(CC) $(CFLAGS) -O0 -g $(SRC) $(LDFLAGS) -fsanitize=address -lasan -lsqlite3 -lreadosm -lm -o $(BUILD_DIR)$(BIN) -DDEBUG
 
 .PHONY: compile_static
 compile_static:
@@ -56,13 +57,13 @@ compile_static:
      -DSQLITE_OMIT_LOAD_EXTENSION \
      -DSQLITE_ENABLE_RTREE \
      -DSQLITE_ENABLE_MATH_FUNCTIONS \
-     $(SRC) \
+     $(SRC) $(LDFLAGS) \
      ./src/sqlite3/sqlite3.c \
      ./src/readosm/osm_objects.c \
      ./src/readosm/osmxml.c \
      ./src/readosm/protobuf.c \
      ./src/readosm/readosm.c \
-     -o $(BUILD_DIR)$(TARGET) \
+     -o $(BUILD_DIR)$(BIN) \
      -I. -I./src/sqlite3 -I./src/readosm \
      -lexpat -lz -lm -lgcc
 
@@ -74,13 +75,13 @@ compile_static_win64:
      -DSQLITE_ENABLE_RTREE \
      -DSQLITE_ENABLE_MATH_FUNCTIONS \
      -D_FORTIFY_SOURCE=2 \
-     $(SRC) \
+     $(SRC) $(LDFLAGS) \
      ./src/sqlite3/sqlite3.c \
      ./src/readosm/osm_objects.c \
      ./src/readosm/osmxml.c \
      ./src/readosm/protobuf.c \
      ./src/readosm/readosm.c \
-     -o $(BUILD_DIR)$(TARGET).exe \
+     -o $(BUILD_DIR)$(BIN).exe \
      -I. -I./src/sqlite3 -I./src/readosm \
      -I/usr/x86_64-w64-mingw32/sys-root/mingw/include \
      -L/usr/x86_64-w64-mingw32/sys-root/mingw/lib \
@@ -101,21 +102,21 @@ render_doc:
      $(DOC_SRC) \
      --pdf-engine=xelatex \
      --toc \
-     -o $(BUILD_DIR)$(TARGET).pdf
+     -o $(BUILD_DIR)$(BIN).pdf
 	pandoc \
      --standalone \
      --embed-resources \
-     --metadata title="$(TARGET)" \
+     --metadata title="$(BIN)" \
      --toc \
      --css=$(DOC_CSS) \
      $(DOC_SRC) \
-     -o $(BUILD_DIR)$(TARGET).html
-	rm -f $(BUILD_DIR)$(TARGET).1.gz
+     -o $(BUILD_DIR)$(BIN).html
+	rm -f $(BUILD_DIR)$(BIN).1.gz
 	pandoc \
      -s -f markdown -t man \
      $(DOC_SRC) \
-     -o $(BUILD_DIR)$(TARGET).1
-	gzip $(BUILD_DIR)$(TARGET).1
+     -o $(BUILD_DIR)$(BIN).1
+	gzip $(BUILD_DIR)$(BIN).1
 
 .PHONY: render_doc_src
 render_doc_src:
@@ -124,5 +125,5 @@ render_doc_src:
 
 .PHONY: single_src
 single_src:
-	$(CC) -E $(SRC) | grep -v '^#' > $(BUILD_DIR)$(TARGET).c
+	$(CC) -E $(SRC) | grep -v '^#' > $(BUILD_DIR)$(BIN).c
 
