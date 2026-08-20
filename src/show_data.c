@@ -37,7 +37,7 @@ void sql_read_stdin(sqlite3 *db){
       if (!new_sql) {
         free(sql);
         sqlite3_close(db);
-        abort_msg("Out of memory\n");
+        abort_msg("Out of memory");
       }
       sql = new_sql;
       memcpy(sql + sql_size, buffer, len);
@@ -191,7 +191,7 @@ void html_map_addr(
   char popup_text[1000];
   int64_t way_id, node_id;
   html = fopen(html_file, "w");
-  if( html==NULL ) abort_msg("Error opening file\n");
+  if( html==NULL ) abort_msg("Error opening file");
   leaflet_html_header(html, "map addr");
   fprintf(html,
     "<h3>Map 1 - Address</h3>\n"
@@ -280,7 +280,7 @@ void html_map_addr(
       "<p>Boundingbox: %f %f - %f %f</p>\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
   leaflet_html_footer(html);
   /* Close the file */
-  if( fclose(html)!=0 ) abort_msg("Error closing file\n");
+  if( fclose(html)!=0 ) abort_msg("Error closing file");
   sqlite3_finalize(stmt_addr);
 }
 
@@ -357,7 +357,7 @@ void html_map_graph(
 ){
   FILE *html;
   html = fopen(html_file, "w");
-  if( html==NULL ) abort_msg("Error opening file\n");
+  if( html==NULL ) abort_msg("Error opening file");
   leaflet_html_header(html, "map graph");
   fprintf(html,
     "<h3>Map 1 - Graph complete</h3>\n"
@@ -383,5 +383,5 @@ void html_map_graph(
       "<hr>\n"
       "<p>Boundingbox: %f %f - %f %f</p>\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
   leaflet_html_footer(html);
-  if( fclose(html)!=0 ) abort_msg("Error closing file\n");
+  if( fclose(html)!=0 ) abort_msg("Error closing file");
 }

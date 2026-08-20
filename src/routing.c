@@ -33,16 +33,16 @@ void write_file_csv(
   FILE *csv;
   char *ext = ".csv";
   char *filename = malloc(strlen(name) + strlen(ext) + 1);
-  if (!filename) abort_msg("Out of memory\n");
+  if (!filename) abort_msg("Out of memory");
   strcpy(filename, name);
   strcat(filename, ext);
   csv = fopen(filename, "w");
-  if( csv==NULL ) abort_msg("Error opening file\n");
+  if( csv==NULL ) abort_msg("Error opening file");
   fprintf(csv, "lon,lat,ele,node_id\r\n");
   for(i=0; i<list->size; i++){
     fprintf(csv, "%.7f,%.7f,0,%" PRId64 "\r\n", list->node[i].lon, list->node[i].lat, list->node[i].node_id);
   }
-  if( fclose(csv)!=0 ) abort_msg("Error closing file\n");
+  if( fclose(csv)!=0 ) abort_msg("Error closing file");
   free(filename);
 }
 
@@ -59,11 +59,11 @@ void write_file_gpx(
   FILE *gpx;
   char *ext = ".gpx";
   char *filename = malloc(strlen(name) + strlen(ext) + 1);
-  if (!filename) abort_msg("Out of memory\n");
+  if (!filename) abort_msg("Out of memory");
   strcpy(filename, name);
   strcat(filename, ext);
   gpx = fopen(filename, "w");
-  if( gpx==NULL ) abort_msg("Error opening file\n");
+  if( gpx==NULL ) abort_msg("Error opening file");
   fprintf(gpx,
     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n"
     "<gpx version=\"1.1\" xmlns=\"http://www.topografix.com/GPX/1/1\" creator=\"pbf2sqlite\">\n"
@@ -83,7 +83,7 @@ void write_file_gpx(
     "  </trk>\n"
     "</gpx>"
   );
-  if( fclose(gpx)!=0 ) abort_msg("Error closing file\n");
+  if( fclose(gpx)!=0 ) abort_msg("Error closing file");
   free(filename);
 }
 
@@ -136,7 +136,7 @@ void route(
   char buffer[30];                             /* Buffer */
   char *filename;                              /* File name HTML file */
   /* Number of parameters must be even */
-  if( argc % 2 == 0 ) abort_msg("Option route: Incorrect number of parameters\n");
+  if( argc % 2 == 0 ) abort_msg("Option route: Incorrect number of parameters");
   /* Get permit mask, coordinates of all route points and filename without extension */
   mask_permit = permit_mask(argv[3]);
   nodelist_init(&route_points);
@@ -160,7 +160,7 @@ void route(
   /* For all route points get nearest node in the subgraph */
   for (i = 0; i < route_points.size; i++) {
     no = subgraph_nearest_node(db, route_points.node[i].lon, route_points.node[i].lat);
-    if( no == -1 ) abort_msg("Option route: Coordinates out of range\n");
+    if( no == -1 ) abort_msg("Option route: Coordinates out of range");
     route_points.node[i].node_id = no;  /* Attention: Inserts Node ID subgraph, not OSM Node ID */
   }
   /* Fill adjacency list */
@@ -282,11 +282,11 @@ void route(
   write_file_gpx(name, &path2);
   /* Create HTML file */
   filename = malloc(strlen(argv[argc-1]) + strlen(ext) + 1);
-  if (!filename) abort_msg("Out of memory\n");
+  if (!filename) abort_msg("Out of memory");
   strcpy(filename, argv[argc-1]);
   strcat(filename, ext);
   html = fopen(filename, "w");
-  if( html==NULL ) abort_msg("Error opening file\n");
+  if( html==NULL ) abort_msg("Error opening file");
   leaflet_html_header(html, "map route");
   fprintf(html, "<h3>Route</h3>\n<pre>\n");
   fprintf(html, "# permit: %s -> mask_permit: %d\n", argv[3], mask_permit);
@@ -312,7 +312,7 @@ void route(
   leaflet_polyline(html, "map", &path2, "Shortest way");
   fprintf(html, "</script>\n");
   leaflet_html_footer(html);
-  if( fclose(html)!=0 ) abort_msg("Error closing file\n");
+  if( fclose(html)!=0 ) abort_msg("Error closing file");
   /* Cleanup */
   free(filename);
   nodelist_free(&path);

@@ -46,10 +46,10 @@ void abort_db_error(sqlite3 *db, int rc) {
 }
 
 /**
- * \brief Terminates the program with a message
+ * \brief Displays a message and then terminates the program
  */
 void abort_msg(const char *msg) {
-  fprintf(stderr, msg);
+  fprintf(stderr, "%s\n", msg);
   exit(EXIT_FAILURE);
 }
 
