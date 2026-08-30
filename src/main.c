@@ -18,7 +18,7 @@
 # define M_PI   3.141592653589793238462643383279502884
 #endif
 
-#define PBF2SQLITE_VERSION  "0.5.4"
+#define PBF2SQLITE_VERSION  "0.5.5 ALPHA"
 
 #define RED     "\033[31m"
 #define GREEN   "\033[32m"
@@ -43,9 +43,6 @@ sqlite3_stmt *stmt_insert_nodes, *stmt_insert_node_tags, *stmt_insert_way_nodes,
              *stmt_insert_way_tags, *stmt_insert_relation_members, *stmt_insert_relation_tags;
 int duplicate_nodes;               /* Number of nodes that could not be inserted */
 static char *help =
-#ifdef DEBUG
-  RED "\n!!!!! Warning: This is a DEBUG build. "__DATE__" "__TIME__" !!!!!\n" RESET
-#endif
   "\n"
   "Imports PBF or XML OpenStreetMap data into an SQLite database.\n"
   "\n"
@@ -70,7 +67,6 @@ static char *help =
   "  route <permit> <lon1> <lat1> <lon2> <lat2> [<lon3> <lat3> ...] <file>\n"
   "        (<permit>: 'foot', 'bike' or 'car')\n"
   "\n"
-  "This is pbf2sqlite version " PBF2SQLITE_VERSION "\n"
   ;
 
 #include "functions.c"
@@ -82,16 +78,89 @@ static char *help =
 #include "read_osm.c"
 #include "options.c"
 #include "show_data.c"
-#include "get_args.c"
+
+/**
+ * \brief Parses the arguments and calls the functions if exec is true
+ */
+void parse_args(sqlite3 *db, int argc, char **argv, int exec) {
+  int i;
+  int64_t id;
+  bbox b;
+  i = 2;
+  while( i<argc ){
+    if( strcmp("read", argv[i])==0 && argc>=i+2 ){
+      if( exec ) read_osm_file(db, argv[i+1]);
+      i++;
+    } 
+    else if( strcmp("index", argv[i])==0 ){
+      if( exec ) add_index(db);
+    }
+    else if( strcmp("rtree", argv[i])==0 ){
+      if( exec ) add_rtree(db);
+    }
+    else if( strcmp("addr", argv[i])==0 ){
+      if( exec ) add_addr(db);
+    }
+    else if( strcmp("graph", argv[i])==0 ){
+      if( exec ) add_graph(db);
+    }
+    else if( strcmp("node", argv[2])==0 && argc==4 ){
+      id = get_argv_int64(argv, 3);
+      if( exec ) show_node(db, id);
+      break;
+    } 
+    else if( strcmp("way", argv[2])==0 && argc==4 ){
+      id = get_argv_int64(argv, 3);
+      if( exec ) show_way(db, id);
+      break;
+    } 
+    else if( strcmp("relation", argv[2])==0 && argc==4 ){
+      id = get_argv_int64(argv, 3);
+      if( exec ) show_relation(db, id);
+      break;
+    } 
+    else if( strcmp("vaddr", argv[2])==0 && argc==8 ){
+      b.min_lon = get_argv_double(argv, 3);
+      b.min_lat = get_argv_double(argv, 4);
+      b.max_lon = get_argv_double(argv, 5);
+      b.max_lat = get_argv_double(argv, 6);
+      if( exec ) html_map_addr(db, b, argv[7]);
+      break;
+    } 
+    else if( strcmp("vgraph", argv[2])==0 && argc==8 ){
+      b.min_lon = get_argv_double(argv, 3);
+      b.min_lat = get_argv_double(argv, 4);
+      b.max_lon = get_argv_double(argv, 5);
+      b.max_lat = get_argv_double(argv, 6);
+      if( exec ) html_map_graph(db, b, argv[7]);
+      break;
+    } 
+    else if( strcmp("sql", argv[2])==0 && argc==4 ){
+      if( exec ) sql_exec_stmt(db, argv[3]);
+      break;
+    } 
+    else if( strcmp("sql", argv[2])==0 && argc==3 ){
+      if( exec ) sql_read_stdin(db);
+      break;
+    } 
+    else if( strcmp("route", argv[2])==0 && argc>=9 ){
+      if( exec ) route(db, argc, argv);
+      break;
+    } 
+    else {
+      printf("Incorrect option '%s'\n", argv[i]);
+      exit(EXIT_FAILURE);
+    };
+    i++;
+  }
+}
 
 /**
  * Program start 
  */
 int main(int argc, char **argv) {
   if( argc==1 ){
-    printf("%s", help);
-    printf("SQLite %s and readosm %s are used.\n\n",
-             sqlite3_libversion(), readosm_version());
+    print_help();
     return EXIT_FAILURE;
   }
   parse_args(db, argc, argv, 0);       /* Check args, no execution */

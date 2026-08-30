@@ -1,6 +1,6 @@
-/*
-** Graph data structures as an adjacency list
-*/
+/**
+ * \brief Graph adjacency list node info
+ */
 struct AdjNode {
   int dest;
   int dist;
@@ -8,15 +8,24 @@ struct AdjNode {
   struct AdjNode* next;
 };
 
+/**
+ * \brief Graph adjacency list
+ */
 struct AdjList {
   struct AdjNode* head;
 };
 
+/**
+ * \brief Graph struct
+ */
 struct Graph {
   int num_nodes;
   struct AdjList* array;
 };
 
+/**
+ * \brief Adjacency list append new node
+ */
 struct AdjNode* newAdjListNode(int dest, int dist, int edge) {
   struct AdjNode* newNode = (struct AdjNode*)malloc(sizeof(struct AdjNode));
   if(!newNode) abort_msg("Out of memory");
@@ -27,6 +36,9 @@ struct AdjNode* newAdjListNode(int dest, int dist, int edge) {
   return newNode;
 }
 
+/**
+ * \brief Create new graph with V nodes
+ */
 struct Graph* createGraph(int V) {
   struct Graph* graph = (struct Graph*)malloc(sizeof(struct Graph));
   if(!graph) abort_msg("Out of memory");
@@ -41,7 +53,10 @@ struct Graph* createGraph(int V) {
   return graph;
 }
 
-void destroyGraph(struct Graph* graph) {
+/**
+ * \brief Free graph memory
+ */
+void freeGraph(struct Graph* graph) {
   for (int i = 0; i < graph->num_nodes; ++i) {
     struct AdjNode* current = graph->array[i].head;
     while (current != NULL) {
@@ -54,6 +69,9 @@ void destroyGraph(struct Graph* graph) {
   free(graph);
 }
 
+/**
+ * \brief TODO
+ */
 void addEdge(struct Graph* graph, int src, int dest, int dist, int edge, int dir) {
   struct AdjNode* newNode;
   newNode = newAdjListNode(dest, dist, edge);  /* add edge from src to dest */
@@ -66,6 +84,9 @@ void addEdge(struct Graph* graph, int src, int dest, int dist, int edge, int dir
   }
 }
 
+/**
+ * \brief TODO
+ */
 void printGraph(struct Graph* graph) {
   printf("Graph (%d nodes):\n", graph->num_nodes);
   for (int n = 0; n < graph->num_nodes; n++) {
@@ -79,9 +100,9 @@ void printGraph(struct Graph* graph) {
   printf("\n");
 }
 
-/*
-** Structures for the Dijkstra Algorithm
-*/
+/**
+ * \brief Data for the Dijkstra Algorithm
+ */
 struct Dijkstra {
   int d;         /* Total distance to the node */
   int v_node;    /* Predecessor node (shortest path tree) */
@@ -94,14 +115,13 @@ struct Dijkstra* node;
 int *b;          /* Array b[] contains the nodes in the priority queue */
 int b_size;      /* Contains the current number of nodes in the priority queue */
 
-/*
-** Priority Queue
-**
-** b_insert() : Insert node in priority queue
-** b_remove() : Remove the node with minimal distance from priority queue
-** b_relax()  : Reduce the distance, adjust priority queue
-**
-*/
+/**
+ * Priority Queue
+ */
+
+/**
+ * \brief Priority queue TODO
+ */
 void downheap(int k) {
   int j, v, v_k;
 
@@ -119,6 +139,9 @@ void downheap(int k) {
   node[ b[k] ].pos_heap = k;
 }
 
+/**
+ * \brief Priority queue TODO
+ */
 void upheap(int k) {
   int v, v_k;
 
@@ -134,11 +157,17 @@ void upheap(int k) {
   node[ b[k] ].pos_heap = k;
 }
 
+/**
+ * \brief Insert node in priority queue
+ */
 void b_insert(int v) {
   b[++b_size] = v;
   upheap( b_size );
 }
 
+/**
+ * \brief Remove the node with minimal distance from priority queue
+ */
 int b_remove(void) {
   int v;
 
@@ -149,6 +178,9 @@ int b_remove(void) {
   return v;
 }
 
+/**
+ * \brief Reduce the distance, adjust priority queue
+ */
 void b_relax(int k, int v) {
   if ( node[ k ].d > v ) {
     node[ k ].d = v;
@@ -160,10 +192,10 @@ void b_relax(int k, int v) {
   }
 }
 
-/*
-** Dijkstra Algorithm
-** https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
-*/
+/**
+ * \brief Dijkstra Algorithm
+ *        https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
+ */
 void Dijkstra(struct Graph* graph, int start_node, int dest_node) {
   int i, minD=0, minB=0;
   /* Allocate memory */
@@ -210,7 +242,10 @@ void Dijkstra(struct Graph* graph, int start_node, int dest_node) {
   free(b);
 }
 
-void destroyDijkstra() {
+/**
+ * \brief
+ */
+void freeDijkstra() {
   free(node);
 }
 

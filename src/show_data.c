@@ -1,10 +1,11 @@
-/*
-** Show data
-*/
+/**
+ * \file show_data.c
+ * \brief Functions for displaying the data on the console
+ */
 
-/*
-** Execute SQL statement
-*/
+/**
+ * \brief Output a row from an executed SQL statement
+ */
 static int sql_print_row(void *NotUsed, int argc, char **argv, char **azColName){
   int i;
   for(i=0; i<argc; i++){
@@ -15,6 +16,9 @@ static int sql_print_row(void *NotUsed, int argc, char **argv, char **azColName)
   return 0;
 }
 
+/**
+ * \brief Execute SQL statement
+ */
 void sql_exec_stmt(sqlite3 *db, const char *sql){
   char *zErrMsg = 0;
   rc = sqlite3_exec(db, sql, sql_print_row, 0, &zErrMsg);
@@ -24,6 +28,9 @@ void sql_exec_stmt(sqlite3 *db, const char *sql){
   }
 }
 
+/**
+ * \brief Execute input from stdin as an SQL command
+ */
 void sql_read_stdin(sqlite3 *db){
   char *sql = NULL;
   size_t sql_size = 0;
@@ -49,9 +56,9 @@ void sql_read_stdin(sqlite3 *db){
   free(sql);
 }
 
-/*
-** Show data for node, way or relation
-*/
+/**
+ * \brief Display data of a node
+ */
 void show_node(sqlite3 *db, const int64_t node_id) {
   sqlite3_stmt *stmt;
   /* Location */
@@ -91,6 +98,9 @@ void show_node(sqlite3 *db, const int64_t node_id) {
   sqlite3_finalize(stmt);
 }
 
+/**
+ * \brief Display data of a way
+ */
 void show_way(sqlite3 *db, const int64_t way_id) {
   sqlite3_stmt *stmt;
   /* Tags */
@@ -135,6 +145,9 @@ void show_way(sqlite3 *db, const int64_t way_id) {
   sqlite3_finalize(stmt);
 }
 
+/**
+ * \brief Display data of a relation
+ */
 void show_relation(sqlite3 *db, const int64_t relation_id) {
   sqlite3_stmt *stmt;
   /* Tags */

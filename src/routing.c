@@ -87,9 +87,9 @@ void write_file_gpx(
   free(filename);
 }
 
-/*
-** Transforms a string into a permit mask
-*/
+/**
+ * \brief Transforms a string into a permit mask
+ */
 int permit_mask(const char *permit){
   int mask_permit;
   if     ( strcmp("foot", permit)==0 ) mask_permit = 1;
@@ -220,7 +220,7 @@ void route(
       /* get previous node of the shortest way */
       v = node[v].v_node;
     }
-    destroyDijkstra();
+    freeDijkstra();
   }
   sqlite3_finalize(stmt_insert_path_edges);
   /* Get all edges in the right order */
@@ -318,5 +318,5 @@ void route(
   nodelist_free(&path);
   nodelist_free(&path2);
   nodelist_free(&route_points);
-  destroyGraph(graph);
+  freeGraph(graph);
 }

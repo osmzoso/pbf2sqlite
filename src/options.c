@@ -1,6 +1,11 @@
-/*
-** Add additional data in the database
-*/
+/**
+ * \file options.c
+ * \brief Functions for adding additional data to the database
+ */
+
+/**
+ * \brief Create basic indexes
+ */
 void add_index(sqlite3 *db) {
   rc = sqlite3_exec(
     db,
@@ -20,6 +25,9 @@ void add_index(sqlite3 *db) {
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
 }
 
+/**
+ * \brief Create R*Tree indexes
+ */
 void add_rtree(sqlite3 *db) {
   const char *sql = 
   #include "opt_rtree.sql"
@@ -28,6 +36,9 @@ void add_rtree(sqlite3 *db) {
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
 }
 
+/**
+ * \brief Create tables containing address data
+ */
 void add_addr(sqlite3 *db) {
   const char *sql = 
   #include "opt_addr.sql"
@@ -36,6 +47,9 @@ void add_addr(sqlite3 *db) {
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
 }
 
+/**
+ * \brief Fill field 'permit' in table 'graph_edges'
+ */
 void fill_graph_permit(sqlite3 *db) {
   sqlite3_stmt *stmt, *stmt_mask, *stmt_update;
   int64_t way_id;
@@ -84,6 +98,9 @@ void fill_graph_permit(sqlite3 *db) {
   sqlite3_finalize(stmt_update);
 }
 
+/**
+ * \brief Create table 'graph_permit'
+ */
 void create_table_graph_permit(sqlite3 *db) {
   sqlite3_stmt *stmt_check;
   /* do not create the table if it already exists */
@@ -105,6 +122,9 @@ void create_table_graph_permit(sqlite3 *db) {
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
 }
 
+/**
+ * \brief Create a graph from the data
+ */
 void add_graph(sqlite3 *db) {
   rc = sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, NULL);
   rc = sqlite3_exec(
