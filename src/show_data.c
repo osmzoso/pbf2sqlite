@@ -1,6 +1,6 @@
 /**
  * \file show_data.c
- * \brief Functions for displaying the data on the console
+ * \brief Contains functions for displaying the data on the console
  */
 
 /**

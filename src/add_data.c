@@ -1,6 +1,6 @@
 /**
- * \file options.c
- * \brief Functions for adding additional data to the database
+ * \file add_data.c
+ * \brief Contains functions for adding additional data to the database
  */
 
 /**

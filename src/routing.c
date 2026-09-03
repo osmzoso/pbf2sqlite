@@ -1,4 +1,9 @@
 /**
+ * \file routing.c
+ * \brief Contains functions for calculating shortest paths
+ */
+
+/**
  * \brief Resize boundingbox
  */
 bbox resize_boundingbox(const bbox b, const double enlarge){

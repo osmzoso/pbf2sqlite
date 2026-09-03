@@ -1,13 +1,7 @@
 /**
- * \brief Display version numbers and usage information
+ * \file functions.c
+ * \brief Contains general functions
  */
-void print_help(){
-#ifdef DEBUG
-  printf("%s", RED "\n!!!!! Warning: This is a DEBUG build. "__DATE__" "__TIME__" !!!!!\n\n" RESET);
-#endif
-  printf("pbf2sqlite version %s (with SQLite %s and readosm %s)\n%s",
-           PBF2SQLITE_VERSION, sqlite3_libversion(), readosm_version(), help);
-}
 
 /**
  * \brief Get int64 from ARGV and checks if input is valid int64

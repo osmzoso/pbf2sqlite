@@ -1,6 +1,8 @@
 /**
  * \file leaflet.c
- * \brief Functions for creating an HTML file with Leaflet.js for visualizing map data
+ * \brief Contains functions for creating an HTML file for visualizing map data
+ *
+ * The Leaflet library https://leafletjs.com is used
  */
 
 /**

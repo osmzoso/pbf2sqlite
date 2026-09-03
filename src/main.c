@@ -1,5 +1,6 @@
 /**
- * pbf2sqlite
+ * \file main.c
+ * \brief Start program
  */
 #include <stdlib.h>
 #include <stdio.h>
@@ -24,25 +25,10 @@
 #define GREEN   "\033[32m"
 #define RESET   "\033[0m"
 
-/**
- * Data type boundingbox
- */
-typedef struct {
-  double min_lon;
-  double min_lat;
-  double max_lon;
-  double max_lat;
-} bbox;
-
-/**
- * Public variables
- */
-sqlite3 *db;                       /* SQLite Database connection */
-int rc;                            /* SQLite Result code */
-sqlite3_stmt *stmt_insert_nodes, *stmt_insert_node_tags, *stmt_insert_way_nodes,
-             *stmt_insert_way_tags, *stmt_insert_relation_members, *stmt_insert_relation_tags;
-int duplicate_nodes;               /* Number of nodes that could not be inserted */
-static char *help =
+static char *built_in_help =
+#ifdef DEBUG
+  RED "\n!!!!! Warning: This is a DEBUG build. "__DATE__" "__TIME__" !!!!!\n" RESET
+#endif
   "\n"
   "Imports PBF or XML OpenStreetMap data into an SQLite database.\n"
   "\n"
@@ -69,6 +55,27 @@ static char *help =
   "\n"
   ;
 
+/**
+ * \brief Defines a bounding box (rectangular boundary)
+ */
+typedef struct {
+  double min_lon;
+  double min_lat;
+  double max_lon;
+  double max_lat;
+} bbox;
+
+/* Public variables */
+sqlite3 *db;                                 /**< SQLite Database connection */
+int rc;                                      /**< SQLite Result code */
+sqlite3_stmt *stmt_insert_nodes;             /**< SQlite Prepared Statement Object insert nodes */
+sqlite3_stmt *stmt_insert_node_tags;         /**< SQlite Prepared Statement Object insert node_tags */
+sqlite3_stmt *stmt_insert_way_nodes;         /**< SQlite Prepared Statement Object insert way_nodes */
+sqlite3_stmt *stmt_insert_way_tags;          /**< SQlite Prepared Statement Object insert way_tags */
+sqlite3_stmt *stmt_insert_relation_members;  /**< SQlite Prepared Statement Object insert relation_members */
+sqlite3_stmt *stmt_insert_relation_tags;     /**< SQlite Prepared Statement Object insert relation_tags */
+int duplicate_nodes;                         /**< Number of nodes that could not be inserted */
+
 #include "functions.c"
 #include "nodelist.c"
 #include "leaflet.c"
@@ -76,7 +83,7 @@ static char *help =
 #include "graph.c"
 #include "routing.c"
 #include "read_osm.c"
-#include "options.c"
+#include "add_data.c"
 #include "show_data.c"
 
 /**
@@ -156,11 +163,12 @@ void parse_args(sqlite3 *db, int argc, char **argv, int exec) {
 }
 
 /**
- * Program start 
+ * \brief Program start 
  */
 int main(int argc, char **argv) {
   if( argc==1 ){
-    print_help();
+    printf("pbf2sqlite version %s (with SQLite %s and readosm %s)\n%s",
+             PBF2SQLITE_VERSION, sqlite3_libversion(), readosm_version(), built_in_help);
     return EXIT_FAILURE;
   }
   parse_args(db, argc, argv, 0);       /* Check args, no execution */

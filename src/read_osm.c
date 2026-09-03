@@ -1,7 +1,8 @@
 /**
  * \file read_osm.c
- * \brief Reading OpenStreetMap data with the ReadOSM library
- * https://www.gaia-gis.it/fossil/readosm/index
+ * \brief Contains functions for reading OpenStreetMap data
+ *
+ * The ReadOSM library https://www.gaia-gis.it/fossil/readosm/index is used
  */
 
 /**

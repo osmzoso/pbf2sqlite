@@ -1,4 +1,14 @@
 /**
+ * \file dijkstra.c
+ * \brief Contains functions for Dijkstra's algorithm
+ *
+ * - Functions for a graph with adjacency lists
+ * - Functions for the Priority queue
+ * - Functions for the Dijkstra's algorithm
+ *
+ */
+
+/**
  * \brief Graph adjacency list node info
  */
 struct AdjNode {
@@ -70,7 +80,7 @@ void freeGraph(struct Graph* graph) {
 }
 
 /**
- * \brief TODO
+ * \brief Adds an edge to the graph
  */
 void addEdge(struct Graph* graph, int src, int dest, int dist, int edge, int dir) {
   struct AdjNode* newNode;
@@ -85,7 +95,7 @@ void addEdge(struct Graph* graph, int src, int dest, int dist, int edge, int dir
 }
 
 /**
- * \brief TODO
+ * \brief Displays the graph (for testing purposes)
  */
 void printGraph(struct Graph* graph) {
   printf("Graph (%d nodes):\n", graph->num_nodes);
@@ -101,26 +111,26 @@ void printGraph(struct Graph* graph) {
 }
 
 /**
- * \brief Data for the Dijkstra Algorithm
+ * \brief Contains data for the Dijkstra Algorithm
  */
 struct Dijkstra {
-  int d;         /* Total distance to the node */
-  int v_node;    /* Predecessor node (shortest path tree) */
-  int v_edge;    /* Predecessor edge (shortest path tree) */
-  int pos_heap;  /* Contains the position of the node in b[] */
+  int d;         /**< Total distance to the node */
+  int v_node;    /**< Predecessor node (shortest path tree) */
+  int v_edge;    /**< Predecessor edge (shortest path tree) */
+  int pos_heap;  /**< Contains the position of the node in b[] */
 };
 
 /* Public variables */
 struct Dijkstra* node;
-int *b;          /* Array b[] contains the nodes in the priority queue */
-int b_size;      /* Contains the current number of nodes in the priority queue */
+int *b;          /**< Array b[] contains the nodes in the priority queue */
+int b_size;      /**< Contains the current number of nodes in the priority queue */
 
 /**
- * Priority Queue
+ * Binary heap-based priority queue
  */
 
 /**
- * \brief Priority queue TODO
+ * \brief Restore the heap property by moving an element down the tree
  */
 void downheap(int k) {
   int j, v, v_k;
@@ -140,7 +150,7 @@ void downheap(int k) {
 }
 
 /**
- * \brief Priority queue TODO
+ * \brief Restore the heap order property after adding a new element
  */
 void upheap(int k) {
   int v, v_k;
@@ -194,7 +204,8 @@ void b_relax(int k, int v) {
 
 /**
  * \brief Dijkstra Algorithm
- *        https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
+ *
+ * https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
  */
 void Dijkstra(struct Graph* graph, int start_node, int dest_node) {
   int i, minD=0, minB=0;
@@ -243,7 +254,7 @@ void Dijkstra(struct Graph* graph, int start_node, int dest_node) {
 }
 
 /**
- * \brief
+ * \brief Free memory for the result of Dijkstra's algorithm
  */
 void freeDijkstra() {
   free(node);
