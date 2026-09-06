@@ -232,7 +232,7 @@ Then, the bits are set according to the tags found (set_bit).
 Finally, the bits are cleared according to the tags found (clear_bit).  
 
 
-# 3. Options for displaying data
+# 3. View data
 
 ## 3.1. Option "node", "way" and "relation"
 
@@ -271,7 +271,7 @@ pbf2sqlite test.db sql < stmt.sql
 cat stmt.sql | pbf2sqlite test.db sql
 ```
 
-### Additional functions
+### Additional SQL functions
 
 SQLite is extended with the following functions:
 
@@ -302,7 +302,7 @@ pbf2sqlite test.db sql "UPDATE nodes SET x=mercator_x(lon),y=mercator_y(lat)"
 ```
 
 
-# 4. Option to calculate the shortest path
+# 4. Calculate the shortest path
 
 ## 4.1. Option "route"
 
@@ -317,7 +317,17 @@ Usage:
 pbf2sqlite <database> route <permit> <lon1> <lat1> <lon2> <lat2> [<lon3> <lat3> ...] <file>
 ```
 
-`<permit>` can be "foot", "bike" or "car".  
+`<permit>` is an integer that is combined with the **permit** field in the **graph_edges** table
+using a bitwise AND operation to determine the usable edges.  
+
+For ease of input, the following strings are also recognized and converted into the corresponding number:  
+
+| `<permit>` | decimal |
+|------------|--------:|
+| foot       |       1 |
+| bike       |       2 |
+| roadbike   |      10 |
+| car        |       4 |
 
 The result is written to three files (HTML, CSV and GPX).  
 Therefore, `<file>` is supplemented with the file extensions **.html**, **.csv** and **.gpx**.  

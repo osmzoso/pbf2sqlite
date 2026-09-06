@@ -19,7 +19,7 @@
 # define M_PI   3.141592653589793238462643383279502884
 #endif
 
-#define PBF2SQLITE_VERSION  "0.5.5 ALPHA"
+#define PBF2SQLITE_VERSION  "0.5.5"
 
 #define RED     "\033[31m"
 #define GREEN   "\033[32m"
@@ -51,7 +51,7 @@ static char *built_in_help =
   "\n"
   "Option to calculate the shortest path:\n"
   "  route <permit> <lon1> <lat1> <lon2> <lat2> [<lon3> <lat3> ...] <file>\n"
-  "        (<permit>: 'foot', 'bike' or 'car')\n"
+  "        (<permit>: 'foot', 'bike', 'roadbike', 'car' or a number)\n"
   "\n"
   ;
 
@@ -80,7 +80,6 @@ int duplicate_nodes;                         /**< Number of nodes that could not
 #include "nodelist.c"
 #include "leaflet.c"
 #include "dijkstra.c"
-#include "graph.c"
 #include "routing.c"
 #include "read_osm.c"
 #include "add_data.c"

@@ -329,7 +329,7 @@ void write_graph(
   }
   /* show graph edges */
   NodeList nodelist;
-  nodelist_init(&nodelist);
+  initNodelist(&nodelist);
   leaflet_style(html, "#0000ff", 0.5, 3, "", "none", 1.0, 5);
   rc = sqlite3_prepare_v2(db,
     "SELECT start_node_id,end_node_id,way_id,directed FROM subgraph",
@@ -340,7 +340,7 @@ void write_graph(
     end_node_id = (int64_t)sqlite3_column_int64(stmt_edges, 1);
     way_id = (int64_t)sqlite3_column_int64(stmt_edges, 2);
     directed = (int)sqlite3_column_int(stmt_edges, 3);
-    nodelist_clear(&nodelist);
+    clearNodelist(&nodelist);
     slice_way_nodes(db, way_id, start_node_id, end_node_id, &nodelist);
     snprintf(popuptext, sizeof(popuptext), "way_id %" PRId64, way_id);
     if( directed ){
@@ -355,7 +355,7 @@ void write_graph(
   leaflet_style(html, "#000000", 0.3, 2, "5 5", "none", 0.3, 5);
   leaflet_rectangle(html, mapid, b.min_lon, b.min_lat, b.max_lon, b.max_lat, "");
   /*  */
-  nodelist_free(&nodelist);
+  freeNodelist(&nodelist);
   sqlite3_finalize(stmt_nodes);
   sqlite3_finalize(stmt_edges);
 }

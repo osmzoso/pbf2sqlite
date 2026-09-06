@@ -64,7 +64,7 @@ struct Graph* createGraph(int V) {
 }
 
 /**
- * \brief Free graph memory
+ * \brief Free the memory of a graph
  */
 void freeGraph(struct Graph* graph) {
   for (int i = 0; i < graph->num_nodes; ++i) {
