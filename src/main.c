@@ -19,7 +19,7 @@
 # define M_PI   3.141592653589793238462643383279502884
 #endif
 
-#define PBF2SQLITE_VERSION  "0.5.5"
+#define PBF2SQLITE_VERSION  "0.5.5 BETA"
 
 #define RED     "\033[31m"
 #define GREEN   "\033[32m"
@@ -35,11 +35,11 @@ static char *built_in_help =
   "Usage:\npbf2sqlite <database> [OPTION ...]\n"
   "\n"
   "Main options:\n"
-  "  read <file>      Reads an .osm.pbf or .osm file into the database\n"
-  "  index            Add basic indexes\n"
-  "  rtree            Add R*Tree indexes\n"
-  "  addr             Add address tables\n"
-  "  graph            Add graph tables\n"
+  "  read <file>                                         Reads an .osm.pbf or .osm file\n"
+  "  index                                               Add basic indexes\n"
+  "  rtree                                               Add R*Tree indexes\n"
+  "  addr                                                Add address tables\n"
+  "  graph                                               Add graph tables\n"
   "\n"
   "Options for displaying data:\n"
   "  node <id>                                           Show data of a node\n"
@@ -49,9 +49,8 @@ static char *built_in_help =
   "  vgraph <lon1> <lat1> <lon2> <lat2> <htmlfile>       Generates a map of the graph\n"
   "  sql [<stmt>]                                        Executes an SQL statement\n"
   "\n"
-  "Option to calculate the shortest path:\n"
+  "Calculate shortest path (<permit> can be either foot, bike, roadbike, car or a decimal number):\n"
   "  route <permit> <lon1> <lat1> <lon2> <lat2> [<lon3> <lat3> ...] <file>\n"
-  "        (<permit>: 'foot', 'bike', 'roadbike', 'car' or a number)\n"
   "\n"
   ;
 
@@ -154,7 +153,7 @@ void parse_args(sqlite3 *db, int argc, char **argv, int exec) {
       break;
     } 
     else {
-      printf("Incorrect option '%s'\n", argv[i]);
+      printf("Incorrect option '%s', type 'pbf2sqlite' without parameters to display help.\n", argv[i]);
       exit(EXIT_FAILURE);
     };
     i++;
@@ -166,11 +165,13 @@ void parse_args(sqlite3 *db, int argc, char **argv, int exec) {
  */
 int main(int argc, char **argv) {
   if( argc==1 ){
-    printf("pbf2sqlite version %s (with SQLite %s and readosm %s)\n%s",
+    printf("\npbf2sqlite %s (with SQLite %s and readosm %s)\n%s",
              PBF2SQLITE_VERSION, sqlite3_libversion(), readosm_version(), built_in_help);
     return EXIT_FAILURE;
   }
   parse_args(db, argc, argv, 0);       /* Check args, no execution */
+  rc = sqlite3_initialize();           /* Initialize the SQLite library */
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   rc = sqlite3_open(argv[1], &db);     /* Open database connection */
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   rc = sqlite3_exec(db,                /* Set PRAGMAs */

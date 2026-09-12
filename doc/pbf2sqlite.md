@@ -201,16 +201,16 @@ Index **graph_vertices\_\_node_id** on column (node_id)
 
 The bit field **permit** determines who may use this edge:  
 
-bit   | meaning     | value decimal
-------|-------------|----------------
-Bit 0 | foot        | 2^0   1
-Bit 1 | bike        | 2^1   2
-Bit 2 | car         | 2^2   4
-Bit 3 | paved       | 2^3   8
-Bit 4 | oneway_bike | 2^4  16
-Bit 5 | oneway_car  | 2^5  32
-Bit 6 | (not used)  | 2^6  64
-Bit 7 | (not used)  | 2^7 128
+| bit   | meaning     | decimal |
+|-------|-------------|--------:|
+| Bit 0 | foot        |       1 |
+| Bit 1 | bike        |       2 |
+| Bit 2 | car         |       4 |
+| Bit 3 | paved       |       8 |
+| Bit 4 | oneway_bike |      16 |
+| Bit 5 | oneway_car  |      32 |
+| Bit 6 | (not used)  |      64 |
+| Bit 7 | (not used)  |     128 |
 
 To fill the column **permit** a table **graph_permit** is needed:  
 
@@ -320,17 +320,19 @@ pbf2sqlite <database> route <permit> <lon1> <lat1> <lon2> <lat2> [<lon3> <lat3> 
 `<permit>` is an integer that is combined with the **permit** field in the **graph_edges** table
 using a bitwise AND operation to determine the usable edges.  
 
-For ease of input, the following strings are also recognized and converted into the corresponding number:  
+For ease of input, the following strings are also recognized and converted into the corresponding decimal number:  
 
-| `<permit>` | decimal |
-|------------|--------:|
-| foot       |       1 |
-| bike       |       2 |
-| roadbike   |      10 |
-| car        |       4 |
+| `<permit>` | decimal | binary |
+|------------|--------:|-------:|
+| foot       |       1 |   0001 |
+| bike       |       2 |   0010 |
+| roadbike   |      10 |   1010 |
+| car        |       4 |   0100 |
 
 The result is written to three files (HTML, CSV and GPX).  
 Therefore, `<file>` is supplemented with the file extensions **.html**, **.csv** and **.gpx**.  
+
+> Note: Turning regulations for cars are currently not being evaluated.
 
 Examples:  
 ```

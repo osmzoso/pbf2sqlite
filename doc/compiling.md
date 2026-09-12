@@ -3,7 +3,7 @@
 make options:
 ```
 make               ;# Build dynamic binary for Linux
-make static        ;# Build static binaries for Linux and Windows
+make static        ;# Build static binaries for Linux and Windows (upx is required)
 make install       ;# Copy binary in /usr/bin (sudo is required)
 make doc           ;# Create the documentation files (pandoc is required)
 make clean         ;# Remove ./build directory

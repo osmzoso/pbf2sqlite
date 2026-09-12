@@ -379,17 +379,21 @@ void html_map_graph(
     "<div id='map2' style='width:100%%; height:500px;'></div>\n"
     "<h1>Map 3 - Graph bike</h1>\n"
     "<div id='map3' style='width:100%%; height:500px;'></div>\n"
-    "<h1>Map 4 - Graph car</h1>\n"
-    "<div id='map4' style='width:100%%; height:500px;'></div>\n");
+    "<h1>Map 4 - Graph roadbike</h1>\n"
+    "<div id='map4' style='width:100%%; height:500px;'></div>\n"
+    "<h1>Map 5 - Graph car</h1>\n"
+    "<div id='map5' style='width:100%%; height:500px;'></div>\n");
   fprintf(html, "<script>\n");
   leaflet_init(html, "map1", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
   leaflet_init(html, "map2", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
   leaflet_init(html, "map3", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
   leaflet_init(html, "map4", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
-  write_graph(db, html, "map1", b, 0);  /* graph complete */
-  write_graph(db, html, "map2", b, 1);  /* graph foot */
-  write_graph(db, html, "map3", b, 2);  /* graph bike */
-  write_graph(db, html, "map4", b, 4);  /* graph car */
+  leaflet_init(html, "map5", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
+  write_graph(db, html, "map1", b,  0);  /* graph complete */
+  write_graph(db, html, "map2", b,  1);  /* graph foot */
+  write_graph(db, html, "map3", b,  2);  /* graph bike */
+  write_graph(db, html, "map4", b, 10);  /* graph roadbike */
+  write_graph(db, html, "map5", b,  4);  /* graph car */
   fprintf(html,
       "</script>\n"
       "<p>dashed line ➔ one way</p>\n"
