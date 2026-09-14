@@ -3,7 +3,7 @@
 #
 # C compiler, compiler flags, linker flags
 CC = gcc
-CFLAGS += -Wall -std=c99 -O2
+CFLAGS += -Wall -std=c99 -O2 -I. -I./src/sqlite3 -I./src/readosm
 LDFLAGS += -static -s
 
 # build directory, binary name
@@ -24,8 +24,15 @@ DOC_SRC = ./doc/pbf2sqlite.md
 DOC_CSS = ./doc/custom.css
 
 #
-# use the recommended SQLite compile-time options, see
+# SQLite compile-time options
+#
+# Use the recommended options:
 # https://www.sqlite.org/compile.html#recommended_compile_time_options
+# Activate the following additional extensions:
+# https://www.sqlite.org/rtree.html
+# https://www.sqlite.org/geopoly.html
+# https://www.sqlite.org/lang_mathfunc.html
+# https://www.sqlite.org/fts3.html
 #
 COMPILE_OPTIONS_SQLITE = \
  -DSQLITE_DQS=0 \
@@ -41,7 +48,10 @@ COMPILE_OPTIONS_SQLITE = \
  -DSQLITE_OMIT_AUTOINIT \
  -DSQLITE_STRICT_SUBTYPE=1 \
  -DSQLITE_ENABLE_RTREE \
- -DSQLITE_ENABLE_MATH_FUNCTIONS
+ -DSQLITE_ENABLE_GEOPOLY=1 \
+ -DSQLITE_ENABLE_MATH_FUNCTIONS \
+ -DSQLITE_ENABLE_FTS3 \
+ -DSQLITE_ENABLE_FTS3_PARENTHESIS
 
 #
 # main targets
@@ -62,8 +72,8 @@ amalgamation: bldir single_src
 #
 #
 #
-.PHONY: bldir compile compile_debug compile_asan compile_static compile_static_win64
-.PHONY: quicktest check_static_binaries render_doc render_doc_src single_src
+.PHONY: bldir compile compile_debug compile_asan compile_static compile_static_win64 \
+        quicktest check_static_binaries render_doc render_doc_src single_src
 bldir:
 	mkdir -p $(BUILD_DIR)
 
@@ -80,14 +90,12 @@ compile_asan:
 compile_static:
 	$(CC) $(CFLAGS) $(LDFLAGS) $(COMPILE_OPTIONS_SQLITE) $(SRC) $(SRC_STATIC) \
  -o $(BUILD_DIR)$(BIN) \
- -I. -I./src/sqlite3 -I./src/readosm \
  -lexpat -lz -lm -lgcc
 	upx --best $(BUILD_DIR)$(BIN)
 
 compile_static_win64:
 	x86_64-w64-mingw32-gcc $(CFLAGS) $(LDFLAGS) $(COMPILE_OPTIONS_SQLITE) $(SRC) $(SRC_STATIC) \
  -o $(BUILD_DIR)$(BIN).exe \
- -I. -I./src/sqlite3 -I./src/readosm \
  -I/usr/x86_64-w64-mingw32/sys-root/mingw/include \
  -L/usr/x86_64-w64-mingw32/sys-root/mingw/lib \
  -lexpat -lz -lpthread -lwinpthread -lws2_32 -lssp -lgcc
@@ -99,26 +107,10 @@ check_static_binaries:
 	bash $(PWD)/test/check_static_binaries.sh $(PWD)/build $(PWD)/test/weimar.osm
 
 render_doc:
-	pandoc \
-     -V geometry:margin=0.6in \
-     $(DOC_SRC) \
-     --pdf-engine=xelatex \
-     --toc \
-     -o $(BUILD_DIR)$(BIN).pdf
-	pandoc \
-     --standalone \
-     --embed-resources \
-     --metadata title="$(BIN)" \
-     --toc \
-     --css=$(DOC_CSS) \
-     $(DOC_SRC) \
-     -o $(BUILD_DIR)$(BIN).html
-	rm -f $(BUILD_DIR)$(BIN).1.gz
-	pandoc \
-     -s -f markdown -t man \
-     $(DOC_SRC) \
-     -o $(BUILD_DIR)$(BIN).1
-	gzip $(BUILD_DIR)$(BIN).1
+	pandoc $(DOC_SRC) -V geometry:margin=0.6in --pdf-engine=xelatex --toc -o $(BUILD_DIR)$(BIN).pdf
+	pandoc $(DOC_SRC) --standalone --embed-resources --metadata title="$(BIN)" --toc \
+           --css=$(DOC_CSS) -o $(BUILD_DIR)$(BIN).html
+	pandoc $(DOC_SRC) -s -t man | gzip > $(BUILD_DIR)$(BIN).1.gz
 
 render_doc_src:
 	doxygen

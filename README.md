@@ -11,11 +11,11 @@ Usage:
 pbf2sqlite <database> [OPTION ...]
 
 Main options:
-  read <file>      Reads an .osm.pbf or .osm file into the database
-  index            Add basic indexes
-  rtree            Add R*Tree indexes
-  addr             Add address tables
-  graph            Add graph tables
+  read <file>                                         Reads an .osm.pbf or .osm file
+  index                                               Add basic indexes
+  rtree                                               Add R*Tree indexes
+  addr                                                Add address tables
+  graph                                               Add graph tables
 
 Options for displaying data:
   node <id>                                           Show data of a node
@@ -25,9 +25,8 @@ Options for displaying data:
   vgraph <lon1> <lat1> <lon2> <lat2> <htmlfile>       Generates a map of the graph
   sql [<stmt>]                                        Executes an SQL statement
 
-Option to calculate the shortest path:
+Calculate shortest path (<permit> can be: foot bike roadbike car):
   route <permit> <lon1> <lat1> <lon2> <lat2> [<lon3> <lat3> ...] <file>
-        (<permit>: 'foot', 'bike' or 'car')
 ```
 
 The command

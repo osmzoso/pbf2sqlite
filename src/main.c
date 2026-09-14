@@ -19,7 +19,7 @@
 # define M_PI   3.141592653589793238462643383279502884
 #endif
 
-#define PBF2SQLITE_VERSION  "0.5.5 BETA"
+#define PBF2SQLITE_VERSION  "0.5.5"
 
 #define RED     "\033[31m"
 #define GREEN   "\033[32m"
@@ -49,7 +49,7 @@ static char *built_in_help =
   "  vgraph <lon1> <lat1> <lon2> <lat2> <htmlfile>       Generates a map of the graph\n"
   "  sql [<stmt>]                                        Executes an SQL statement\n"
   "\n"
-  "Calculate shortest path (<permit> can be either foot, bike, roadbike, car or a decimal number):\n"
+  "Calculate shortest path (<permit> can be: foot bike roadbike car):\n"
   "  route <permit> <lon1> <lat1> <lon2> <lat2> [<lon3> <lat3> ...] <file>\n"
   "\n"
   ;
