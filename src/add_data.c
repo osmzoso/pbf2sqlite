@@ -289,3 +289,15 @@ void add_graph(sqlite3 *db) {
   create_table_graph_permit(db);
   fill_graph_permit(db);
 }
+
+/**
+ * \brief Adds two columns with Mercator coordinates to the 'nodes' table
+ */
+void add_mercator(sqlite3 *db) {
+  rc = sqlite3_exec(db,
+    " ALTER TABLE nodes ADD COLUMN x REAL;"
+    " ALTER TABLE nodes ADD COLUMN y REAL;"
+    " UPDATE nodes SET x=mercator_x(lon), y=mercator_y(lat);",
+    NULL, NULL, NULL);
+  if( rc!=SQLITE_OK ) abort_db_error(db, rc);
+}

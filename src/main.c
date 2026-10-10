@@ -152,6 +152,9 @@ void parse_args(sqlite3 *db, int argc, char **argv, int exec) {
       if( exec ) route(db, argc, argv);
       break;
     } 
+    else if( strcmp("mercator", argv[i])==0 ){
+      if( exec ) add_mercator(db);
+    }
     else {
       printf("Incorrect option '%s', type 'pbf2sqlite' without parameters to display help.\n", argv[i]);
       exit(EXIT_FAILURE);

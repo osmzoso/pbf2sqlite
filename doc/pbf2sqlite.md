@@ -301,6 +301,12 @@ pbf2sqlite test.db sql "ALTER TABLE nodes ADD COLUMN y"
 pbf2sqlite test.db sql "UPDATE nodes SET x=mercator_x(lon),y=mercator_y(lat)"
 ```
 
+The following extensions are included:  
+<https://www.sqlite.org/rtree.html>  
+<https://www.sqlite.org/geopoly.html>  
+<https://www.sqlite.org/lang_mathfunc.html>  
+<https://www.sqlite.org/fts3.html>  
+
 
 # 4. Calculate the shortest path
 
