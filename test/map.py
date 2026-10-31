@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 """
 Prototype map renderer for pbf2sqlite
+
+spherical : lon (-180 to +180 degrees), lat (-90 to +90 degrees)
+mercator  : x (-20037508.343 to -20037508.343 meter), y (-20037508.343 to -20037508.343)
+bitmap    : x = y (any size in pixels)
+picture   : part of the bitmap, translate to 0,0
 """
 import sys
 import time
@@ -46,6 +51,9 @@ def mercator_to_spherical(x, y):
 def webmercator_to_pixel(x, y, world_map_size):
     """
     Transform Web Mercator to pixel coordinates
+    TODO:
+     - rename function name: mercator_to_bitmap()
+     - Matrix
     """
     world_map_size -= 1
     webmercator = 20037508.342789244
@@ -256,6 +264,44 @@ def tk_show_map(cur, lon, lat, zoomlevel, width, height):
 
 
 #
+# Test
+#
+def test_spherical_to_mercator(lon, lat):
+    x, y = spherical_to_mercator(lon, lat)
+    print(f' lon: {lon:13.8f} lat: {lat:13.8f}  ->  x: {x:19.9f} y: {y:19.9f}')
+
+
+def test_mercator_to_spherical(x, y):
+    lon, lat = mercator_to_spherical(x, y)
+    print(f' x: {x:19.9f} y: {y:19.9f}  ->  lon: {lon:13.8f} lat: {lat:13.8f}')
+
+
+def test_webmercator_to_pixel(x, y, world_map_size):
+    wx, wy = webmercator_to_pixel(x, y, world_map_size)
+    print(f' x: {x:19.9f} y: {y:19.9f} world_map: {world_map_size:10}  ->  wx: {wx:10} wy: {wy:10}')
+
+
+def test_proj():
+    print('Test size_world_map():')
+    for zoomlevel in range(19):
+        world_map_size = size_world_map(zoomlevel)
+        print(f'zoomlevel: {zoomlevel:3}  world_map_size: {world_map_size:10}')
+    print('Test spherical_to_mercator():')
+    test_spherical_to_mercator( 180.00,  85.05112878)
+    test_spherical_to_mercator(-180.00, -85.05112878)
+    test_spherical_to_mercator(   0.00,   0.00)
+    test_spherical_to_mercator(   7.81,  48.00)
+    print('Test mercator_to_spherical():')
+    test_mercator_to_spherical( 20037508.343,  20037508.343)
+    test_mercator_to_spherical(-20037508.343, -20037508.343)
+    test_mercator_to_spherical(0,0)
+    print('Test webmercator_to_pixel():')
+    world_map_size = 2000
+    test_webmercator_to_pixel( 20037508.343,  20037508.343, world_map_size)
+    test_webmercator_to_pixel(-20037508.343, -20037508.343, world_map_size)
+
+
+#
 #
 #
 def main():
@@ -264,7 +310,8 @@ def main():
     if len(sys.argv) == 1:
         print('Creates a simple map.\n'
               'Usage:\n'
-              f'{sys.argv[0]} DATABASE LON LAT ZOOMLEVEL WIDTH HEIGHT\n')
+              f'{sys.argv[0]} DATABASE LON LAT ZOOMLEVEL WIDTH HEIGHT\n'
+              f'{sys.argv[0]} test\n')
         sys.exit(1)
     if len(sys.argv) >= 7:
         con = sqlite3.connect(sys.argv[1])  # database connection
@@ -280,6 +327,8 @@ def main():
              'delta_x': 0.001, 'delta_y': 0.001}
         #
         tk_show_map(cur, lon, lat, zoomlevel, width, height)
+    if sys.argv[1] == 'test' and len(sys.argv) == 2:
+        test_proj()
 
 
 if __name__ == '__main__':

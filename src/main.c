@@ -19,7 +19,7 @@
 # define M_PI   3.141592653589793238462643383279502884
 #endif
 
-#define PBF2SQLITE_VERSION  "0.5.5"
+#define PBF2SQLITE_VERSION  "0.5.6 ALPHA"
 
 #define RED     "\033[31m"
 #define GREEN   "\033[32m"
@@ -83,13 +83,15 @@ int duplicate_nodes;                         /**< Number of nodes that could not
 #include "read_osm.c"
 #include "add_data.c"
 #include "show_data.c"
+#include "drawmap.c"
 
 /**
  * \brief Parses the arguments and calls the functions if exec is true
  */
 void parse_args(sqlite3 *db, int argc, char **argv, int exec) {
-  int i;
+  int i, zoomlevel, width, height;
   int64_t id;
+  double lon, lat;
   bbox b;
   i = 2;
   while( i<argc ){
@@ -150,6 +152,16 @@ void parse_args(sqlite3 *db, int argc, char **argv, int exec) {
     } 
     else if( strcmp("route", argv[2])==0 && argc>=9 ){
       if( exec ) route(db, argc, argv);
+      break;
+    } 
+    /* Undocumented options: */
+    else if( strcmp("map", argv[2])==0 && argc==9 ){
+      lon = get_argv_double(argv, 3);
+      lat = get_argv_double(argv, 4);
+      zoomlevel = (int)get_argv_int64(argv, 5);
+      width = (int)get_argv_int64(argv, 6);
+      height = (int)get_argv_int64(argv, 7);
+      if( exec ) map(db, lon, lat, zoomlevel, width, height, argv[8]);
       break;
     } 
     else if( strcmp("mercator", argv[i])==0 ){
