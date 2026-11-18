@@ -45,7 +45,7 @@ double get_argv_double(char **argv, int i) {
  * Displays the last SQLite error message and then terminates the program
  */
 void abort_db_error(sqlite3 *db, int rc) {
-  fprintf(stderr, "pbf2sqlite - (%i) %s - %s\n", rc, sqlite3_errstr(rc), sqlite3_errmsg(db));
+  fprintf(stderr, BIN_NAME" - (%i) %s - %s\n", rc, sqlite3_errstr(rc), sqlite3_errmsg(db));
   sqlite3_close(db);
   exit(EXIT_FAILURE);
 }

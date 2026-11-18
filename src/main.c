@@ -19,40 +19,9 @@
 # define M_PI   3.141592653589793238462643383279502884
 #endif
 
-#define PBF2SQLITE_VERSION  "0.5.6 ALPHA"
-
 #define RED     "\033[31m"
 #define GREEN   "\033[32m"
 #define RESET   "\033[0m"
-
-static char *built_in_help =
-#ifdef DEBUG
-  RED "\n!!!!! Warning: This is a DEBUG build. "__DATE__" "__TIME__" !!!!!\n" RESET
-#endif
-  "\n"
-  "Imports PBF or XML OpenStreetMap data into an SQLite database.\n"
-  "\n"
-  "Usage:\npbf2sqlite <database> [OPTION ...]\n"
-  "\n"
-  "Main options:\n"
-  "  read <file>                                         Reads an .osm.pbf or .osm file\n"
-  "  index                                               Add basic indexes\n"
-  "  rtree                                               Add R*Tree indexes\n"
-  "  addr                                                Add address tables\n"
-  "  graph                                               Add graph tables\n"
-  "\n"
-  "Options for displaying data:\n"
-  "  node <id>                                           Show data of a node\n"
-  "  way <id>                                            Show data of a way\n"
-  "  relation <id>                                       Show data of a relation\n"
-  "  vaddr <lon1> <lat1> <lon2> <lat2> <htmlfile>        Generates a map of the addresses\n"
-  "  vgraph <lon1> <lat1> <lon2> <lat2> <htmlfile>       Generates a map of the graph\n"
-  "  sql [<stmt>]                                        Executes an SQL statement\n"
-  "\n"
-  "Calculate shortest path (<permit> can be: foot bike roadbike car):\n"
-  "  route <permit> <lon1> <lat1> <lon2> <lat2> [<lon3> <lat3> ...] <file>\n"
-  "\n"
-  ;
 
 /**
  * \brief Defines a bounding box (rectangular boundary)
@@ -75,9 +44,12 @@ sqlite3_stmt *stmt_insert_relation_members;  /**< SQlite Prepared Statement Obje
 sqlite3_stmt *stmt_insert_relation_tags;     /**< SQlite Prepared Statement Object insert relation_tags */
 int duplicate_nodes;                         /**< Number of nodes that could not be inserted */
 
+#include "header.h"
 #include "functions.c"
 #include "nodelist.c"
 #include "leaflet.c"
+#include "matrix.c"
+#include "svg.c"
 #include "dijkstra.c"
 #include "routing.c"
 #include "read_osm.c"
@@ -168,7 +140,7 @@ void parse_args(sqlite3 *db, int argc, char **argv, int exec) {
       if( exec ) add_mercator(db);
     }
     else {
-      printf("Incorrect option '%s', type 'pbf2sqlite' without parameters to display help.\n", argv[i]);
+      printf("Incorrect option '%s', type '"BIN_NAME"' without parameters to display help.\n", argv[i]);
       exit(EXIT_FAILURE);
     };
     i++;
@@ -180,8 +152,11 @@ void parse_args(sqlite3 *db, int argc, char **argv, int exec) {
  */
 int main(int argc, char **argv) {
   if( argc==1 ){
-    printf("\npbf2sqlite %s (with SQLite %s and readosm %s)\n%s",
-             PBF2SQLITE_VERSION, sqlite3_libversion(), readosm_version(), built_in_help);
+    printf("%s", QUICK_HELP);
+    printf("Uses SQLite %s and readosm %s\n\n", sqlite3_libversion(), readosm_version());
+#ifdef DEBUG
+    printf("%s",  RED "!!!!! Warning: This is a DEBUG build. "__DATE__" "__TIME__" !!!!!\n\n" RESET);
+#endif
     return EXIT_FAILURE;
   }
   parse_args(db, argc, argv, 0);       /* Check args, no execution */

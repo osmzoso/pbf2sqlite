@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Comparison of all tables of two pbf2sqlite databases
+Comparison of all tables of two databases
 """
 import sys
 import sqlite3
@@ -42,7 +42,7 @@ def compare_table(cur, table, columns):
         return False
 
 
-def compare_pbf2sqlite_db(db1, db2):
+def compare_db(db1, db2):
     """Establishing database connection, compare each table"""
     print("Compare two databases\n"
           f"db1 : {db1}\ndb2 : {db2}")
@@ -68,11 +68,11 @@ def main():
     """entry point"""
     if len(sys.argv) != 3:
         print('\n'
-              'Comparison of all tables of two pbf2sqlite databases.\n\n'
+              'Comparison of all tables of two databases.\n\n'
               'Usage:\n'
               f'{sys.argv[0]} DB1 DB2')
         sys.exit(1)
-    compare_pbf2sqlite_db(sys.argv[1], sys.argv[2])
+    compare_db(sys.argv[1], sys.argv[2])
 
 
 if __name__ == "__main__":

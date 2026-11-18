@@ -15,12 +15,12 @@ typedef struct {
     double y;
     double lat;
   };
-} point;
+} Point;
 
 typedef struct {
   int64_t x;
   int64_t y;
-} int_point;
+} IntPoint;
 
 /**
  * \brief Calculates the size of a square world map in pixels for a given zoom level (tile: 256x256 pixel)
@@ -35,8 +35,8 @@ int64_t size_world_map(const int zoomlevel){
 /**
  * \brief Converts spherical coordinates into planar coordinates
  */
-point spherical_to_mercator(const point spherical){
-  point mercator;
+Point spherical_to_mercator(const Point spherical){
+  Point mercator;
   const double r = 6378137.0;
   mercator.x = r * radians(spherical.lon);
   mercator.y = r * log(tan(M_PI / 4 + radians(spherical.lat) / 2));
@@ -46,8 +46,8 @@ point spherical_to_mercator(const point spherical){
 /**
  * \brief Converts planar coordinates into spherical coordinates
  */
-point mercator_to_spherical(const point mercator){
-  point spherical;
+Point mercator_to_spherical(const Point mercator){
+  Point spherical;
   const double r = 6378137.0;
   spherical.lon = degrees(mercator.x / r);
   spherical.lat = degrees(2 * atan(exp(mercator.y / r)) - M_PI / 2.0);
@@ -58,13 +58,13 @@ point mercator_to_spherical(const point mercator){
 /**
  * Test
  */
-void test_spherical_to_mercator(point s){
-  point m = spherical_to_mercator(s);
+void test_spherical_to_mercator(Point s){
+  Point m = spherical_to_mercator(s);
   printf(" lon: %13.8f lat: %13.8f  ->  x: %19.9f  y: %19.9f\n", s.lon, s.lat, m.x, m.y);
 }
 
-void test_mercator_to_spherical(point m){
-  point s = mercator_to_spherical(m);
+void test_mercator_to_spherical(Point m){
+  Point s = mercator_to_spherical(m);
   printf(" x: %19.9f y: %19.9f  ->  lon: %13.8f  lat: %13.8f\n", m.x, m.y, s.lon, s.lat);
 }
 
@@ -75,14 +75,50 @@ void test_proj(){
     printf("zoomlevel: %3d  world_map_size: %10" PRId64 "\n", i, world_map_size);
   }
   printf("Test spherical_to_mercator():\n");
-  test_spherical_to_mercator( (point){ {.lon =  180.00}, {.lat =  85.05112878}} );
-  test_spherical_to_mercator( (point){ {.lon = -180.00}, {.lat = -85.05112878}} );
-  test_spherical_to_mercator( (point){ {.lon =    0.00}, {.lat =   0.00}} );
-  test_spherical_to_mercator( (point){ {.lon =    7.81}, {.lat =  48.00}} );
+  test_spherical_to_mercator( (Point){ {.lon =  180.00}, {.lat =  85.05112878}} );
+  test_spherical_to_mercator( (Point){ {.lon = -180.00}, {.lat = -85.05112878}} );
+  test_spherical_to_mercator( (Point){ {.lon =    0.00}, {.lat =   0.00}} );
+  test_spherical_to_mercator( (Point){ {.lon =    7.81}, {.lat =  48.00}} );
   printf("Test mercator_to_spherical():\n");
-  test_mercator_to_spherical( (point){ {.x =  20037508.343}, {.y =  20037508.343} });
-  test_mercator_to_spherical( (point){ {.x = -20037508.343}, {.y = -20037508.343} });
-  test_mercator_to_spherical( (point){ {.x =         0.000}, {.y =         0.000} });
+  test_mercator_to_spherical( (Point){ {.x =  20037508.343}, {.y =  20037508.343} });
+  test_mercator_to_spherical( (Point){ {.x = -20037508.343}, {.y = -20037508.343} });
+  test_mercator_to_spherical( (Point){ {.x =         0.000}, {.y =         0.000} });
+}
+
+void test_matrix(){
+  printf("\nTest matrix:\n");
+
+  Matrix *z = matrix_zeros(3, 5);
+  matrix_display(z, "Z");
+  matrix_free(z);
+
+  Matrix *o = matrix_ones(3, 5);
+  matrix_display(o, "O");
+  matrix_free(o);
+
+  Matrix *e = matrix_identity(5);
+  matrix_display(e, "E");
+  matrix_free(e);
+
+  const double values_a[] = {
+    3, 2, 1,
+    1, 0, 2 };
+  Matrix *a = matrix_init(2, 3, values_a);
+  matrix_display(a, "A");
+
+  const double values_b[] = {
+    1, 2,
+    0, 1,
+    4, 0 };
+  Matrix *b = matrix_init(3, 2, values_b);
+  matrix_display(b, "B");
+
+  Matrix *c = matrix_multiply(a, b);
+  matrix_display(c, "C = A ⋅ B");
+
+  matrix_free(a);
+  matrix_free(b);
+  matrix_free(c);
 }
 
 /**
@@ -107,4 +143,10 @@ void map(
    "svg_file  : %s\n",
     lon, lat, zoomlevel, width, height, svg_file);
   test_proj();
+  test_matrix();
+  /* Test SVG */
+  FILE *svg;
+  svg = svgOpen(svg_file, width, height);
+  svgLine(svg, 20, 20, 300, 300);
+  svgClose(svg);
 }

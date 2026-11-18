@@ -265,7 +265,7 @@ void write_file_gpx(
   if( gpx==NULL ) abort_msg("Error opening file");
   fprintf(gpx,
     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n"
-    "<gpx version=\"1.1\" xmlns=\"http://www.topografix.com/GPX/1/1\" creator=\"pbf2sqlite\">\n"
+    "<gpx version=\"1.1\" xmlns=\"http://www.topografix.com/GPX/1/1\" creator=\""BIN_NAME"\">\n"
     "  <metadata></metadata>\n"
     "  <trk>\n"
     "    <name>Track</name>\n"

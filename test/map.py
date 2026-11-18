@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 """
-Prototype map renderer for pbf2sqlite
+Test map renderer
 
 spherical : lon (-180 to +180 degrees), lat (-90 to +90 degrees)
 mercator  : x (-20037508.343 to -20037508.343 meter), y (-20037508.343 to -20037508.343)
-bitmap    : x = y (any size in pixels)
-picture   : part of the bitmap, translate to 0,0
+world     : Square world map (size in pixels is arbitrary)
+picture   : part of world, translate to 0,0
 """
 import sys
 import time
@@ -21,17 +21,20 @@ root = None
 
 
 #
-# Mercator Projection
+# Size world
 #
-def size_world_map(zoomlevel):
+def world_pixel(zoomlevel):
     """
     Calculates the size of a square world map in pixels for a given zoom level
     """
     tile_size = 256     # tile 256px x 256px
-    world_map_size = 2**zoomlevel * tile_size
-    return world_map_size
+    world_size = 2**zoomlevel * tile_size
+    return world_size
 
 
+#
+# Mercator Projection
+#
 def spherical_to_mercator(lon, lat):
     "Converts spherical coordinates into planar coordinates"
     r = 6378137.0
@@ -46,64 +49,6 @@ def mercator_to_spherical(x, y):
     lon = m.degrees(x / r)
     lat = m.degrees(2 * m.atan(m.exp(y / r)) - m.pi / 2.0)
     return lon, lat
-
-
-def webmercator_to_pixel(x, y, world_map_size):
-    """
-    Transform Web Mercator to pixel coordinates
-    TODO:
-     - rename function name: mercator_to_bitmap()
-     - Matrix
-    """
-    world_map_size -= 1
-    webmercator = 20037508.342789244
-    x += webmercator  # move origin to avoid negativ coordinates
-    y += webmercator
-    x_px = int(round((x * world_map_size) / (webmercator * 2), 0))
-    y_px = int(round((y * world_map_size) / (webmercator * 2), 0))
-    return x_px, y_px
-
-
-def pixel_to_webmercator(x_px, y_px, world_map_size):
-    """
-    Transform pixel coordinates to Web Mercator
-    """
-    webmercator = 20037508.342789244
-    x_px -= world_map_size / 2
-    y_px -= world_map_size / 2
-    x = (x_px / world_map_size) * (webmercator * 2)
-    y = (y_px / world_map_size) * (webmercator * 2)
-    return x, y
-
-
-def spherical_to_pixel(lon, lat, world_map_size):
-    """
-    Transform spherical coordinates to pixel coordinates
-    """
-    x, y = spherical_to_mercator(lon, lat)
-    x_px, y_px = webmercator_to_pixel(x, y, world_map_size)
-    return x_px, y_px
-
-
-def pixel_to_spherical(x_px, y_px, world_map_size):
-    """
-    Transform pixel coordinates to spherical coordinates
-    """
-    x, y = pixel_to_webmercator(x_px, y_px, world_map_size)
-    lon, lat = mercator_to_spherical(x, y)
-    return lon, lat
-
-
-def boundingbox_pixel(lon, lat, world_map_size, width, height):
-    """
-    Calculate pixel boundingbox
-    """
-    x, y = spherical_to_pixel(lon, lat, world_map_size)
-    min_x = x - int(width / 2)
-    min_y = y - int(height / 2)
-    max_x = x + int(width / 2)
-    max_y = y + int(height / 2)
-    return min_x, min_y, max_x, max_y
 
 
 #
@@ -133,7 +78,42 @@ def matrix_translation(tx, ty):
      (tx, ty,  1) ])
 
 
-def matrix_world_device(x_min, x_max, y_min, y_max, width, height, origin_top_left):
+#
+#
+#
+def mercator_to_world(world_size):
+    "Returns a transform matrix to convert webmercator coordinates into world coordinates"
+    webmercator = 20037508.342789244
+    # Translate coordinates to avoid negative numbers
+    tx = webmercator
+    ty = webmercator
+    t = matrix_translation(tx, ty)
+    # Scale webmercator coordinates to world coordinates
+    sx = (world_size - 1) / (2 * webmercator)
+    sy = (world_size - 1) / (2 * webmercator)
+    s = matrix_scaling(sx, sy)
+    # Create the transformation matrix
+    mercator_to_world = t @ s
+    return mercator_to_world
+
+
+def world_to_mercator(world_size):
+    "Returns a transform matrix to convert world coordinates into webmercator coordinates"
+    webmercator = 20037508.342789244
+    # Translate coordinates to get negative numbers
+    tx = -1 * world_size / 2
+    ty = -1 * world_size / 2
+    t = matrix_translation(tx, ty)
+    # Scale world coordinates to webmercator coordinates
+    sx = (2 * webmercator) / (world_size - 1)
+    sy = (2 * webmercator) / (world_size - 1)
+    s = matrix_scaling(sx, sy)
+    # Create the transformation matrix
+    world_to_mercator = t @ s
+    return world_to_mercator
+
+
+def world_to_picture(x_min, x_max, y_min, y_max, width, height, origin_top_left):
     """
     Returns a transform matrix A to convert world coordinate into screen coordinates.
     First a translation matrix T and a scaling matrix S is generated.
@@ -172,25 +152,30 @@ def draw_map(cur, map_lon, map_lat, zoomlevel, width, height):
     """
     Draw a map.
     """
-    world_map_size = size_world_map(zoomlevel)
-    # calculate pixel and sperical boundingboxes
-    x1, y1, x2, y2 = boundingbox_pixel(map_lon, map_lat, world_map_size, width, height)
-    lon1, lat1 = pixel_to_spherical(x1, y1, world_map_size)
-    lon2, lat2 = pixel_to_spherical(x2, y2, world_map_size)
-    #
-    d = matrix_world_device(x1, x2, y1, y2, width, height, True)
-    # TEST
-    if False:
-        print("Input:", map_lon, map_lat, zoomlevel, width, height)
-        print("World map size:", world_map_size)
-        print("Boundingbox pixel:", x1, y1, x2, y2)
-        print("Boundingbox spherical:", lon1, lat1, lon2, lat2)
-        print("Transform Matrix World -> Screen:\n", d)
-        print(x1, y1, "->", transform_point(x1, y1, d))
-        print(x2, y2, "->", transform_point(x2, y2, d))
-    #
+    # Determine the size of the world map
+    world_size = world_pixel(zoomlevel)
+    # Create the transformation matrices for mercator to world and vice versa
+    matrix_mercator_to_world = mercator_to_world(world_size)
+    matrix_world_to_mercator = world_to_mercator(world_size)
+    # Calculate world boundingbox x1,y1,x2,y2
+    x, y = spherical_to_mercator(map_lon, map_lat)
+    x, y = transform_point(x, y, matrix_mercator_to_world)
+    x1 = x - int(width / 2)
+    y1 = y - int(height / 2)
+    x2 = x + int(width / 2)
+    y2 = y + int(height / 2)
+    # Calculate spherical boundingbox lon1,lat1,lon2,lat2
+    x, y = transform_point(x1, y1, matrix_world_to_mercator)
+    lon1, lat1 = mercator_to_spherical(x, y)
+    x, y = transform_point(x2, y2, matrix_world_to_mercator)
+    lon2, lat2 = mercator_to_spherical(x, y)
+    # Only Tk steering
     p['delta_x'] = (lon2 - lon1) / 2
     p['delta_y'] = (lat2 - lat1) / 2
+    # Create the transformation matrix world to picture
+    matrix_world_to_picture = world_to_picture(x1, x2, y1, y2, width, height, True)
+    # Create the transformation matrix mercator to picture
+    matrix_mercator_to_picture = matrix_mercator_to_world @ matrix_world_to_picture
     # get all ways in the boundingbox
     cur.execute("""
     SELECT way_id
@@ -209,13 +194,15 @@ def draw_map(cur, map_lon, map_lat, zoomlevel, width, height):
         ORDER BY way_nodes.node_order
         """, (way_id,))
         for (lon, lat) in cur.fetchall():
-            x, y = spherical_to_pixel(lon, lat, world_map_size)
-            polyline.append(transform_point(x, y, d))
-        canvas.create_line(polyline, fill='blue', width=1)
+            x, y = spherical_to_mercator(lon, lat)
+            x, y = transform_point(x, y, matrix_mercator_to_picture)
+            polyline.append((x, y))
         #
         cur.execute("SELECT key,value FROM way_tags WHERE way_id=?", (way_id,))
         for (key, value) in cur.fetchall():
             pass
+        #
+        canvas.create_line(polyline, fill='blue', width=1)
 
 
 #
@@ -254,7 +241,7 @@ def tk_show_map(cur, lon, lat, zoomlevel, width, height):
     root = tk.Tk()
     canvas = tk.Canvas(root, width=width, height=height)
     canvas.pack()
-    root.title("pbf2sqlite test map")
+    root.title("test map renderer")
     # bind any key to a function
     root.bind("<Key>", on_key_press)
     # draw the map
@@ -267,25 +254,36 @@ def tk_show_map(cur, lon, lat, zoomlevel, width, height):
 # Test
 #
 def test_spherical_to_mercator(lon, lat):
-    x, y = spherical_to_mercator(lon, lat)
-    print(f' lon: {lon:13.8f} lat: {lat:13.8f}  ->  x: {x:19.9f} y: {y:19.9f}')
+    mx, my = spherical_to_mercator(lon, lat)
+    print(f' lon: {lon:13.8f} lat: {lat:13.8f}  ->  mx: {mx:19.9f} my: {my:19.9f}')
 
 
-def test_mercator_to_spherical(x, y):
-    lon, lat = mercator_to_spherical(x, y)
-    print(f' x: {x:19.9f} y: {y:19.9f}  ->  lon: {lon:13.8f} lat: {lat:13.8f}')
+def test_mercator_to_spherical(mx, my):
+    lon, lat = mercator_to_spherical(mx, my)
+    print(f' mx: {mx:19.9f} my: {my:19.9f}  ->  lon: {lon:13.8f} lat: {lat:13.8f}')
 
 
-def test_webmercator_to_pixel(x, y, world_map_size):
-    wx, wy = webmercator_to_pixel(x, y, world_map_size)
-    print(f' x: {x:19.9f} y: {y:19.9f} world_map: {world_map_size:10}  ->  wx: {wx:10} wy: {wy:10}')
+def test_mercator_to_world(mx, my, world_size):
+    matrix_mercator_to_world = mercator_to_world(world_size)
+    #
+    wx, wy = transform_point(mx, my, matrix_mercator_to_world)
+    wx = int(round(wx , 0))
+    wy = int(round(wy , 0))
+    print(f' mx: {mx:19.9f} my: {my:19.9f} world_size: {world_size:10}  ->  wx: {wx:10} wy: {wy:10}')
+
+
+def test_world_to_mercator(wx, wy, world_size):
+    matrix_world_to_mercator = world_to_mercator(world_size)
+    #
+    mx, my = transform_point(wx, wy, matrix_world_to_mercator)
+    print(f' wx: {wx:10} wy: {wy:10} world_size: {world_size:10}  ->  mx: {mx:19.9f} my: {my:19.9f}')
 
 
 def test_proj():
-    print('Test size_world_map():')
+    print('Test world_pixel():')
     for zoomlevel in range(19):
-        world_map_size = size_world_map(zoomlevel)
-        print(f'zoomlevel: {zoomlevel:3}  world_map_size: {world_map_size:10}')
+        world_size = world_pixel(zoomlevel)
+        print(f'zoomlevel: {zoomlevel:3}  ->  world_size: {world_size:10}')
     print('Test spherical_to_mercator():')
     test_spherical_to_mercator( 180.00,  85.05112878)
     test_spherical_to_mercator(-180.00, -85.05112878)
@@ -295,10 +293,16 @@ def test_proj():
     test_mercator_to_spherical( 20037508.343,  20037508.343)
     test_mercator_to_spherical(-20037508.343, -20037508.343)
     test_mercator_to_spherical(0,0)
-    print('Test webmercator_to_pixel():')
-    world_map_size = 2000
-    test_webmercator_to_pixel( 20037508.343,  20037508.343, world_map_size)
-    test_webmercator_to_pixel(-20037508.343, -20037508.343, world_map_size)
+    #
+    world_size = 100000
+    print('Test matrix mercator_to_world():')
+    test_mercator_to_world( 20037508.343,  20037508.343, world_size)
+    test_mercator_to_world(            0,             0, world_size)
+    test_mercator_to_world(-20037508.343, -20037508.343, world_size)
+    print('Test matrix world_to_mercator():')
+    test_world_to_mercator( world_size - 1,  world_size - 1, world_size)
+    test_world_to_mercator( world_size / 2,  world_size / 2, world_size)
+    test_world_to_mercator(              0,               0, world_size)
 
 
 #

@@ -1,5 +1,5 @@
 #
-# Makefile pbf2sqlite
+# Makefile
 #
 # C compiler, compiler flags, linker flags
 CC = gcc
@@ -8,7 +8,7 @@ LDFLAGS += -static -s
 
 # build directory, binary name
 BUILD_DIR = ./build/
-BIN = pbf2sqlite
+BIN_NAME = pbf2sqlite
 
 # source files
 SRC = ./src/main.c
@@ -35,6 +35,7 @@ DOC_CSS = ./doc/custom.css
 # https://www.sqlite.org/fts3.html
 #
 COMPILE_OPTIONS_SQLITE = \
+ -DSQLITE_OMIT_LOAD_EXTENSION \
  -DSQLITE_DQS=0 \
  -DSQLITE_THREADSAFE=0 \
  -DSQLITE_DEFAULT_MEMSTATUS=0 \
@@ -60,7 +61,7 @@ COMPILE_OPTIONS_SQLITE = \
 all: bldir compile
 static: clean bldir compile_static compile_static_win64 check_static_binaries render_doc
 install:
-	install -m755 $(BUILD_DIR)$(BIN) /usr/bin
+	install -m755 $(BUILD_DIR)$(BIN_NAME) /usr/bin
 doc: bldir render_doc
 clean:
 	rm -rf $(BUILD_DIR)
@@ -78,44 +79,44 @@ bldir:
 	mkdir -p $(BUILD_DIR)
 
 compile:
-	$(CC) -Wall -std=c99 -O2 -s $(SRC) -lsqlite3 -lreadosm -lm -o $(BUILD_DIR)$(BIN)
-	ldd $(BUILD_DIR)$(BIN)
+	$(CC) -Wall -std=c99 -O2 -s $(SRC) -lsqlite3 -lreadosm -lm -o $(BUILD_DIR)$(BIN_NAME)
+	ldd $(BUILD_DIR)$(BIN_NAME)
 
 compile_debug:
-	$(CC) -Wall -std=c99 -O0 -g -DDEBUG $(SRC) -lsqlite3 -lreadosm -lm -o $(BUILD_DIR)$(BIN)
+	$(CC) -Wall -std=c99 -O0 -g -DDEBUG $(SRC) -lsqlite3 -lreadosm -lm -o $(BUILD_DIR)$(BIN_NAME)
 
 compile_asan:
-	$(CC) -Wall -std=c99 -O0 -g -DDEBUG $(SRC) -fsanitize=address -lasan -lsqlite3 -lreadosm -lm -o $(BUILD_DIR)$(BIN)
+	$(CC) -Wall -std=c99 -O0 -g -DDEBUG $(SRC) -fsanitize=address -lasan -lsqlite3 -lreadosm -lm -o $(BUILD_DIR)$(BIN_NAME)
 
 compile_static:
 	$(CC) $(CFLAGS) $(LDFLAGS) $(COMPILE_OPTIONS_SQLITE) $(SRC) $(SRC_STATIC) \
- -o $(BUILD_DIR)$(BIN) \
+ -o $(BUILD_DIR)$(BIN_NAME) \
  -lexpat -lz -lm -lgcc
-	upx --best $(BUILD_DIR)$(BIN)
+	upx --best $(BUILD_DIR)$(BIN_NAME)
 
 compile_static_win64:
 	x86_64-w64-mingw32-gcc $(CFLAGS) $(LDFLAGS) $(COMPILE_OPTIONS_SQLITE) $(SRC) $(SRC_STATIC) \
- -o $(BUILD_DIR)$(BIN).exe \
+ -o $(BUILD_DIR)$(BIN_NAME).exe \
  -I/usr/x86_64-w64-mingw32/sys-root/mingw/include \
  -L/usr/x86_64-w64-mingw32/sys-root/mingw/lib \
  -lexpat -lz -lpthread -lwinpthread -lws2_32 -lssp -lgcc
 
 quicktest:
-	bash $(PWD)/test/run_test.sh $(PWD)/build $(PWD)/test/weimar.osm
+	bash $(PWD)/test/run_test.sh $(PWD)/build/$(BIN_NAME) $(PWD)/test/weimar.osm
 
 check_static_binaries:
-	bash $(PWD)/test/check_static_binaries.sh $(PWD)/build $(PWD)/test/weimar.osm
+	bash $(PWD)/test/check_static_binaries.sh $(PWD)/build/$(BIN_NAME) $(PWD)/build/$(BIN_NAME).exe $(PWD)/test/weimar.osm
 
 render_doc:
-	pandoc $(DOC_SRC) -V geometry:margin=0.6in --pdf-engine=xelatex --toc -o $(BUILD_DIR)$(BIN).pdf
-	pandoc $(DOC_SRC) --standalone --embed-resources --metadata title="$(BIN)" --toc \
-           --css=$(DOC_CSS) -o $(BUILD_DIR)$(BIN).html
-	pandoc $(DOC_SRC) -s -t man | gzip > $(BUILD_DIR)$(BIN).1.gz
+	pandoc $(DOC_SRC) -V geometry:margin=0.6in --pdf-engine=xelatex --toc -o $(BUILD_DIR)$(BIN_NAME).pdf
+	pandoc $(DOC_SRC) --standalone --embed-resources --metadata title="$(BIN_NAME)" --toc \
+           --css=$(DOC_CSS) -o $(BUILD_DIR)$(BIN_NAME).html
+	pandoc $(DOC_SRC) -s -t man | gzip > $(BUILD_DIR)$(BIN_NAME).1.gz
 
 render_doc_src:
 	doxygen
 	xdg-open ./build/html/index.html
 
 single_src:
-	$(CC) -E $(SRC) | grep -v '^#' > $(BUILD_DIR)$(BIN).c
+	$(CC) -E $(SRC) | grep -v '^#' > $(BUILD_DIR)$(BIN_NAME).c
 

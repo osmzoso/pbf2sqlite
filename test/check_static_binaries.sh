@@ -1,15 +1,21 @@
 #!/bin/bash
-if [ $# != 2 ]; then
-    echo "Simple test to verify the functionality of static binaries."
-    echo "The binaries for Linux and Windows must be present in the /build directory."
+if [ $# != 3 ]; then
+    echo "Test to verify the functionality of static binaries for Linux and Windows"
     echo "Usage:"
-    echo "$0 BUILD_DIR OSM_FILE"
+    echo "$0 PATH/BINARY_LINUX PATH/BINARY_WINDOWS OSM_FILE"
     exit 1
 fi
-dir=$1
-osm_file=$2
+binary_linux=$1
+binary_windows=$2
+osm_file=$3
+dir="${binary_linux%/*}"
 
 echo "************************************** Check static binaries **************************************"
+
+echo "Binary Linux       : " $binary_linux
+echo "Binary Windows     : " $binary_windows
+echo "OSM file           : " $osm_file
+echo "Write databases in : " $dir
 
 #
 db1="$dir/test_linux.db"
@@ -19,9 +25,9 @@ db2="$dir/test_windows.db"
 rm -f $db1 $db2
 
 echo "Create database '$db1' with the Linux binary..."
-$dir/pbf2sqlite          $db1 read $osm_file index rtree addr graph
+$binary_linux          $db1 read $osm_file index rtree addr graph
 echo "Create database '$db2' with the Windows binary..."
-wine $dir/pbf2sqlite.exe $db2 read $osm_file index rtree addr graph
+wine $binary_windows   $db2 read $osm_file index rtree addr graph
 
 echo "Size and hash values of the databases:"
 ls -l $db1 $db2
