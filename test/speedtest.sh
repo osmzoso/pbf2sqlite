@@ -27,3 +27,5 @@ echo "Time required for option addr:"
 time -p $binary $db addr
 echo "Time required for option graph:"
 time -p $binary $db graph
+echo "Time required for option mercator:"
+time -p $binary $db mercator

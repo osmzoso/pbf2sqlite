@@ -145,7 +145,7 @@ static int callback_relation (const void *user_data, const readosm_relation * re
 /**
  * \brief Create tables, open OSM file and parse it
  */
-int read_osm_file(sqlite3 *db, char *filename) {
+int command_read(sqlite3 *db, char *filename) {
   const void *osm_handle;
   int ret;
   rc = sqlite3_exec(db, "BEGIN TRANSACTION;", NULL, NULL, NULL);    /* Start transaction */

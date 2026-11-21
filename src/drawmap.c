@@ -124,7 +124,7 @@ void test_matrix(){
 /**
  * \brief Creates a map. The output format is SVG.
  */
-void map(
+void command_map(
   sqlite3 *db,
   const double lon,
   const double lat,
@@ -142,8 +142,10 @@ void map(
    "height    : %d\n"
    "svg_file  : %s\n",
     lon, lat, zoomlevel, width, height, svg_file);
+  /*
   test_proj();
   test_matrix();
+  */
   /* Test SVG */
   FILE *svg;
   svg = svgOpen(svg_file, width, height);

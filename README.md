@@ -1,40 +1,52 @@
 # pbf2sqlite
 
-A simple command-line tool that imports
-[PBF](https://wiki.openstreetmap.org/wiki/PBF_Format)
-or
-[XML](https://wiki.openstreetmap.org/wiki/OSM_XML)
-OpenStreetMap data into an SQLite database.
-
 ```
+OpenStreetMap PBF/XML importer for SQLite
+
+`pbf2sqlite` imports OpenStreetMap data from `.osm.pbf` or `.osm` files into an SQLite database.
+It also provides commands for creating spatial indexes, address and routing tables, inspecting OSM elements,
+executing SQL statements, visualizing geographic data, and calculating shortest paths.
+
 Usage:
-pbf2sqlite <database> [OPTION ...]
+pbf2sqlite <database> [COMMAND ...]
 
-Main options:
-  read <file>                                         Reads an .osm.pbf or .osm file
-  index                                               Add basic indexes
-  rtree                                               Add R*Tree indexes
-  addr                                                Add address tables
-  graph                                               Add graph tables
++----------------------------------------------------+----------------------------------------------------+
+|                      Command                       |                    Description                     |
++----------------------------------------------------+----------------------------------------------------+
+| read <file>                                        | Import data from an `.osm.pbf` or `.osm` file.     |
+| index                                              | Create basic database indexes.                     |
+| rtree                                              | Create R*Tree spatial indexes.                     |
+| addr                                               | Create address tables.                             |
+| graph                                              | Create graph tables for routing.                   |
+|                                                    |                                                    |
+| node <id>                                          | Display information about a node.                  |
+| way <id>                                           | Display information about a way.                   |
+| relation <id>                                      | Display information about a relation.              |
+| sql [<stmt>]                                       | Execute an SQL statement.                          |
+|                                                    |                                                    |
+| vaddr <lon> <lat> <length_m> <htmlfile>            | Create an HTML file that displays addresses.       |
+| vgraph <lon> <lat> <length_m> <mode> <htmlfile>    | Create an HTML file that displays the graph.       |
+|                                                    |                                                    |
+| route <mode> <lon1> <lat1> <lon2> <lat2> [<lon3> <lat3> ...] <file>                                     |
+|                                    Shortest-path routing: <mode> can be `foot` `bike` `roadbike` `car`. |
+|                                                    |                                                    |
+| map <lon> <lat> <zoom> <width> <height> <svgfile>  | Draw a map (not yet implemented...).               |
+|                                                    |                                                    |
+| mercator                                           | Add mercator projection in table `nodes`.          |
+| version                                            | Print version numbers.                             |
++----------------------------------------------------+----------------------------------------------------+
 
-Options for displaying data:
-  node <id>                                           Show data of a node
-  way <id>                                            Show data of a way
-  relation <id>                                       Show data of a relation
-  vaddr <lon1> <lat1> <lon2> <lat2> <htmlfile>        Generates a map of the addresses
-  vgraph <lon1> <lat1> <lon2> <lat2> <htmlfile>       Generates a map of the graph
-  sql [<stmt>]                                        Executes an SQL statement
+Examples:
 
-Calculate shortest path (<permit> can be: foot bike roadbike car):
-  route <permit> <lon1> <lat1> <lon2> <lat2> [<lon3> <lat3> ...] <file>
+# Import an OpenStreetMap extract
+pbf2sqlite map.db read germany.osm.pbf
+
+# Create normal indexes, spatial indexes and routing tables
+pbf2sqlite map.db index rtree graph
+
+# Calculate a foot route
+pbf2sqlite map.db route foot 13.3645 52.5108 13.4096 52.5182 my_route
 ```
-
-The command
-```
-pbf2sqlite test.db read country.osm.pbf
-```
-reads the [OSM PBF](https://wiki.openstreetmap.org/wiki/PBF_Format) file **country.osm.pbf**
-and creates in the database **test.db** the tables.
 
 The tables created are described in the [documentation](doc/pbf2sqlite.md).
 

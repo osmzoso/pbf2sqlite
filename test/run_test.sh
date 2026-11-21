@@ -14,66 +14,65 @@ echo "OSM file           : " $osm_file
 echo "Write databases in : " $dir
 
 echo "-----------------------------------------------------------------"
-echo "Test 1: Main options"
+echo "1. Test commands: read index rtree addr graph mercator version"
 echo "-----------------------------------------------------------------"
 
-echo "Test option 'read'..."
+echo "read OSM file with C version..."
 rm -f $dir/osm_c.db
-$binary $dir/osm_c.db read $osm_file
-
-echo "Test option 'index'..."
-$binary $dir/osm_c.db index
-
-echo "Test option 'rtree'..."
-$binary $dir/osm_c.db rtree
-
-echo "Test option 'addr'..."
-$binary $dir/osm_c.db addr
-
-echo "Test option 'graph'..."
-$binary $dir/osm_c.db graph
+$binary \
+ $dir/osm_c.db \
+ read $osm_file \
+ index \
+ rtree \
+ addr \
+ graph \
+ mercator \
+ version
 
 echo "read OSM file with Python version..."
 rm -f $dir/osm_py.db
 $dir/../test/pbf2sqlite.py $dir/osm_py.db read $osm_file graph
+
 $dir/../test/compare_databases.py $dir/osm_py.db $dir/osm_c.db
 
 
 echo "-----------------------------------------------------------------"
-echo "Test 2: Show data (weimar.osm)"
+echo "2. Test commands: node way relation vaddr vgraph"
 echo "-----------------------------------------------------------------"
 
-echo "Test option 'node'..."
-$binary $dir/osm_c.db node 2616037670
-
-echo "Test option 'way'..."
-$binary $dir/osm_c.db way 15805105
-
-echo "Test option 'relation'..."
-$binary $dir/osm_c.db relation 2731564
-
-echo "Test option 'vaddr'..."
-$binary $dir/osm_c.db vaddr 11.3309 50.9771 11.3326 50.9786 $dir/vaddr.html
+$binary \
+ $dir/osm_c.db \
+ node 2616037670 \
+ way 15805105 \
+ relation 2731564 \
+ vaddr 11.3317 50.9781 150 $dir/vaddr.html \
+ vgraph 11.3317 50.9781 150 all $dir/vgraph.html
 xdg-open $dir/vaddr.html
-
-echo "Test option 'vgraph'..."
-$binary $dir/osm_c.db vgraph 11.3309 50.9771 11.3326 50.9786 $dir/vgraph.html
 xdg-open $dir/vgraph.html
 
-echo "Test option 'sql'..."
-$binary $dir/osm_c.db sql "SELECT * FROM nodes LIMIT 5"
-$binary $dir/osm_c.db sql "SELECT radians(lat),sin(radians(lat)) FROM nodes LIMIT 5"
 
-echo "Test option 'sql' (read from stdin)..."
-echo "SELECT * FROM nodes LIMIT 5" | $binary $dir/osm_c.db sql
+echo "-----------------------------------------------------------------"
+echo "3. Test commands: sql"
+echo "-----------------------------------------------------------------"
+
+$binary \
+ $dir/osm_c.db \
+ sql "SELECT * FROM nodes LIMIT 3" \
+ sql "SELECT radians(lat),sin(radians(lat)) FROM nodes LIMIT 3" \
+ sql "SELECT distance(13.3645, 52.5108, 13.4096, 52.5182)||' m'"
+
+echo "Test command 'sql' (read from stdin)..."
+echo "SELECT * FROM nodes LIMIT 3" | $binary $dir/osm_c.db sql
 
 
 echo "-----------------------------------------------------------------"
-echo "Test 3: Routing"
+echo "4. Test commands: route"
 echo "-----------------------------------------------------------------"
 
-echo "Test option 'route'..."
-$binary $dir/osm_c.db route foot \
+$binary \
+  $dir/osm_c.db \
+  route \
+  foot \
   11.3317806 50.9777393 \
   11.3314828 50.9778879 \
   11.3310429 50.9785668 \
@@ -85,10 +84,10 @@ xdg-open $dir/route.html
 
 
 echo "-----------------------------------------------------------------"
-echo "Test 4: Map"
+echo "5. Test commands: map"
 echo "-----------------------------------------------------------------"
 
-echo "Test option 'map'..."
-$binary $dir/osm_c.db map 11.3308 50.9782 18 400 400 $dir/map.svg
+$binary \
+ $dir/osm_c.db map 11.3308 50.9782 18 400 400 $dir/map.svg
 xdg-open $dir/map.svg
 

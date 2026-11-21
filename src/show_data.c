@@ -19,7 +19,7 @@ static int sql_print_row(void *NotUsed, int argc, char **argv, char **azColName)
 /**
  * \brief Execute SQL statement
  */
-void sql_exec_stmt(sqlite3 *db, const char *sql){
+void command_sql(sqlite3 *db, const char *sql){
   char *zErrMsg = 0;
   rc = sqlite3_exec(db, sql, sql_print_row, 0, &zErrMsg);
   if( rc!=SQLITE_OK ){
@@ -31,7 +31,7 @@ void sql_exec_stmt(sqlite3 *db, const char *sql){
 /**
  * \brief Execute input from stdin as an SQL command
  */
-void sql_read_stdin(sqlite3 *db){
+void command_sql_stdin(sqlite3 *db){
   char *sql = NULL;
   size_t sql_size = 0;
   size_t len;
@@ -52,14 +52,14 @@ void sql_read_stdin(sqlite3 *db){
       sql[sql_size] = '\0';
     }
   }
-  sql_exec_stmt(db, sql);
+  command_sql(db, sql);
   free(sql);
 }
 
 /**
  * \brief Display data of a node
  */
-void show_node(sqlite3 *db, const int64_t node_id) {
+void command_node(sqlite3 *db, const int64_t node_id) {
   sqlite3_stmt *stmt;
   /* Location */
   rc = sqlite3_prepare_v2(db,
@@ -101,7 +101,7 @@ void show_node(sqlite3 *db, const int64_t node_id) {
 /**
  * \brief Display data of a way
  */
-void show_way(sqlite3 *db, const int64_t way_id) {
+void command_way(sqlite3 *db, const int64_t way_id) {
   sqlite3_stmt *stmt;
   /* Tags */
   rc = sqlite3_prepare_v2(db,
@@ -148,7 +148,7 @@ void show_way(sqlite3 *db, const int64_t way_id) {
 /**
  * \brief Display data of a relation
  */
-void show_relation(sqlite3 *db, const int64_t relation_id) {
+void command_relation(sqlite3 *db, const int64_t relation_id) {
   sqlite3_stmt *stmt;
   /* Tags */
   rc = sqlite3_prepare_v2(db,
@@ -194,21 +194,26 @@ void show_relation(sqlite3 *db, const int64_t relation_id) {
 /**
  * \brief Creates visualization of the table addr
  */
-void html_map_addr(
+void command_vaddr(
   sqlite3 *db,
-  const bbox b,
+  const double map_lon,
+  const double map_lat,
+  const double side_length_m,
   const char *html_file
 ){
+  bbox b;
   FILE *html;
   sqlite3_stmt *stmt_addr;
   char popup_text[1000];
   int64_t way_id, node_id;
+  /*  */
+  b = point_bbox(map_lon, map_lat, side_length_m);
   html = fopen(html_file, "w");
   if( html==NULL ) abort_msg("Error opening file");
   leaflet_html_header(html, "map addr");
   fprintf(html,
-    "<h1>Map 1 - Address</h1>\n"
-    "<div id='map' style='width:100%%; height:500px;'></div>\n");
+    "<h1>Map addr</h1>\n"
+    "<div id='map' style='width:100%%; height:1000px;'></div>\n");
   fprintf(html, "<script>\n");
   leaflet_init(html, "map", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
   const char *query = 
@@ -290,7 +295,7 @@ void html_map_addr(
   fprintf(html,
       "</table>\n"
       "<hr>\n"
-      "<p>Boundingbox: %f %f - %f %f</p>\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
+      "<p>boundingbox: %f %f - %f %f</p>\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
   leaflet_html_footer(html);
   /* Close the file */
   if( fclose(html)!=0 ) abort_msg("Error closing file");
@@ -298,20 +303,35 @@ void html_map_addr(
 }
 
 /**
- * \brief Creates the Leaflet commands to visualize the graph
+ * \brief Creates visualization of the table graph
  */
-void write_graph(
+void command_vgraph(
   sqlite3 *db,
-  FILE *html,
-  const char *mapid,
-  const bbox b,
-  const int mask_permit
+  const double map_lon,
+  const double map_lat,
+  const double side_length_m,
+  const char *mode,
+  const char *html_file
 ){
+  bbox b;
+  FILE *html;
   sqlite3_stmt *stmt_nodes, *stmt_edges;
   int directed;
   char popuptext[200];
   int64_t node_id, way_id, start_node_id, end_node_id;
   double lon, lat;
+  int mask_permit;
+  /*  */
+  b = point_bbox(map_lon, map_lat, side_length_m);
+  mask_permit = permit_mask(mode);
+  html = fopen(html_file, "w");
+  if( html==NULL ) abort_msg("Error opening file");
+  leaflet_html_header(html, "map graph");
+  fprintf(html,
+    "<h1>Map graph %s</h1>\n"
+    "<div id='map' style='width:100%%; height:1000px;'></div>\n", mode);
+  fprintf(html, "<script>\n");
+  leaflet_init(html, "map", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
   /*  */
   create_subgraph_tables(db, b, mask_permit);
   /* show graph nodes */
@@ -325,7 +345,7 @@ void write_graph(
     lon = (double)sqlite3_column_double(stmt_nodes, 1);
     lat = (double)sqlite3_column_double(stmt_nodes, 2);
     snprintf(popuptext, sizeof(popuptext), "node_id %" PRId64, node_id);
-    leaflet_circlemarker(html, mapid, lon, lat, popuptext);
+    leaflet_circlemarker(html, "map", lon, lat, popuptext);
   }
   /* show graph edges */
   NodeList nodelist;
@@ -345,15 +365,23 @@ void write_graph(
     snprintf(popuptext, sizeof(popuptext), "way_id %" PRId64, way_id);
     if( directed ){
       leaflet_style(html, "#0000ff", 0.5, 3, "5 5", "none", 1.0, 5);
-      leaflet_polyline(html, mapid, &nodelist, popuptext);
+      leaflet_polyline(html, "map", &nodelist, popuptext);
       leaflet_style(html, "#0000ff", 0.5, 3, "", "none", 1.0, 5);
     }else{
-      leaflet_polyline(html, mapid, &nodelist, popuptext);
+      leaflet_polyline(html, "map", &nodelist, popuptext);
     }
   }
   /* show boundingbox */
   leaflet_style(html, "#000000", 0.3, 2, "5 5", "none", 0.3, 5);
-  leaflet_rectangle(html, mapid, b.min_lon, b.min_lat, b.max_lon, b.max_lat, "");
+  leaflet_rectangle(html, "map", b.min_lon, b.min_lat, b.max_lon, b.max_lat, "");
+  fprintf(html, "</script>\n");
+  fprintf(html,
+      "<p>dashed line => one way</p>\n"
+      "<hr>\n"
+      "<p>boundingbox: %f %f - %f %f  mask_permit: %d</p>\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat, mask_permit);
+  leaflet_html_footer(html);
+  /* Close the file */
+  if( fclose(html)!=0 ) abort_msg("Error closing file");
   /*  */
   freeNodelist(&nodelist);
   sqlite3_finalize(stmt_nodes);
@@ -361,44 +389,8 @@ void write_graph(
 }
 
 /**
- * \brief Creates visualization of the table graph
+ * \brief Display version numbers
  */
-void html_map_graph(
-  sqlite3 *db,
-  const bbox b,
-  const char *html_file
-){
-  FILE *html;
-  html = fopen(html_file, "w");
-  if( html==NULL ) abort_msg("Error opening file");
-  leaflet_html_header(html, "map graph");
-  fprintf(html,
-    "<h1>Map 1 - Graph complete</h1>\n"
-    "<div id='map1' style='width:100%%; height:500px;'></div>\n"
-    "<h1>Map 2 - Graph foot</h1>\n"
-    "<div id='map2' style='width:100%%; height:500px;'></div>\n"
-    "<h1>Map 3 - Graph bike</h1>\n"
-    "<div id='map3' style='width:100%%; height:500px;'></div>\n"
-    "<h1>Map 4 - Graph roadbike</h1>\n"
-    "<div id='map4' style='width:100%%; height:500px;'></div>\n"
-    "<h1>Map 5 - Graph car</h1>\n"
-    "<div id='map5' style='width:100%%; height:500px;'></div>\n");
-  fprintf(html, "<script>\n");
-  leaflet_init(html, "map1", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
-  leaflet_init(html, "map2", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
-  leaflet_init(html, "map3", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
-  leaflet_init(html, "map4", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
-  leaflet_init(html, "map5", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
-  write_graph(db, html, "map1", b,  0);  /* graph complete */
-  write_graph(db, html, "map2", b,  1);  /* graph foot */
-  write_graph(db, html, "map3", b,  2);  /* graph bike */
-  write_graph(db, html, "map4", b, 10);  /* graph roadbike */
-  write_graph(db, html, "map5", b,  4);  /* graph car */
-  fprintf(html,
-      "</script>\n"
-      "<p>dashed line ➔ one way</p>\n"
-      "<hr>\n"
-      "<p>Boundingbox: %f %f - %f %f</p>\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
-  leaflet_html_footer(html);
-  if( fclose(html)!=0 ) abort_msg("Error closing file");
+void command_version(){
+  printf("%s %s (uses SQLite %s and readosm %s)\n", BIN_NAME, VERSION_NUMBER, sqlite3_libversion(), readosm_version());
 }

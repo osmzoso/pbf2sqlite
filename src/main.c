@@ -15,35 +15,7 @@
 #include <sqlite3.h>
 #include <readosm.h>
 
-#ifndef M_PI
-# define M_PI   3.141592653589793238462643383279502884
-#endif
-
-#define RED     "\033[31m"
-#define GREEN   "\033[32m"
-#define RESET   "\033[0m"
-
-/**
- * \brief Defines a bounding box (rectangular boundary)
- */
-typedef struct {
-  double min_lon;
-  double min_lat;
-  double max_lon;
-  double max_lat;
-} bbox;
-
-/* Public variables */
-sqlite3 *db;                                 /**< SQLite Database connection */
-int rc;                                      /**< SQLite Result code */
-sqlite3_stmt *stmt_insert_nodes;             /**< SQlite Prepared Statement Object insert nodes */
-sqlite3_stmt *stmt_insert_node_tags;         /**< SQlite Prepared Statement Object insert node_tags */
-sqlite3_stmt *stmt_insert_way_nodes;         /**< SQlite Prepared Statement Object insert way_nodes */
-sqlite3_stmt *stmt_insert_way_tags;          /**< SQlite Prepared Statement Object insert way_tags */
-sqlite3_stmt *stmt_insert_relation_members;  /**< SQlite Prepared Statement Object insert relation_members */
-sqlite3_stmt *stmt_insert_relation_tags;     /**< SQlite Prepared Statement Object insert relation_tags */
-int duplicate_nodes;                         /**< Number of nodes that could not be inserted */
-
+/* Include all source files to avoid declaring prototypes */
 #include "header.h"
 #include "functions.c"
 #include "nodelist.c"
@@ -60,87 +32,86 @@ int duplicate_nodes;                         /**< Number of nodes that could not
 /**
  * \brief Parses the arguments and calls the functions if exec is true
  */
-void parse_args(sqlite3 *db, int argc, char **argv, int exec) {
+void parse_args(sqlite3 *db, int argc, char **argv, int exec){
   int i, zoomlevel, width, height;
   int64_t id;
-  double lon, lat;
-  bbox b;
+  double lon, lat, side_length_m;
   i = 2;
   while( i<argc ){
     if( strcmp("read", argv[i])==0 && argc>=i+2 ){
-      if( exec ) read_osm_file(db, argv[i+1]);
-      i++;
+      if( exec ) command_read(db, argv[i+1]);
+      i = i + 1;
     } 
     else if( strcmp("index", argv[i])==0 ){
-      if( exec ) add_index(db);
+      if( exec ) command_index(db);
     }
     else if( strcmp("rtree", argv[i])==0 ){
-      if( exec ) add_rtree(db);
+      if( exec ) command_rtree(db);
     }
     else if( strcmp("addr", argv[i])==0 ){
-      if( exec ) add_addr(db);
+      if( exec ) command_addr(db);
     }
     else if( strcmp("graph", argv[i])==0 ){
-      if( exec ) add_graph(db);
+      if( exec ) command_graph(db);
     }
-    else if( strcmp("node", argv[2])==0 && argc==4 ){
-      id = get_argv_int64(argv, 3);
-      if( exec ) show_node(db, id);
-      break;
+    else if( strcmp("node", argv[i])==0 && argc>=i+2 ){
+      id = get_argv_int64(argv, i+1);
+      if( exec ) command_node(db, id);
+      i = i + 1;
     } 
-    else if( strcmp("way", argv[2])==0 && argc==4 ){
-      id = get_argv_int64(argv, 3);
-      if( exec ) show_way(db, id);
-      break;
+    else if( strcmp("way", argv[i])==0 && argc>=i+2 ){
+      id = get_argv_int64(argv, i+1);
+      if( exec ) command_way(db, id);
+      i = i + 1;
     } 
-    else if( strcmp("relation", argv[2])==0 && argc==4 ){
-      id = get_argv_int64(argv, 3);
-      if( exec ) show_relation(db, id);
-      break;
+    else if( strcmp("relation", argv[i])==0 && argc>=i+2 ){
+      id = get_argv_int64(argv, i+1);
+      if( exec ) command_relation(db, id);
+      i = i + 1;
     } 
-    else if( strcmp("vaddr", argv[2])==0 && argc==8 ){
-      b.min_lon = get_argv_double(argv, 3);
-      b.min_lat = get_argv_double(argv, 4);
-      b.max_lon = get_argv_double(argv, 5);
-      b.max_lat = get_argv_double(argv, 6);
-      if( exec ) html_map_addr(db, b, argv[7]);
-      break;
+    else if( strcmp("vaddr", argv[i])==0 && argc>=i+5 ){
+      lon = get_argv_double(argv, i+1);
+      lat = get_argv_double(argv, i+2);
+      side_length_m = get_argv_double(argv, i+3);
+      if( exec ) command_vaddr(db, lon, lat, side_length_m, argv[i+4]);
+      i = i + 4;
     } 
-    else if( strcmp("vgraph", argv[2])==0 && argc==8 ){
-      b.min_lon = get_argv_double(argv, 3);
-      b.min_lat = get_argv_double(argv, 4);
-      b.max_lon = get_argv_double(argv, 5);
-      b.max_lat = get_argv_double(argv, 6);
-      if( exec ) html_map_graph(db, b, argv[7]);
-      break;
+    else if( strcmp("vgraph", argv[i])==0 && argc>=i+6 ){
+      lon = get_argv_double(argv, i+1);
+      lat = get_argv_double(argv, i+2);
+      side_length_m = get_argv_double(argv, i+3);
+      if( exec ) command_vgraph(db, lon, lat, side_length_m, argv[i+4], argv[i+5]);
+      i = i + 5;
     } 
-    else if( strcmp("sql", argv[2])==0 && argc==4 ){
-      if( exec ) sql_exec_stmt(db, argv[3]);
-      break;
+    else if( strcmp("sql", argv[i])==0 && argc>=i+2 ){
+      if( exec ) command_sql(db, argv[i+1]);
+      i = i + 1;
     } 
     else if( strcmp("sql", argv[2])==0 && argc==3 ){
-      if( exec ) sql_read_stdin(db);
+      if( exec ) command_sql_stdin(db);
       break;
-    } 
+    }
     else if( strcmp("route", argv[2])==0 && argc>=9 ){
-      if( exec ) route(db, argc, argv);
+      if( exec ) command_route(db, argc, argv);
       break;
     } 
-    /* Undocumented options: */
-    else if( strcmp("map", argv[2])==0 && argc==9 ){
+    else if( strcmp("mercator", argv[i])==0 ){
+      if( exec ) command_mercator(db);
+    }
+    else if( strcmp("map", argv[i])==0 && argc>=i+7 ){
       lon = get_argv_double(argv, 3);
       lat = get_argv_double(argv, 4);
       zoomlevel = (int)get_argv_int64(argv, 5);
       width = (int)get_argv_int64(argv, 6);
       height = (int)get_argv_int64(argv, 7);
-      if( exec ) map(db, lon, lat, zoomlevel, width, height, argv[8]);
-      break;
+      if( exec ) command_map(db, lon, lat, zoomlevel, width, height, argv[8]);
+      i = i + 6;
     } 
-    else if( strcmp("mercator", argv[i])==0 ){
-      if( exec ) add_mercator(db);
+    else if( strcmp("version", argv[i])==0 ){
+      if( exec ) command_version(db);
     }
     else {
-      printf("Incorrect option '%s', type '"BIN_NAME"' without parameters to display help.\n", argv[i]);
+      printf("Incorrect command '%s', type '"BIN_NAME"' without parameters to display help.\n", argv[i]);
       exit(EXIT_FAILURE);
     };
     i++;
@@ -151,9 +122,8 @@ void parse_args(sqlite3 *db, int argc, char **argv, int exec) {
  * \brief Program start 
  */
 int main(int argc, char **argv) {
-  if( argc==1 ){
+  if( argc<=2 ){
     printf("%s", QUICK_HELP);
-    printf("Uses SQLite %s and readosm %s\n\n", sqlite3_libversion(), readosm_version());
 #ifdef DEBUG
     printf("%s",  RED "!!!!! Warning: This is a DEBUG build. "__DATE__" "__TIME__" !!!!!\n\n" RESET);
 #endif

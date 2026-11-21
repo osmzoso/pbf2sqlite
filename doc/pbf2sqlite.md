@@ -11,17 +11,17 @@ OSM data can be obtained from a provider such as [Geofabrik](https://download.ge
 Simple example:  
 `pbf2sqlite test.db read country.osm.pbf`  
 
-Advanced example with all available options:  
+Advanced example with more commands:  
 `pbf2sqlite test.db read country.osm.pbf index rtree addr graph`  
 
 The created database can be easily queried using the [SQLite CLI tool](https://www.sqlite.org/cli.html).  
 
 
-# 2. Main options
+# 2. Main commands
 
-The **order of the options** is important. All options are executed in the order given.
+> The **order of the commands** is important. All commands are executed in the order given.
 
-## 2.1. Option "read"
+## 2.1. Command "read"
 
 This option first creates six tables, provided they do not already exist.  
 Then, the OSM data ([PBF](https://wiki.openstreetmap.org/wiki/PBF_Format) or
@@ -71,7 +71,7 @@ relation_id  | INTEGER             | relation ID
 key          | TEXT                | tag key
 value        | TEXT                | tag value
 
-## 2.2. Option "index"
+## 2.2. Command "index"
 
 This option creates the following basic indexes:  
 
@@ -90,7 +90,7 @@ relation_tags    | relation_tags__key            | key
  
 Finally, the [ANALYZE](https://www.sqlite.org/lang_analyze.html) command is executed.  
 
-## 2.3. Option "rtree"
+## 2.3. Command "rtree"
 
 This option creates two [R*Tree](https://www.sqlite.org/rtree.html)
 indexes **rtree_way** and **rtree_node** for finding ways and nodes quickly.  
@@ -105,6 +105,9 @@ FROM way_nodes
 LEFT JOIN nodes ON way_nodes.node_id=nodes.node_id
 GROUP BY way_nodes.way_id;
 ```
+
+> It is strongly recommended to create the basic indexes using the **index** command
+> *before* executing the **rtree** command.
 
 #### Example queries
 
@@ -134,12 +137,12 @@ WHERE way_id=4872512;
 ```
 
 
-## 2.4. Option "addr"
+## 2.4. Command "addr"
 
 This option creates two tables with the address data.  
 
-Only addr tags from the **node_tags** and **way_tags** tables are taken into account.  
-There are also a few addr tags in the **relation_tags** table; these are not considered.  
+> Only addr tags from the **node_tags** and **way_tags** tables are taken into account.  
+> There are also a few addr tags in the **relation_tags** table; these are not considered.  
 
 #### Table "addr_street"
 column       | type                | description
@@ -169,7 +172,7 @@ Index **addr_housenumber\_\_street_id** on column (street_id)
 The view **addr_view** joins these two tables.
 
 
-## 2.5. Option "graph"
+## 2.5. Command "graph"
 
 This option creates additional tables with the complete graph of all highways.  
 A graph is a set of vertices (nodes/points) connected by edges (links/lines).  
@@ -197,7 +200,7 @@ num_edges  | INTEGER             | number of edges
 
 Index **graph_vertices\_\_node_id** on column (node_id)
 
-### Access for foot, bike and car
+#### Access for foot, bike and car
 
 The bit field **permit** determines who may use this edge:  
 
@@ -234,9 +237,9 @@ Finally, the bits are cleared according to the tags found (clear_bit).
 
 # 3. View data
 
-## 3.1. Option "node", "way" and "relation"
+## 3.1. Command "node", "way" and "relation"
 
-The **node**, **way** and **relation** options display information about
+The **node**, **way** and **relation** commands display information about
 the respective objects on the console.
 
 Examples:  
@@ -246,19 +249,20 @@ pbf2sqlite germany.db way 424415177
 pbf2sqlite germany.db relation 2201742
 ```
 
-## 3.2. Option "vaddr" and "vgraph"
+## 3.2. Command "vaddr" and "vgraph"
 
 The **vaddr** option visualizes the addresses for a given area.  
 The **vgraph** option visualizes the graph table for a given area.  
-These options generate an HTML file with zoomable maps.  
+These commands generate an HTML file with zoomable maps.  
+The area is defined by a point and the size of the square bounding box in meters.  
 
 Examples:  
 ```
-pbf2sqlite germany.db vaddr 13.36 52.52 13.38 52.53 addr_bln.html
-pbf2sqlite germany.db vgraph 11.56 48.13 11.58 48.14 graph_mchn.html
+pbf2sqlite germany.db vaddr 13.37 52.52 1000 addr_bln.html
+pbf2sqlite germany.db vgraph 11.57 48.13 1000 foot graph_mchn.html
 ```
 
-## 3.3. Option "sql" 
+## 3.3. Command "sql" 
 
 The **sql** option executes an SQL command.
 
@@ -310,26 +314,27 @@ The following extensions are included:
 
 # 4. Calculate the shortest path
 
-## 4.1. Option "route"
+## 4.1. Command "route"
 
 The **route** option calculates a shortest way.
 
-Table **graph_edges** and **rtree_way** are required.
+Table **graph_edges** and **rtree_way** are required (commands **graph** and **rtree**).
 
 Any number of intermediate destinations can also be specified.
 
 Usage:  
 ```
-pbf2sqlite <database> route <permit> <lon1> <lat1> <lon2> <lat2> [<lon3> <lat3> ...] <file>
+pbf2sqlite <database> route <mode> <lon1> <lat1> <lon2> <lat2> [<lon3> <lat3> ...] <file>
 ```
 
-`<permit>` is an integer that is combined with the **permit** field in the **graph_edges** table
+`<mode>` is an integer that is combined with the **permit** field in the **graph_edges** table
 using a bitwise AND operation to determine the usable edges.  
 
 For ease of input, the following strings are also recognized and converted into the corresponding decimal number:  
 
-| `<permit>` | decimal | binary |
+| `<mode>`   | decimal | binary |
 |------------|--------:|-------:|
+| all        |       0 |   0000 |
 | foot       |       1 |   0001 |
 | bike       |       2 |   0010 |
 | roadbike   |      10 |   1010 |
@@ -352,13 +357,13 @@ pbf2sqlite germany.db route car 11.5777 48.1427 11.6031 48.1619 route_mchn_car
 
 ## Time requirements
 
-| Option    | germany.osm.pbf (4,4G) | andorra.osm.pbf (3,2M) |
+| Command   | germany.osm.pbf (4,6G) | andorra.osm.pbf (3,2M) |
 |-----------|-----------------------:|-----------------------:|
-| read      | 14 min                 |                 0,85 s |
-| index     | 20 min                 |                 0,62 s |
-| rtree     | 2 h 7 min              |                 0,49 s |
-| addr      | 11 min                 |                 0,04 s |
-| graph     | 17 min                 |                 0,81 s |
+| read      | 15 min                 |                 0,85 s |
+| index     | 22 min                 |                 0,62 s |
+| rtree     | 2 h 13 min             |                 0,49 s |
+| addr      | 22 min                 |                 0,04 s |
+| graph     | 19 min                 |                 0,81 s |
 
 ## Table size
 

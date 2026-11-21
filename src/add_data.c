@@ -6,7 +6,7 @@
 /**
  * \brief Create basic indexes
  */
-void add_index(sqlite3 *db) {
+void command_index(sqlite3 *db) {
   rc = sqlite3_exec(
     db,
     " CREATE INDEX node_tags__node_id            ON node_tags (node_id);"
@@ -28,7 +28,7 @@ void add_index(sqlite3 *db) {
 /**
  * \brief Create R*Tree indexes
  */
-void add_rtree(sqlite3 *db) {
+void command_rtree(sqlite3 *db) {
   const char *sql = 
   #include "opt_rtree.sql"
   ;
@@ -39,7 +39,7 @@ void add_rtree(sqlite3 *db) {
 /**
  * \brief Create tables containing address data
  */
-void add_addr(sqlite3 *db) {
+void command_addr(sqlite3 *db) {
   const char *sql = 
   #include "opt_addr.sql"
   ;
@@ -125,7 +125,7 @@ void create_table_graph_permit(sqlite3 *db) {
 /**
  * \brief Create a graph from the data
  */
-void add_graph(sqlite3 *db) {
+void command_graph(sqlite3 *db) {
   rc = sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, NULL);
   rc = sqlite3_exec(
     db,
@@ -293,7 +293,7 @@ void add_graph(sqlite3 *db) {
 /**
  * \brief Adds two columns with Mercator coordinates to the 'nodes' table
  */
-void add_mercator(sqlite3 *db) {
+void command_mercator(sqlite3 *db) {
   rc = sqlite3_exec(db,
     " ALTER TABLE nodes ADD COLUMN x REAL;"
     " ALTER TABLE nodes ADD COLUMN y REAL;"

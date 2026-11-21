@@ -77,15 +77,34 @@ double degrees(double rad) {
  * \return Distance in meters
  */
 double distance(double lon1, double lat1, double lon2, double lat2) {
+  /* Use earth radius Europe 6371 km (alternatively radius equator 6378 km) */
+  const double earth_radius = 6371000;
   /* Avoid a acos error if the two points are identical */
   if( lon1 == lon2 && lat1 == lat2 ) return 0;
   lon1 = radians(lon1);
   lat1 = radians(lat1);
   lon2 = radians(lon2);
   lat2 = radians(lat2);
-  /* Use earth radius Europe 6371 km (alternatively radius equator 6378 km) */
-  double dist = acos(sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(lon2 - lon1)) * 6371000;
+  double dist = acos(sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(lon2 - lon1)) * earth_radius;
   return dist;
+}
+
+/**
+ * \brief Calculates a bounding box of a specified size in meters around a point
+ */
+bbox point_bbox(double lon, double lat, double side_length_m) {
+  const double earth_radius = 6371000;
+  double half_side, delta_lon, delta_lat;
+  bbox b;
+  half_side = side_length_m / 2.0;
+  /* Calculate displacement in degrees */
+  delta_lon = degrees(half_side / (earth_radius * cos(radians(lat))));
+  delta_lat = degrees(half_side / earth_radius);
+  b.min_lat = lat - delta_lat;
+  b.max_lat = lat + delta_lat;
+  b.min_lon = lon - delta_lon;
+  b.max_lon = lon + delta_lon;
+  return b;
 }
 
 /**

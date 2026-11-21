@@ -291,7 +291,8 @@ void write_file_gpx(
  */
 int permit_mask(const char *permit){
   int mask_permit;
-  if     ( strcmp("foot", permit)==0 ) mask_permit = 1;
+  if     ( strcmp("all", permit)==0 ) mask_permit = 0;
+  else if( strcmp("foot", permit)==0 ) mask_permit = 1;
   else if( strcmp("bike", permit)==0 ) mask_permit = 2;
   else if( strcmp("roadbike", permit)==0 ) mask_permit = 10;
   else if( strcmp("car", permit)==0 ) mask_permit = 4;
@@ -308,7 +309,7 @@ int permit_mask(const char *permit){
  *
  * \param ARGV
  */
-void route(
+void command_route(
   sqlite3 *db,
   int argc,
   char *argv[]
@@ -499,7 +500,7 @@ void route(
   fprintf(html, "#\n# boundingbox: %f %f - %f %f\n", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
   fprintf(html, "# graph number nodes: %d\n", number_nodes);
   fprintf(html, "</pre>\n");
-  fprintf(html, "<div id='map' style='width:100%%; height:500px;'></div>\n");            /* Show map */
+  fprintf(html, "<div id='map' style='width:100%%; height:1000px;'></div>\n");            /* Show map */
   fprintf(html, "<script>\n");
   leaflet_init(html, "map", b.min_lon, b.min_lat, b.max_lon, b.max_lat);
   leaflet_style(html, "#000000", 0.3, 2, "5 5", "none", 0.3, 5);                         /* boundingbox */
