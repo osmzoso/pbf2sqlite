@@ -225,14 +225,14 @@ value      | TEXT     | tag value
 set_bit    | INTEGER  | bitmask set bits
 clear_bit  | INTEGER  | bitmask clear bits
 
-> If table **graph_permit** doesn't exist, a new table will be created with default values.  
-> But if the table already exists, it will be used.  
-> This allows you to create your own definition for filling the permit field.  
-
 This table specifies which tags set or clear which bits in **permit**.  
 Initially, no bits are set in **permit**.  
 Then, the bits are set according to the tags found (set_bit).  
 Finally, the bits are cleared according to the tags found (clear_bit).  
+
+> If table **graph_permit** doesn't exist, a new table will be created with default values.  
+> But if the table already exists, it will be used.  
+> This makes it possible to use one's own custom definition.
 
 
 # 3. View data
@@ -364,38 +364,6 @@ pbf2sqlite germany.db route car 11.5777 48.1427 11.6031 48.1619 route_mchn_car
 | rtree     | 2 h 13 min             |                 0,49 s |
 | addr      | 22 min                 |                 0,04 s |
 | graph     | 19 min                 |                 0,81 s |
-
-## Table size
-
-```
-/** Disk-Space Utilization Report For germany.db
-
-Page size in bytes................................ 65536     
-
-*** Page counts for all tables with their indices *****************************
-
-WAY_NODES......................................... 472076      42.1% 
-WAY_TAGS.......................................... 233117      20.8% 
-NODES............................................. 182308      16.2% 
-NODE_TAGS......................................... 84723        7.6% 
-RTREE_WAY_NODE.................................... 42350        3.8% 
-GRAPH_EDGES....................................... 20515        1.8% 
-RELATION_MEMBERS.................................. 17670        1.6% 
-RTREE_WAY_ROWID................................... 16892        1.5% 
-ADDR_HOUSENUMBER.................................. 16581        1.5% 
-RTREE_NODE_NODE................................... 12331        1.1% 
-GRAPH_VERTICES.................................... 10975        0.98% 
-RTREE_NODE_ROWID.................................. 5185         0.46% 
-RELATION_TAGS..................................... 4772         0.43% 
-ADDR_STREET....................................... 2010         0.18% 
-RTREE_WAY_PARENT.................................. 458          0.041% 
-RTREE_NODE_PARENT................................. 138          0.012% 
-GRAPH_PERMIT...................................... 2            0.0% 
-SQLITE_SCHEMA..................................... 1            0.0% 
-SQLITE_STAT1...................................... 1            0.0% 
-
-*/
-```
 
 ## Links
 

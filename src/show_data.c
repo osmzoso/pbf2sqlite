@@ -392,5 +392,6 @@ void command_vgraph(
  * \brief Display version numbers
  */
 void command_version(){
-  printf("%s %s (uses SQLite %s and readosm %s)\n", BIN_NAME, VERSION_NUMBER, sqlite3_libversion(), readosm_version());
+  printf("%s %s with SQLite %s and readosm %s (compiled on %s %s)\n",
+         BIN_NAME, VERSION_NUMBER, sqlite3_libversion(), readosm_version(), __DATE__, __TIME__);
 }

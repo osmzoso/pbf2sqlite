@@ -123,10 +123,10 @@ void parse_args(sqlite3 *db, int argc, char **argv, int exec){
  */
 int main(int argc, char **argv) {
   if( argc<=2 ){
-    printf("%s", QUICK_HELP);
 #ifdef DEBUG
-    printf("%s",  RED "!!!!! Warning: This is a DEBUG build. "__DATE__" "__TIME__" !!!!!\n\n" RESET);
+    printf("%s",  RED "\n!!!!! Warning: This is a DEBUG build (compiled on "__DATE__" "__TIME__"). !!!!!\n" RESET);
 #endif
+    printf("%s", QUICK_HELP);
     return EXIT_FAILURE;
   }
   parse_args(db, argc, argv, 0);       /* Check args, no execution */
@@ -134,9 +134,7 @@ int main(int argc, char **argv) {
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   rc = sqlite3_open(argv[1], &db);     /* Open database connection */
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
-  rc = sqlite3_exec(db,                /* Set PRAGMAs */
-          " PRAGMA journal_mode = OFF;"
-          " PRAGMA page_size = 65536;", NULL, NULL, NULL);
+  rc = sqlite3_exec(db, "PRAGMA journal_mode = OFF;", NULL, NULL, NULL);  /* Set PRAGMAs */
   if( rc!=SQLITE_OK ) abort_db_error(db, rc);
   register_functions(db);              /* Register custom functions */
   parse_args(db, argc, argv, 1);       /* Execute args */
